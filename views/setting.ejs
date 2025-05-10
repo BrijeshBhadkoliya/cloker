@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<!-- Mirrored from admin.pixelstrap.com/tivo/template/index.html by HTTrack Website Copier/3.x [XR&CO'2014], Mon, 20 Mar 2023 04:00:15 GMT -->
+
+<head>
+    <%- include('partials/head.ejs') %>
+        <!-- Custom Styles -->
+
+
+</head>
+
+<body onload="startTime()">
+    <%- include('partials/sidebar.ejs') %>`
+        <div class="page-body">
+            <div class="container-fluid">
+                <div class="page-title">
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <h3>Setting</h3>
+                        </div>
+                        <div class="col-sm-6">
+                            <ol class="breadcrumb">
+                                <li class="breadcrumb-item"><a href="/admin/setting"><i data-feather="settings" class="me-2"></i>Setting</a></li>
+                            </ol>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Container-fluid starts-->
+            <div class="container-fluid dashboard-default">
+                <div class="row">
+                    <div class="col-sm-12">
+                        <div class="card">
+                            <div class="card-header pb-0">
+                                <h4>Mega form</h4>
+                            </div>
+                            <div class="card-body">
+                                <form class="theme-form mega-form" action="/admin/settingProfile/<%=setting[0].id%>" method="post" enctype="multipart/form-data">
+                                    <div class="row">
+                                        <div class="col-6">
+                                            <div class="mb-3">
+                                                 <img src="/uploads/<%=setting[0].light_img%>" alt="" id="lightlogo" width="100" height="100" onerror="this.onerror=null; this.src='/default/defult-logo.png';">
+                                                </div>
+                                            <div class="mb-3">
+                                                <label class="col-form-label">Light Logo</label>
+                                                <input class="form-control" type="file" name="lightlogo" placeholder="Company name"
+                                                    data-bs-original-title="" title="" id="llogo" onchange="document.getElementById('lightlogo').src = window.URL.createObjectURL(this.files[0])">
+                                            </div>
+                                            <div class="mb-3">
+                                                <label class="col-form-label">Site Title</label>
+                                                <input class="form-control" type="text" name="sitetitle" id="sitetitle" value="<%=setting[0].site_titel%>" placeholder="Site Title"
+                                                    data-bs-original-title="" title="">
+                                            </div>
+                                            <div class="mb-3">
+                                                <label class="col-form-label">Shift Start Time</label>
+                                                <input class="form-control" type="time" name="shiftStart" id="sitetitle" value="<%=setting[0].shift_start%>" placeholder="Shift Start Time"
+                                                    data-bs-original-title="" title="">
+                                            </div>
+                                            
+                                        </div>
+
+                                        <div class="col-6">
+                                        <div class="mb-3">
+                                         <img src="/uploads/<%=setting[0].dark_img%>" alt="" id="darklogo"  width="100" height="100" onerror="this.onerror=null; this.src='/default/defult-logo.png';">
+                                        </div>
+
+                                            <div class="mb-3">
+                                                <label class="col-form-label">Dark Logo</label>
+                                                <input class="form-control" type="file" placeholder="Company Name"
+                                                    data-bs-original-title="" title="" name="darklogo" id="blogo" onchange="document.getElementById('darklogo').src = window.URL.createObjectURL(this.files[0])">
+                                            </div>
+                                            <div class="mb-3">
+                                                <label class="col-form-label">Employee Working Time</label>
+                                                <input class="form-control" type="text" name="workingtime" id="workingtime" value="<%=setting[0].employee_worktime%>" placeholder="Employee Working Time"
+                                                    data-bs-original-title="" title="">
+                                            </div>
+                                            <div class="mb-3">
+                                                <label class="col-form-label">Shift End Time</label>
+                                                <input class="form-control" type="time" name="shiftEnd" id="shiftEnd" value="<%=setting[0].shift_end%>" placeholder="Shift Start Time"
+                                                    data-bs-original-title="" title="">
+                                            </div>
+                                        </div>
+                                    </div>
+                              
+
+                                <div class="card-footer text-start">
+                                    <button class="btn btn-primary" data-bs-original-title="" title="" type="submit">Submit</button>
+                                    <button class="btn btn-secondary" data-bs-original-title="" title="" type="reset">Cancel</button>
+                                </div>
+                            </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        </div>
+        <!-- Container-fluid Ends-->
+        </div>
+
+        <%- include('partials/footer.ejs') %>
+
+            <%- include('partials/script.ejs') %>
+                <!-- login js-->
+
+                <script>
+                    function Upstatuas(validID) {
+
+
+
+                        $.ajax({
+                            url: `/admin/status/${validID}`,
+                            method: 'GET',
+                            success: function (res) {
+                                console.log(res);
+                            },
+                            error: function (err) {
+                                console.error(err);
+                            }
+                        });
+                    }
+                </script>
+
+
+</body>
+
+<!-- Mirrored from admin.pixelstrap.com/tivo/template/index.html by HTTrack Website Copier/3.x [XR&CO'2014], Mon, 20 Mar 2023 04:01:15 GMT -->
+
+</html>

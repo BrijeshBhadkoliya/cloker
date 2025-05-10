@@ -1,0 +1,805 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <%- include('partials/head.ejs') %>
+    <link rel="stylesheet" type="text/css" href="/css/vendors/whether-icon.css">
+    <link rel="stylesheet" type="text/css" href="/css/vendors/date-picker.css">
+</head>
+
+<body onload="startTime()">
+  <%- include('partials/sidebar.ejs') %>`
+    <div class="page-body">
+
+      <div class="container-fluid">
+        <div class="page-title" `>
+          <div class="row">
+            <div class="col-sm-6">
+              <h3>Employee List</h3>
+            </div>
+            <div class="col-sm-6">
+              <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="/employee/dashboard"><i data-feather="home"
+                      class="me-2"></i>Dashboard</a></li>
+
+              </ol>
+            </div>
+          </div>
+        </div>
+      </div>
+
+
+      <div class="container-fluid dashboard-default general-widget">
+        <div class="row justify-content-between ">
+
+          <div class="col-xxl-9 col-xl-5 col-lg-6 dash-45 box-col-40 ">
+            <div class="card profile-greeting">
+              <div class="card-body">
+                <div class="d-sm-flex d-block justify-content-end">
+
+                  <div class="badge-group">
+                    <div class="badge badge-light-primary f-12"><i class="fa fa-clock-o"></i><span id="txt"></span>
+                    </div>
+                  </div>
+                </div>
+                <div class="greeting-user">
+                  <div class="profile-vector">
+                    <ul class="dots-images">
+                      <li class="dot-small bg-info dot-1"></li>
+                      <li class="dot-medium bg-primary dot-2"></li>
+                      <li class="dot-medium bg-info dot-3"></li>
+                      <li class="semi-medium bg-primary dot-4"></li>
+                      <li class="dot-small bg-info dot-5"></li>
+                      <li class="dot-big bg-info dot-6"></li>
+                      <li class="dot-small bg-primary dot-7"></li>
+                      <li class="semi-medium bg-primary dot-8"></li>
+                      <li class="dot-big bg-info dot-9"></li>
+                    </ul><img class="img-fluid rounded-circle" style="width: 160px; height: 150px;" src="/uploads/<%= data?.profileimage%>" alt="">
+                    <ul class="vector-image">
+                      <li> <img src="../images/dashboard/default/ribbon1.png" alt=""></li>
+                      <li> <img src="../images/dashboard/default/ribbon3.png" alt=""></li>
+                      <li> <img src="../images/dashboard/default/ribbon4.png" alt=""></li>
+                      <li> <img src="../images/dashboard/default/ribbon5.png" alt=""></li>
+                      <li> <img src="../images/dashboard/default/ribbon6.png" alt=""></li>
+                      <li> <img src="../images/dashboard/default/ribbon7.png" alt=""></li>
+                    </ul>
+                  </div>
+                  <h3 style="font-size: 22px;"><a href="#"><span>Welcome Back</span>
+                      <%=employeedetais[0].firstName +" "+employeedetais[0].lastName%>  </a><span class=" right-circle">
+                        <i class="fa fa-check-circle font-primary f-14 middle"></i></span></h5>
+
+
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-lg-3 col-md-6 box-col-33 ">
+            <div class="card custom-card">
+              <div class="card-profile">
+                <img class="rounded-circle" src="/uploads/<%= data?.profileimage%>" height="110" width="110px" alt="" />
+              </div>
+              <input type="hidden" value="<%=data?.id%>" id="emplyeeId" />
+              <div class="text-center profile-details mb-5">
+                <a href="#" data-bs-original-title="" title="">
+                  <h4>
+                    <%=data?.userName%>
+                  </h4>
+                </a>
+              </div>
+              <div class="d-flex" style="margin-left: -32px">
+                <div class="border-end border-primary border-5 rounded mb-3" style="height: 20px"></div>
+                <!-- <h6 class="ms-1">My Timing</h6> -->
+                <div class="name f-w-600 ms-1">My Timing</div>
+              </div>
+              <div class="d-flex justify-content-center mb-2">
+                <div class="d-flex justify-content-center align-items-center" style="height: 100px; width: 300px">
+                  <div class="text-center">
+                    <h4 class="text-success" style="font-size: 16px">
+                      Current Time
+                    </h4>
+                    <h5 style="font-size: 18px" id="curanttime">
+                      <span id="hou">00</span>:<span id="min">00</span>:<span id="sec">00</span>
+                    </h5>
+                  </div>
+
+                  <div class="border border-primary ms-4 me-4" style="height: 50px"></div>
+
+                  <div class="text-center">
+                    <h4 class="text-danger" style="font-size: 16px">
+                      Break Time
+                    </h4>
+                    <h5 style="font-size: 18px" id="breactime">
+                      <span id="hou2">00</span>:<span id="min2">00</span>:<span id="sec2">00</span>
+                    </h5>
+                  </div>
+                </div>
+              </div>
+
+              <div class="social-btngroup d-flex justify-content-center">
+
+
+                <button class="btn btn-outline-danger rounded me-2 col-6 d-none" id="break" type="button"
+                  data-bs-original-title="" title="">
+                  BREAK
+                </button>
+
+                <button class="btn btn-square btn-success rounded col-12" type="button" data-bs-original-title=""
+                  title="" id="clockin">
+                  CLOCK IN
+                </button>
+                <button class="btn btn-square btn-danger rounded col-6 d-none" type="button" data-bs-original-title=""
+                  title="" id="clockout">
+                  CLOCK OUT
+                </button>
+              </div>
+            </div>
+
+            <div id="emp-data" data-break="<%= Break || '00:00:00' %>" data-work="<%= Working || '00:00:00' %>"
+              data-status="<%= status || '' %>" style="display: none"></div>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-xxl-6 col-xl-12 xl-100 col-sm-12 box-col-12">
+            <div class="card o-hidden">
+              <div class="weather-widget-two">
+                <div class="card-body">
+                  <div class="row">
+                    <div class="col-xl-5 col-md-6">
+                      <div class="mobile-clock-widget">
+                        <div>
+                          <ul class="clock" id="clock">
+                            <li class="hour" id="hour"></li>
+                            <li class="min" id="min"></li>
+                            <li class="sec" id="sec"></li>
+                          </ul>
+                          <div class="date f-24 mb-2" id="date"><span id="monthDay"></span><span id="year">, </span>
+                          </div>
+                          <div>
+                            <p class="m-0 f-14 text-light">kolkata, India</p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="col-xl-7 col-md-6">
+                      <div class="widget-list">
+                        <ul>
+                          <li>
+                            <div class="d-flex">
+                              <svg class="climacon climacon_cloudDrizzleMoonFillAlt" id="cloudDrizzleMoonFillAlt"
+                                version="1.1" viewBox="15 15 70 70">
+                                <g class="climacon_iconWrap climacon_iconWrap-cloudDrizzleMoonFillAlt">
+                                  <g
+                                    class="climacon_wrapperComponent climacon_wrapperComponent-moon climacon_componentWrap-moon_cloud">
+                                    <path
+                                      class="climacon_component climacon_component-stroke climacon_component-stroke_sunBody"
+                                      d="M61.023,50.641c-6.627,0-11.999-5.372-11.999-11.998c0-6.627,5.372-11.999,11.999-11.999c0.755,0,1.491,0.078,2.207,0.212c-0.132,0.576-0.208,1.173-0.208,1.788c0,4.418,3.582,7.999,8,7.999c0.614,0,1.212-0.076,1.788-0.208c0.133,0.717,0.211,1.452,0.211,2.208C73.021,45.269,67.649,50.641,61.023,50.641z">
+                                    </path>
+                                    <path
+                                      class="climacon_component climacon_component-fill climacon_component-fill_moon"
+                                      fill="#FFFFFF"
+                                      d="M59.235,30.851c-3.556,0.813-6.211,3.989-6.211,7.792c0,4.417,3.581,7.999,7.999,7.999c3.802,0,6.979-2.655,7.791-6.211C63.961,39.527,60.139,35.705,59.235,30.851z">
+                                    </path>
+                                  </g>
+                                  <g class="climacon_wrapperComponent climacon_wrapperComponent-drizzle">
+                                    <path
+                                      class="climacon_component climacon_component-stroke climacon_component-stroke_drizzle climacon_component-stroke_drizzle-left"
+                                      id="Drizzle-Left_1_6"
+                                      d="M56.969,57.672l-2.121,2.121c-1.172,1.172-1.172,3.072,0,4.242c1.17,1.172,3.07,1.172,4.24,0c1.172-1.17,1.172-3.07,0-4.242L56.969,57.672z">
+                                    </path>
+                                    <path
+                                      class="climacon_component climacon_component-stroke climacon_component-stroke_drizzle climacon_component-stroke_drizzle-middle"
+                                      d="M50.088,57.672l-2.119,2.121c-1.174,1.172-1.174,3.07,0,4.242c1.17,1.172,3.068,1.172,4.24,0s1.172-3.07,0-4.242L50.088,57.672z">
+                                    </path>
+                                    <path
+                                      class="climacon_component climacon_component-stroke climacon_component-stroke_drizzle climacon_component-stroke_drizzle-right"
+                                      d="M43.033,57.672l-2.121,2.121c-1.172,1.172-1.172,3.07,0,4.242s3.07,1.172,4.244,0c1.172-1.172,1.172-3.07,0-4.242L43.033,57.672z">
+                                    </path>
+                                  </g>
+                                  <g class="climacon_componentWrap climacon_componentWrap_cloud">
+                                    <path
+                                      class="climacon_component climacon_component-stroke climacon_component-stroke_cloud"
+                                      d="M43.945,65.639c-8.835,0-15.998-7.162-15.998-15.998c0-8.836,7.163-15.998,15.998-15.998c6.004,0,11.229,3.312,13.965,8.203c0.664-0.113,1.338-0.205,2.033-0.205c6.627,0,11.998,5.373,11.998,12c0,6.625-5.371,11.998-11.998,11.998C57.168,65.639,47.143,65.639,43.945,65.639z">
+                                    </path>
+                                    <path
+                                      class="climacon_component climacon_component-fill climacon_component-fill_cloud"
+                                      fill="#FFFFFF"
+                                      d="M59.943,61.639c4.418,0,8-3.582,8-7.998c0-4.417-3.582-8-8-8c-1.601,0-3.082,0.481-4.334,1.291c-1.23-5.316-5.973-9.29-11.665-9.29c-6.626,0-11.998,5.372-11.998,11.999c0,6.626,5.372,11.998,11.998,11.998C47.562,61.639,56.924,61.639,59.943,61.639z">
+                                    </path>
+                                  </g>
+                                </g>
+                              </svg>
+                              <div class="flex-grow-1">
+                                <h5>25*C</h5>
+                              </div><span>Peris</span>
+                            </div>
+                          </li>
+                          <li>
+                            <div class="d-flex">
+                              <svg class="climacon climacon_cloudLightningMoonFill" id="cloudLightningMoonFill"
+                                version="1.1" viewBox="15 15 70 70">
+                                <g class="climacon_iconWrap climacon_iconWrap-cloudLightningMoonFill">
+                                  <g
+                                    class="climacon_wrapperComponent climacon_wrapperComponent-moon climacon_componentWrap-moon_cloud">
+                                    <path
+                                      class="climacon_component climacon_component-stroke climacon_component-stroke_sunBody"
+                                      d="M61.023,50.641c-6.627,0-11.999-5.372-11.999-11.998c0-6.627,5.372-11.999,11.999-11.999c0.755,0,1.491,0.078,2.207,0.212c-0.132,0.576-0.208,1.173-0.208,1.788c0,4.418,3.582,7.999,8,7.999c0.614,0,1.212-0.076,1.788-0.208c0.133,0.717,0.211,1.452,0.211,2.208C73.021,45.269,67.649,50.641,61.023,50.641z">
+                                    </path>
+                                    <path
+                                      class="climacon_component climacon_component-fill climacon_component-fill_moon"
+                                      fill="#FFFFFF"
+                                      d="M59.235,30.851c-3.556,0.813-6.211,3.989-6.211,7.792c0,4.417,3.581,7.999,7.999,7.999c3.802,0,6.979-2.655,7.791-6.211C63.961,39.527,60.139,35.705,59.235,30.851z">
+                                    </path>
+                                  </g>
+                                  <g class="climacon_wrapperComponent climacon_wrapperComponent-lightning">
+                                    <polygon
+                                      class="climacon_component climacon_component-stroke climacon_component-stroke_lightning"
+                                      points="48.001,51.641 57.999,51.641 52,61.641 58.999,61.641 46.001,77.639 49.601,65.641 43.001,65.641 ">
+                                    </polygon>
+                                  </g>
+                                  <g class="climacon_componentWrap climacon_componentWrap_cloud">
+                                    <path
+                                      class="climacon_component climacon_component-stroke climacon_component-stroke_cloud"
+                                      d="M43.945,65.639c-8.835,0-15.998-7.162-15.998-15.998c0-8.836,7.163-15.998,15.998-15.998c6.004,0,11.229,3.312,13.965,8.203c0.664-0.113,1.338-0.205,2.033-0.205c6.627,0,11.998,5.373,11.998,12c0,6.625-5.371,11.998-11.998,11.998C57.168,65.639,47.143,65.639,43.945,65.639z">
+                                    </path>
+                                    <path
+                                      class="climacon_component climacon_component-fill climacon_component-fill_cloud"
+                                      fill="#FFFFFF"
+                                      d="M59.943,61.639c4.418,0,8-3.582,8-7.998c0-4.417-3.582-8-8-8c-1.601,0-3.082,0.481-4.334,1.291c-1.23-5.316-5.973-9.29-11.665-9.29c-6.626,0-11.998,5.372-11.998,11.999c0,6.626,5.372,11.998,11.998,11.998C47.562,61.639,56.924,61.639,59.943,61.639z">
+                                    </path>
+                                  </g>
+                                </g>
+                              </svg>
+                              <div class="flex-grow-1">
+                                <h5>25*C</h5>
+                              </div><span>New York</span>
+                            </div>
+                          </li>
+                          <li>
+                            <div class="d-flex">
+                              <svg class="climacon climacon_cloudHailAltSun" id="cloudHailAltSunalt" version="1.1"
+                                viewBox="15 15 70 70">
+                                <g class="climacon_iconWrap climacon_iconWrap-cloudHailAltSun">
+                                  <g
+                                    class="climacon_componentWrap climacon_componentWrap-sun climacon_componentWrap-sun_cloud">
+                                    <g class="climacon_componentWrap climacon_componentWrap_sunSpoke">
+                                      <path
+                                        class="climacon_component climacon_component-stroke climacon_component-stroke_sunSpoke climacon_component-stroke_sunSpoke-north"
+                                        d="M80.029,43.611h-3.998c-1.105,0-2-0.896-2-1.999s0.895-2,2-2h3.998c1.104,0,2,0.896,2,2S81.135,43.611,80.029,43.611z">
+                                      </path>
+                                      <path
+                                        class="climacon_component climacon_component-stroke climacon_component-stroke_sunSpoke climacon_component-stroke_sunSpoke-north"
+                                        d="M72.174,30.3c-0.781,0.781-2.049,0.781-2.828,0c-0.781-0.781-0.781-2.047,0-2.828l2.828-2.828c0.779-0.781,2.047-0.781,2.828,0c0.779,0.781,0.779,2.047,0,2.828L72.174,30.3z">
+                                      </path>
+                                      <path
+                                        class="climacon_component climacon_component-stroke climacon_component-stroke_sunSpoke climacon_component-stroke_sunSpoke-north"
+                                        d="M58.033,25.614c-1.105,0-2-0.896-2-2v-3.999c0-1.104,0.895-2,2-2c1.104,0,2,0.896,2,2v3.999C60.033,24.718,59.135,25.614,58.033,25.614z">
+                                      </path>
+                                      <path
+                                        class="climacon_component climacon_component-stroke climacon_component-stroke_sunSpoke climacon_component-stroke_sunSpoke-north"
+                                        d="M43.892,30.3l-2.827-2.828c-0.781-0.781-0.781-2.047,0-2.828c0.78-0.781,2.047-0.781,2.827,0l2.827,2.828c0.781,0.781,0.781,2.047,0,2.828C45.939,31.081,44.673,31.081,43.892,30.3z">
+                                      </path>
+                                      <path
+                                        class="climacon_component climacon_component-stroke climacon_component-stroke_sunSpoke climacon_component-stroke_sunSpoke-north"
+                                        d="M42.033,41.612c0,1.104-0.896,1.999-2,1.999h-4c-1.104,0-1.998-0.896-1.998-1.999s0.896-2,1.998-2h4C41.139,39.612,42.033,40.509,42.033,41.612z">
+                                      </path>
+                                      <path
+                                        class="climacon_component climacon_component-stroke climacon_component-stroke_sunSpoke climacon_component-stroke_sunSpoke-north"
+                                        d="M43.892,52.925c0.781-0.78,2.048-0.78,2.827,0c0.781,0.78,0.781,2.047,0,2.828l-2.827,2.827c-0.78,0.781-2.047,0.781-2.827,0c-0.781-0.78-0.781-2.047,0-2.827L43.892,52.925z">
+                                      </path>
+                                      <path
+                                        class="climacon_component climacon_component-stroke climacon_component-stroke_sunSpoke climacon_component-stroke_sunSpoke-north"
+                                        d="M58.033,57.61c1.104,0,2,0.895,2,1.999v4c0,1.104-0.896,2-2,2c-1.105,0-2-0.896-2-2v-4C56.033,58.505,56.928,57.61,58.033,57.61z">
+                                      </path>
+                                      <path
+                                        class="climacon_component climacon_component-stroke climacon_component-stroke_sunSpoke climacon_component-stroke_sunSpoke-north"
+                                        d="M72.174,52.925l2.828,2.828c0.779,0.78,0.779,2.047,0,2.827c-0.781,0.781-2.049,0.781-2.828,0l-2.828-2.827c-0.781-0.781-0.781-2.048,0-2.828C70.125,52.144,71.391,52.144,72.174,52.925z">
+                                      </path>
+                                    </g>
+                                    <g class="climacon_wrapperComponent climacon_wrapperComponent-sunBody">
+                                      <circle
+                                        class="climacon_component climacon_component-stroke climacon_component-stroke_sunBody"
+                                        cx="58.033" cy="41.612" r="11.999"></circle>
+                                      <circle
+                                        class="climacon_component climacon_component-fill climacon_component-fill_sunBody"
+                                        fill="#FFFFFF" cx="58.033" cy="41.612" r="7.999"></circle>
+                                    </g>
+                                  </g>
+                                  <g class="climacon_wrapperComponent climacon_wrapperComponent-hailAlt">
+                                    <g
+                                      class="climacon_component climacon_component-stroke climacon_component-stroke_hailAlt climacon_component-stroke_hailAlt-left">
+                                      <circle cx="42" cy="65.498" r="2"></circle>
+                                    </g>
+                                    <g
+                                      class="climacon_component climacon_component-stroke climacon_component-stroke_hailAlt climacon_component-stroke_hailAlt-middle">
+                                      <circle cx="49.999" cy="65.498" r="2"></circle>
+                                    </g>
+                                    <g
+                                      class="climacon_component climacon_component-stroke climacon_component-stroke_hailAlt climacon_component-stroke_hailAlt-right">
+                                      <circle cx="57.998" cy="65.498" r="2"></circle>
+                                    </g>
+                                    <g
+                                      class="climacon_component climacon_component-stroke climacon_component-stroke_hailAlt climacon_component-stroke_hailAlt-left">
+                                      <circle cx="42" cy="65.498" r="2"></circle>
+                                    </g>
+                                    <g
+                                      class="climacon_component climacon_component-stroke climacon_component-stroke_hailAlt climacon_component-stroke_hailAlt-middle">
+                                      <circle cx="49.999" cy="65.498" r="2"></circle>
+                                    </g>
+                                    <g
+                                      class="climacon_component climacon_component-stroke climacon_component-stroke_hailAlt climacon_component-stroke_hailAlt-right">
+                                      <circle cx="57.998" cy="65.498" r="2"></circle>
+                                    </g>
+                                  </g>
+                                  <g class="climacon_componentWrap climacon_componentWrap_cloud">
+                                    <path
+                                      class="climacon_component climacon_component-stroke climacon_component-stroke_cloud"
+                                      d="M43.945,65.639c-8.835,0-15.998-7.162-15.998-15.998c0-8.836,7.163-15.998,15.998-15.998c6.004,0,11.229,3.312,13.965,8.203c0.664-0.113,1.338-0.205,2.033-0.205c6.627,0,11.998,5.373,11.998,12c0,6.625-5.371,11.998-11.998,11.998C57.168,65.639,47.143,65.639,43.945,65.639z">
+                                    </path>
+                                    <path
+                                      class="climacon_component climacon_component-fill climacon_component-fill_cloud"
+                                      fill="#FFFFFF"
+                                      d="M59.943,61.639c4.418,0,8-3.582,8-7.998c0-4.417-3.582-8-8-8c-1.601,0-3.082,0.481-4.334,1.291c-1.23-5.316-5.973-9.29-11.665-9.29c-6.626,0-11.998,5.372-11.998,11.999c0,6.626,5.372,11.998,11.998,11.998C47.562,61.639,56.924,61.639,59.943,61.639z">
+                                    </path>
+                                  </g>
+                                </g>
+                              </svg>
+                              <div class="flex-grow-1">
+                                <h5>25*C</h5>
+                              </div><span>India</span>
+                            </div>
+                          </li>
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-xxl-3 col-xl-6 xl-50 col-md-6 box-col-6">
+            <div class="card">
+              <div class="cal-date-widget card-body">
+                <div class="cal-datepicker">
+                  <div class="datepicker-here float-sm-end" data-language="en"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-xxl-3 col-xl-6 xl-50 col-md-6 box-col-6">
+            <div class="card">
+              <div class="widget-feedback card-body">
+                <div class="feedback-top text-center">
+                  <svg class="fill-primary" viewBox="0 0 44 46" xmlns="http://www.w3.org/2000/svg">
+                    <path
+                      d="M9.73709 35.2337C6.17884 31.58 4.00316 26.8452 3.49802 21.7377C1.60687 24.237 0.581465 27.3024 0.586192 30.5195C0.589372 32.612 1.03986 34.692 1.89348 36.5729L0.1333 41.9282C-0.169286 42.8488 0.0517454 43.8484 0.7102 44.5369C1.17358 45.0213 1.78451 45.2794 2.4128 45.2794C2.67714 45.2794 2.94458 45.2337 3.2054 45.14L8.32806 43.2997C10.1272 44.1922 12.1167 44.6631 14.1182 44.6665C17.2557 44.6709 20.2418 43.558 22.657 41.5068C17.8005 41.0474 13.2702 38.8615 9.73709 35.2337Z">
+                    </path>
+                    <path
+                      d="M43.8418 35.7427L41.2863 27.9674C42.5181 25.3348 43.1691 22.407 43.1735 19.4611C43.181 14.3388 41.2854 9.49561 37.8357 5.82369C34.3853 2.15096 29.7875 0.0836476 24.889 0.00251856C19.8097 -0.0814855 15.0354 1.93839 11.446 5.69081C7.85665 9.44332 5.92425 14.4346 6.00469 19.7451C6.08229 24.8661 8.05972 29.673 11.5726 33.2803C15.078 36.8798 19.6988 38.861 24.5879 38.8608C24.5975 38.8608 24.6077 38.8608 24.6171 38.8608C27.435 38.8563 30.2356 38.1757 32.7537 36.8879L40.1911 39.5596C40.501 39.671 40.8188 39.7252 41.1329 39.7252C41.8795 39.7252 42.6055 39.4187 43.1563 38.8428C43.9388 38.0247 44.2014 36.8369 43.8418 35.7427ZM26.3834 26.1731H16.7865C16.0633 26.1731 15.477 25.5601 15.477 24.804C15.477 24.0479 16.0633 23.435 16.7865 23.435H26.3833C27.1066 23.435 27.6929 24.048 27.6929 24.804C27.6929 25.5602 27.1067 26.1731 26.3834 26.1731ZM32.3894 20.5426H16.7866C16.0633 20.5426 15.4771 19.9296 15.4771 19.1736C15.4771 18.4176 16.0634 17.8046 16.7866 17.8046H32.3894C33.1127 17.8046 33.6989 18.4176 33.6989 19.1736C33.6989 19.9296 33.1127 20.5426 32.3894 20.5426ZM32.3894 14.912H16.7866C16.0633 14.912 15.4771 14.299 15.4771 13.543C15.4771 12.7869 16.0634 12.1739 16.7866 12.1739H32.3894C33.1127 12.1739 33.6989 12.787 33.6989 13.543C33.6989 14.299 33.1127 14.912 32.3894 14.912Z">
+                    </path>
+                  </svg>
+                  <h3>Working Hours</h3>
+                  <h6 class="f-w-400">385749</h6>
+                </div>
+                <div id="feedback-chart"></div>
+                <ul>
+                  <li>
+                    <h4>Positive</h4>
+                    <h5 class="font-success">90%</h5>
+                  </li>
+                  <li>
+                    <h4>Negative</h4>
+                    <h5 class="font-danger">10%</h5>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- Container-fluid Ends-->
+      </div>
+    </div>
+
+
+    <!-- Day Gap Modal  -->
+    <div class="modal fade show d-none" id="exampleModalCenter" tabindex="-1" aria-labelledby="exampleModalCenter"
+      style="padding-right: 15px; display: block" aria-modal="true" role="dialog">
+      <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+        <div class="modal-content" style="background-color: transparent; border: none">
+          <div class="card m-0 border-0 shadow-sm">
+            <div class="card-header bg-primary text-white">
+              <h5 class="mb-0">Add Attendance & Leave</h5>
+            </div>
+            <div class="card-body">
+              <form action="/employee/rersonRoutes/<%=data?.id%>" method="post" enctype="multipart/form-data"
+                onsubmit="return checkIfCurrentDate(document.getElementById('leavelastDate'))">
+                <div class="row">
+                  <!-- Leave Type -->
+                  <div class="col-md-6 mb-3">
+                    <label for="leaveType" class="form-label">Leave Type</label>
+                    <select name="leavetype" id="leaveType" class="form-select" required>
+                      <option value="">Select Leave Type</option>
+                      <option value="Sick">Sick</option>
+                      <option value="Paid">Paid</option>
+                      <option value="Unpaid">Unpaid</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div class="row">
+                  <!-- Start Date -->
+                  <div class="col-md-6 mb-3">
+                    <label for="leaveDate" class="form-label" id="startdate-label">Date</label>
+                    <input type="date" class="form-control" id="leaveDate" name="satrtdate" required />
+                  </div>
+
+                  <!-- "More than one day?" link -->
+                  <div class="col-md-6 mb-3 font-400 d-flex align-items-end" id="linketext">
+                    <a class="text-decoration-none fw-semibold" style="cursor: pointer"
+                      onclick="$('#enddate').removeClass('d-none'); $('#linketext').addClass('d-none'); $('#startdate-label').text('Start Date');">
+                      MORE THAN ONE DAY?
+                    </a>
+                  </div>
+
+                  <!-- End Date (initially hidden) -->
+                  <div class="col-md-6 mb-3 d-none" id="enddate">
+                    <label for="leavelastDate" class="form-label">End Date</label>
+                    <input type="date" class="form-control" id="leavelastDate" name="enddate"
+                      onchange="checkIfCurrentDate(this)" />
+                    <div class="invalid-feedback d-none" id="enddate-error">
+                      End date cannot be today's date.
+                    </div>
+                  </div>
+
+
+                </div>
+
+                <div class="row">
+                  <!-- Reason -->
+                  <div class="col-12 mb-3">
+                    <label for="leaveReason" class="form-label">Reason For Leave</label>
+                    <textarea class="form-control" id="leaveReason" name="reason" rows="3"
+                      placeholder="Type reason here..." required></textarea>
+                  </div>
+                </div>
+
+                <div class="row">
+                  <!-- Attachment -->
+                  <div class="col-12 mb-3">
+                    <label for="attachment" class="form-label d-block">Attachment (optional)</label>
+
+                    <!-- File name will appear here -->
+                    <div id="file-name" class="mb-2 text-primary fw-semibold small"></div>
+
+                    <div class="border border-2 rounded d-inline-block position-relative" style="
+                        width: 50px;
+                        height: 50px;
+                        border-style: dashed;
+                        cursor: pointer;
+                      ">
+                      <input type="file" id="attachment" name="attachment"
+                        class="position-absolute w-100 h-100 opacity-0" multiple />
+                      <div class="d-flex align-items-center justify-content-center h-100">
+                        <span class="fw-bold text-muted fs-1">+</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Buttons -->
+                <div class="text-end">
+                  <button type="button" class="btn btn-secondary me-2" data-bs-dismiss="modal">
+                    Cancel
+                  </button>
+                  <button type="submit" class="btn btn-primary">Save</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+
+    <%- include('partials/footer.ejs') %> <%- include('partials/script.ejs') %>
+        <!-- login js-->
+        <script src="/js/datepicker/date-picker/datepicker.js"></script>
+        <script src="/js/datepicker/date-picker/datepicker.en.js"></script>
+        <script src="/js/datepicker/date-picker/datepicker.custom.js"></script>
+ 
+         <script src="/js/owlcarousel/owl.carousel.js"></script>
+          <script src="/js/general-widget.js"></script>
+        <!-- imag model path text  -->
+        <script>
+          function checkIfCurrentDate(input) {
+            const selectedDate = input.value;
+            const today = new Date().toISOString().split("T")[0];
+
+            if (selectedDate === today || selectedDate > today) {
+              input.classList.add("is-invalid");
+              document.getElementById("enddate-error").classList.remove("d-none");
+              return false;
+            } else {
+              input.classList.remove("is-invalid");
+              document.getElementById("enddate-error").classList.add("d-none");
+              return true;
+            }
+          }
+        </script>
+
+
+
+        <script>
+          document
+            .getElementById("attachment")
+            .addEventListener("change", function () {
+              const fileName = this.files.length > 0 ? this.files[0].name : "";
+              document.getElementById("file-name").textContent = fileName;
+            });
+        </script>
+
+        <script>
+          $(document).ready(function () {
+            let workInterval = null;
+            let breakInterval = null;
+
+            let workTime = { h: 0, m: 0, s: 0 };
+            let breakTime = { h: 0, m: 0, s: 0 };
+
+            function updateTime(time) {
+              time.s += 1;
+              if (time.s === 60) {
+                time.s = 0;
+                time.m += 1;
+                if (time.m === 60) {
+                  time.m = 0;
+                  time.h += 1;
+                }
+              }
+            }
+
+            function displayTime(prefix, time) {
+              $(`#hou${prefix}`).text(String(time.h).padStart(2, "0"));
+              $(`#min${prefix}`).text(String(time.m).padStart(2, "0"));
+              $(`#sec${prefix}`).text(String(time.s).padStart(2, "0"));
+            }
+
+            (function () {
+              const el = document.getElementById("emp-data");
+
+              const breaker = el.dataset.break;
+              const work = el.dataset.work;
+              const status = el.dataset.status;
+
+              let changework = work.replace(/"/g, "").split(":").map(Number);
+              let changebreak = breaker.replace(/"/g, "").split(":").map(Number);
+
+              if (status === "true") {
+                console.log(changework);
+
+                workTime = { h: changework[0], m: changework[1], s: changework[2] };
+                displayTime("", workTime);
+                breakTime = {
+                  h: changebreak[0],
+                  m: changebreak[1],
+                  s: changebreak[2],
+                };
+                displayTime("2", breakTime);
+                startWorkTimer();
+                stopBreakTimer();
+                $("#clockin").addClass("d-none");
+                $("#fromhom").addClass("d-none");
+                $("#clockout").removeClass("d-none");
+                $("#break").removeClass("d-none");
+              } else if (status === "false") {
+                workTime = { h: changework[0], m: changework[1], s: changework[2] };
+                displayTime("", workTime);
+                breakTime = {
+                  h: changebreak[0],
+                  m: changebreak[1],
+                  s: changebreak[2],
+                };
+                displayTime("2", breakTime);
+                stopWorkTimer();
+                startBreakTimer();
+                $("#clockout").addClass("d-none");
+                $("#break").addClass("d-none");
+                $("#clockin").removeClass("d-none");
+                $("#fromhom").removeClass("d-none");
+              } else {
+                workTime = { h: changework[0], m: changework[1], s: changework[2] };
+                displayTime("", workTime);
+                breakTime = {
+                  h: changebreak[0],
+                  m: changebreak[1],
+                  s: changebreak[2],
+                };
+                displayTime("2", breakTime);
+              }
+            })();
+
+            function startWorkTimer() {
+              workInterval = setInterval(() => {
+                updateTime(workTime);
+                displayTime("", workTime);
+              }, 1000);
+            }
+
+            function stopWorkTimer() {
+              if (workInterval) {
+                clearInterval(workInterval);
+                workInterval = null;
+              }
+            }
+
+            function startBreakTimer() {
+              breakInterval = setInterval(() => {
+                updateTime(breakTime);
+
+                displayTime("2", breakTime);
+              }, 1000);
+            }
+
+            function stopBreakTimer() {
+              if (breakInterval) {
+                clearInterval(breakInterval);
+                breakInterval = null;
+              }
+            }
+
+            $("#clockin").click(function () {
+              stopBreakTimer();
+              startWorkTimer();
+
+              let id = $("#emplyeeId").val();
+
+              $("#clockin").addClass("d-none");
+              $("#fromhom").addClass("d-none");
+              $("#clockout").removeClass("d-none");
+              $("#break").removeClass("d-none");
+
+              $.ajax({
+                url: `/employee/attendence/${id}`,
+                method: "POST",
+                success: function (res) {
+                  let Break = res.Break.split(":");
+                  console.log(Break);
+                  breakTime = {
+                    h: Number(Break[0]),
+                    m: Number(Break[1]),
+                    s: Number(Break[2]),
+                  };
+                  displayTime("2", breakTime);
+
+                  let Working = res.WorkingTime.split(":");
+                  console.log(Working);
+                  workTime = {
+                    h: Number(Working[0]),
+                    m: Number(Working[1]),
+                    s: Number(Working[2]),
+                  };
+                  displayTime("", workTime);
+                  console.log(res);
+
+                  if (res.MissingDates.length > 0) {
+                    console.log(res);
+                    stopWorkTimer();
+                    stopBreakTimer();
+
+                    $("#exampleModalCenter").removeClass("d-none");
+                    $("#exampleModalCenter").modal("show");
+
+                    function formatDateToISO(dateStr) {
+                      const parts = dateStr.split("-");
+                      if (parts.length === 3) {
+                        return `${parts[2]}-${parts[1]}-${parts[0]}`; // yyyy-MM-dd
+                      }
+                      return dateStr;
+                    }
+
+                    // Set start and end date
+                    $("#leaveDate").val(formatDateToISO(res.MissingDates[0])); // start date
+
+                  }
+                },
+              });
+            });
+
+            $("#break").click(function () {
+              stopWorkTimer();
+              startBreakTimer();
+
+              let id = $("#emplyeeId").val();
+
+              $("#clockout").addClass("d-none");
+              $("#break").addClass("d-none");
+              $("#clockin").removeClass("d-none");
+              $("#fromhom").removeClass("d-none");
+
+              $.ajax({
+                url: `/employee/attendence/${id}`,
+                method: "POST",
+                success: function (res) {
+                  let Break = res.Break.split(":");
+                  console.log(Break);
+                  breakTime = {
+                    h: Number(Break[0]),
+                    m: Number(Break[1]),
+                    s: Number(Break[2]),
+                  };
+                  displayTime("2", breakTime);
+
+                  let Working = res.WorkingTime.split(":");
+                  console.log(Working);
+                  workTime = {
+                    h: Number(Working[0]),
+                    m: Number(Working[1]),
+                    s: Number(Working[2]),
+                  };
+                  displayTime("", workTime);
+                },
+              });
+            });
+
+            $("#clockout").click(function () {
+              // Stop both timers
+              stopWorkTimer();
+              stopBreakTimer();
+
+              // Optional: Log final times (or send them to backend here)
+              console.log("Final Work Time:", workTime);
+              console.log("Final Break Time:", breakTime);
+
+              // UI changes
+              $("#clockout").addClass("d-none");
+              $("#break").addClass("d-none");
+              $("#clockin").removeClass("d-none");
+              $("#fromhom").removeClass("d-none");
+
+              // If you want to send final times to backend:
+              const id = $("#emplyeeId").val();
+              $.ajax({
+                url: `/employee/clockout/${id}`,
+                method: "POST",
+
+                data: {
+                  workTime: `${String(workTime.h).padStart(2, "0")}:${String(
+                    workTime.m
+                  ).padStart(2, "0")}:${String(workTime.s).padStart(2, "0")}`,
+                  breakTime: `${String(breakTime.h).padStart(2, "0")}:${String(
+                    breakTime.m
+                  ).padStart(2, "0")}:${String(breakTime.s).padStart(2, "0")}`,
+                },
+                success: function (res) {
+                  console.log("Clocked out:", res);
+                },
+                error: function (err) {
+                  console.error("Clockout error:", err);
+                },
+              });
+            });
+          });
+        </script>
+
+        <!-- <script>
+      window.addEventListener("visibilitychange", () => {
+    if (!document.hidden) {
+        alert(111)
+    } else {
+        alert(222)
+        // localStorage.setItem("startTime", startTime);
+    }
+});
+
+    </script> -->
+
+        <!-- latest jquery-->
+   
+
+
+</body>
+
+
+</html>

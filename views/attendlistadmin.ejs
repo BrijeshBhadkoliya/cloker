@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<!-- Mirrored from admin.pixelstrap.com/tivo/template/index.html by HTTrack Website Copier/3.x [XR&CO'2014], Mon, 20 Mar 2023 04:00:15 GMT -->
+
+<head>
+    <%- include('partials/head.ejs') %>
+      
+        <link rel="stylesheet" type="text/css" href="/css/vendors/daterange-picker.css">
+ 
+</head>
+
+<body onload="startTime()">
+    <%- include('partials/sidebar.ejs') %>`
+        <div class="page-body">
+            <div class="container-fluid">
+                <div class="page-title">
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <h3>Employee List</h3>
+                        </div>
+                        <div class="col-sm-6">
+                            <ol class="breadcrumb">
+                                <li class="breadcrumb-item"><a
+                                        href="<%=role===2?'/employee/dashboard':'/admin/dashboard'%>"><i
+                                            data-feather="home" class="me-2"></i>Dashboard</a></li>
+                                <li class="breadcrumb-item active"><a
+                                        href="<%=role===2?'/employee/attendlist':'/admin/attendance'%>"><i
+                                            data-feather="user-check" class="me-2"></i>Attendance List</a></li>
+                                <%if(role===1){%>
+                                    <li class="breadcrumb-item active"><a><i data-feather="user-check"
+                                                class="me-2"></i>Worker Attendance</a></li>
+                                    <%}%>
+                            </ol>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="container-fluid ">
+                <div class="row">
+                    <div class="col-sm-12">
+                        <div class="mt-3">
+                            <div class="card">
+                                <div class="card-body d-flex justify-content-between align-items-center gap-3">
+                                    <div class="date-range-picker d-flex align-items-center gap-2">
+                                        <div class="theme-form">
+                                        <input type="hidden" value="<%=employeeId===''?'':employeeId%>" id="employeeId">
+ 
+                                            <input class="form-control text-primary" b type="text" id="datarang" name="daterange"
+                                                placeholder="Select Date Range" value="02/15/2023 - 2/3/2023"
+                                                style="width: 250px;" oninput="DatePicker()" onchange="DatePicker()">
+                                        </div>
+                                    </div>
+                                    <div class="action-buttons d-flex gap-2">
+
+                                        <button class="btn btn-square btn-outline-dark rounded"
+                                            style="font-size: 18px; height: 35px; width: 35px; padding: 0px !important;">
+                                            <i class="fa-solid fa-arrow-down-to-line"></i>
+                                        </button>
+                                        <button class="btn btn-primary rounded-circle text-white"
+                                            style="font-size: 20px; height: 35px; width: 35px; padding: 0px !important;">
+                                            +
+                                        </button>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- HTML (DOM) sourced data  Starts-->
+                <div class="col-sm-12">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="table-responsive theme-scrollbar">
+                                <table class="display" style="font-size: 12px;" id="basic-1">
+                                    <thead>
+                                        <tr>
+                                            <th class="d-none">#</th>
+                                            <th>Date</th>
+
+                                            <th>Day</th>
+                                            <th>Attendance</th>
+                                            <th>Clock In</th>
+                                            <th>Clock Out</th>
+                                            <th>Total Time</th>
+                                            <th>Break Time</th>
+                                            <th>Work Time</th>
+                                            <th>Extra Time</th>
+                                            <th>Clockin IP</th>
+                                            <th>Clockout IP</th>
+                                            <th>Action</th>
+                                        </tr>
+
+                                    </thead>
+                                    <tbody id="tbody">
+                                        <% currantData.map((val,i)=>{%>
+                                            <% const [day, month, year]=val.date.split('-'); const dateObj=new
+                                                Date(`${year}-${month}-${day}`); const
+                                                weekday=dateObj.toLocaleDateString('en-US', { weekday: 'short' }); const
+                                                monthName=dateObj.toLocaleDateString('en-US', { month: 'short' }); const
+                                                formattedDate=`${weekday}, ${String(day).padStart(2, '0' )}
+                                                ${monthName}, ${year}`; %>
+                                                <tr class="odd">
+                                                    <td class="d-none">
+                                                        <%=i++%>
+                                                    </td>
+                                                    <td>
+                                                        <%=formattedDate%>
+                                                    </td>
+
+                                                    <td>
+                                                        <% if(val.day_status==='FD' ){ %>
+                                                            <div class="d-flex align-items-center justify-content-center px-2 py-1 rounded text-success fw-semibold"
+                                                                style="width: 40px; height: 28px; background-color: rgba(25, 135, 84, 0.1);">
+                                                                FD
+                                                            </div>
+                                                            <% } else { %>
+                                                                <div class="d-flex align-items-center justify-content-center px-2 py-1 rounded text-info fw-semibold"
+                                                                    style="width: 40px; height: 28px; background-color: rgba(13, 202, 240, 0.1); ">
+                                                                    WK
+                                                                </div>
+                                                                <% } %>
+                                                    </td>
+                                                    <td>
+                                                        <% const today=new Date(); const
+                                                            dayDate=String(today.getDate()).padStart(2, '0' ); const
+                                                            monthDate=String(today.getMonth() + 1).padStart(2, '0' );
+                                                            const yearDate=today.getFullYear(); const
+                                                            formattedDate2=`${dayDate}-${monthDate}-${yearDate}`;%>
+                                                            <% if(val.clockOut_time==='' ) {%>
+
+                                                                <div class="d-flex align-items-center justify-content-center px-2 py-1 rounded text-primary fw-semibold"
+                                                                    style="width: 20px; height: 20px; background-color: rgba(25, 76, 135, 0.1); font-size: 12px;"
+                                                                    data-bs-toggle="tooltip" data-bs-placement="top"
+                                                                    title="Warning!">
+                                                                    <i class="fa-solid fa-triangle-exclamation"></i>
+                                                                </div>
+                                                                <% }else if(val.attendens_status==='P' ) { %>
+                                                                    <div class="d-flex align-items-center justify-content-center px-2 py-1 rounded text-success fw-semibold"
+                                                                        style="width: 20px; height: 20px; background-color: rgba(25, 135, 84, 0.1); font-size: 12px;">
+                                                                        P
+                                                                    </div>
+                                                                    <% } else { %>
+                                                                        <div class="d-flex align-items-center justify-content-center px-2 py-1 rounded text-danger fw-semibold"
+                                                                            style="width: 20px; height: 20px; background-color: rgba(220, 53, 69, 0.1); font-size: 12px;">
+                                                                            A
+                                                                        </div>
+                                                                        <% } %>
+                                                    </td>
+                                                    <td>
+                                                        <%=val.clockIn_time%>
+                                                    </td>
+                                                    <td>
+                                                        <%=val.clockOut_time%>
+                                                    </td>
+                                                    <td>
+                                                        <%=val.total_time%>
+                                                    </td>
+                                                    <td>
+                                                        <%=val.break_time%>
+                                                    </td>
+                                                    <td>
+                                                        <%=val.productive_time%>
+                                                    </td>
+                                                    <td>
+                                                        <%=val.extra_time%>
+                                                    </td>
+                                                    <td>
+                                                        <%=val.clockIn_ip%>
+                                                    </td>
+                                                    <td>
+                                                        <%=val.clockOut_ip%>
+                                                    </td>
+                                                    <td>
+                                                        <%if(val.attendens_status==='P' ){%>
+                                                            <ul class="action">
+                                                                <li class="edit"><a href="/employee/entry/<%=val.id%>"
+                                                                        data-bs-original-title="" title="">
+                                                                        <i
+                                                                            class="fa-light fa-eye me-2 text-primary"></i></a>
+                                                                </li>
+                                                            </ul>
+                                                            <%}else{%>
+                                                                <ul class="action">
+                                                                    <span>-</span>
+                                                                </ul>
+                                                                <%}%>
+                                                    </td>
+                                                </tr>
+                                                <%})%>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- HTML (DOM) sourced data  Ends-->
+                </div>
+                <!-- Container-fluid Ends-->
+            </div>
+        </div>
+        </div>
+
+
+        <%- include('partials/footer.ejs') %>
+            <%- include('partials/script.ejs') %>
+
+                
+
+                <script src="/js/datepicker/daterange-picker/moment.min.js"></script>
+                <script src="/js/datepicker/daterange-picker/daterangepicker.js"></script>
+                <script src="/js/datepicker/daterange-picker/daterange-picker.custom.js"></script>
+
+               
+
+                <script>
+                    const today = new Date();
+                    const lastMonth = new Date();
+                    lastMonth.setMonth(today.getMonth() - 1);
+
+                    const formatDate = (date) => {
+                        const day = String(date.getDate()).padStart(2, '0');
+                        const month = String(date.getMonth() + 1).padStart(2, '0');
+                        const year = date.getFullYear();
+                        return `${month}/${day}/${year}`;
+                    };
+
+                    document.querySelector('input[name="daterange"]').value =
+                        `<i class="fa-solid fa-calendar-days"></i>${formatDate(lastMonth)} - ${formatDate(today)}`;
+
+
+                    function DatePicker() {
+
+                        const id = document.getElementById('employeeId').value
+
+                        // format function start 
+                        function getDateRangeArray(startDateStr, endDateStr) {
+                            const dateArray = [];
+
+                        
+                            const [startMonth, startDay, startYear] = startDateStr.split('/');
+                            const [endMonth, endDay, endYear] = endDateStr.split('/'); 
+
+                            let currentDate = new Date(`${startYear}-${startMonth}-${startDay}`);
+                            const endDate = new Date(`${endYear}-${endMonth}-${endDay}`);
+
+                            while (currentDate <= endDate) {
+                                const day = String(currentDate.getDate()).padStart(2, '0');
+                                const month = String(currentDate.getMonth() + 1).padStart(2, '0');
+                                const year = currentDate.getFullYear();
+
+                                const formattedDate = `${day}-${month}-${year}`;
+                                dateArray.push(formattedDate);
+
+                                currentDate.setDate(currentDate.getDate() + 1);
+                            }
+
+                            return dateArray;
+                        }
+
+                        // format function end
+
+
+                        let datepic = document.getElementById('datarang').value;
+                        console.log("Input Date Range:", datepic);
+
+                        let datepicArr = datepic.split('-').map(val => val.trim());
+                        console.log("Split Date Array:", datepicArr);
+
+
+                        const startDate = datepicArr[0];
+                        const endDate = datepicArr[1];
+
+                        const dateRangeArray = getDateRangeArray(startDate, endDate);
+                        console.log("Date Range Array:", dateRangeArray);
+
+
+
+                        $.ajax({
+                            url: `/admin/workerList/${id}`,
+                            method: 'POST',
+                            data: { data: dateRangeArray },
+                            success: (function (res) {
+                                console.log(res);
+                                const tbody = document.getElementById("tbody");
+                                tbody.innerHTML = "";
+
+                                res.forEach((val, i) => {
+                                    const [day, month, year] = val.date.split('-');
+                                    const dateObj = new Date(`${year}-${month}-${day}`);
+                                    const weekday = dateObj.toLocaleDateString('en-US', { weekday: 'short' });
+                                    const monthName = dateObj.toLocaleDateString('en-US', { month: 'short' });
+                                    const formattedDate = `${weekday}, ${String(day).padStart(2, '0')} ${monthName}, ${year}`;
+
+
+                                    const statusDiv = val.day_status === 'FD' ? `
+                <div class="d-flex align-items-center justify-content-center px-2 py-1 rounded text-success fw-semibold"
+                    style="width: 40px; height: 28px; background-color: rgba(25, 135, 84, 0.1);">FD
+                </div>` : `
+                <div class="d-flex align-items-center justify-content-center px-2 py-1 rounded text-info fw-semibold"
+                    style="width: 40px; height: 28px; background-color: rgba(13, 202, 240, 0.1);">WK
+                </div>`;
+
+
+                                    const attendanceIcon = val.clockOut_time === '' ? `
+                <div class="d-flex align-items-center justify-content-center px-2 py-1 rounded text-primary fw-semibold"
+                    style="width: 20px; height: 20px; background-color: rgba(25, 76, 135, 0.1); font-size: 12px;" 
+                    title="Warning!">
+                    <i class="fa-solid fa-triangle-exclamation"></i>
+                </div>` : val.attendens_status === 'P' ? `
+                <div class="d-flex align-items-center justify-content-center px-2 py-1 rounded text-success fw-semibold"
+                    style="width: 20px; height: 20px; background-color: rgba(25, 135, 84, 0.1); font-size: 12px;">P
+                </div>` : `
+                <div class="d-flex align-items-center justify-content-center px-2 py-1 rounded text-danger fw-semibold"
+                    style="width: 20px; height: 20px; background-color: rgba(220, 53, 69, 0.1); font-size: 12px;">A
+                </div>`;
+
+
+                                    const actionLink = val.attendens_status === 'P' ? `
+                <ul class="action">
+                    <li class="edit"><a href="/employee/entry/${val.id}" title="">
+                        <i class="fa-light fa-eye me-2 text-primary"></i></a>
+                    </li>
+                </ul>` : `
+                <ul class="action">
+                    <span>-</span>
+                </ul>`;
+
+
+                                    tbody.innerHTML += `
+                <tr class="odd">
+                    <td class="d-none">${i + 1}</td>
+                    <td>${formattedDate}</td>
+                    <td>${statusDiv}</td>
+                    <td>${attendanceIcon}</td>
+                    <td>${val.clockIn_time}</td>
+                    <td>${val.clockOut_time}</td>
+                    <td>${val.total_time}</td>
+                    <td>${val.break_time}</td>
+                    <td>${val.productive_time}</td>
+                    <td>${val.extra_time}</td>
+                    <td>${val.clockIn_ip}</td>
+                    <td>${val.clockOut_ip}</td>
+                    <td>${actionLink}</td>
+                </tr>`;
+                                });
+                            })
+                        })
+
+
+
+
+                    } 
+                </script>
+
+               
+
+
+
+</body>
+
+
+<!-- Mirrored from admin.pixelstrap.com/tivo/template/index.html by HTTrack Website Copier/3.x [XR&CO'2014], Mon, 20 Mar 2023 04:01:15 GMT -->
+
+</html>

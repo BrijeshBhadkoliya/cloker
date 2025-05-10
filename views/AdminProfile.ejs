@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<!-- Mirrored from admin.pixelstrap.com/tivo/template/index.html by HTTrack Website Copier/3.x [XR&CO'2014], Mon, 20 Mar 2023 04:00:15 GMT -->
+
+<head>
+  <%- include('partials/head.ejs') %>
+</head>
+
+<body onload="startTime()">
+  <%- include('partials/sidebar.ejs') %>`
+    <div class="page-body">
+      <div class="container-fluid">
+        <div class="page-title">
+          <div class="row">
+            <div class="col-sm-6">
+              <h3>Edit Profile</h3>
+            </div>
+            <div class="col-sm-6">
+              <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="<%=role===2 ?'/employee/dashboard':'/admin/dashboard'%>"><i
+                      data-feather="home" class="me-2"></i>Dashboard</a></li>
+
+                <li class="breadcrumb-item active"><a href="">Profile Details</a></li>
+              </ol>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Container-fluid starts-->
+      <div class="container-fluid">
+        <div class="edit-profile">
+          <div class="row">
+            <div class="col-xl-4 col-lg-5">
+              <div class="card">
+                <div class="card-header pb-0">
+                  <h4 class="card-title mb-0">My Profile</h4>
+                  <div class="card-options"><a class="card-options-collapse" href="#" data-bs-toggle="card-collapse"><i
+                        class="fe fe-chevron-up"></i></a><a class="card-options-remove" href="#"
+                      data-bs-toggle="card-remove"><i class="fe fe-x"></i></a></div>
+                </div>
+                <div class="card-body">
+                  <form>
+                    <div class="row mb-2">
+                      <div class="profile-title">
+                        <div class="d-lg-flex d-block align-items-center"><img class="img-70 rounded-circle" height="70"
+                            alt="" src="/uploads/<%=setting[0].light_img%>">
+                          <div class="flex-grow-1">
+                            <h3 class="mb-1 f-20 txt-primary"> <a href="user-profile.html">
+                                <%=proDetails[0].name%>
+                              </a></h3>
+                            <!-- <p class=" f-12 mb-0">DESIGNER</p> -->
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <!-- <div class="mb-3">
+                          <h6 class="form-label">Bio</h6>
+                          <textarea class="form-control" rows="5">On the other hand, we denounce with righteous indignation</textarea>
+                        </div> -->
+                    <div class="mb-3">
+                      <label class="form-label f-w-500">Email-Address</label>
+                      <input class="form-control bg-white" placeholder="your-email@domain.com"
+                        value="<%=proDetails[0].email%>" readonly>
+                    </div>
+                    <!-- <div class="mb-3">
+                          <label class="form-label f-w-500">Password</label>
+                          <input class="form-control" type="password" value="password">
+                        </div> -->
+                    <!-- <div class="mb-3">
+                          <label class="form-label f-w-500">Website</label>
+                          <input class="form-control" placeholder="http://Uplor .com">
+                        </div> -->
+                    <!-- <div class="form-footer">
+                          <button class="btn btn-primary btn-block">Save</button>
+                        </div> -->
+                  </form>
+                </div>
+              </div>
+            </div>
+            <div class="col-xl-8 col-lg-7">
+              <form class="card" action="/admin/updateadmin" method="post">
+                <div class="card-header pb-0">
+                  <h4 class="card-title mb-0">View Profile</h4>
+                  <div class="card-options"><a class="card-options-collapse" href="#" data-bs-toggle="card-collapse"><i
+                        class="fe fe-chevron-up"></i></a><a class="card-options-remove" href="#"
+                      data-bs-toggle="card-remove"><i class="fe fe-x"></i></a></div>
+                </div>
+                <div class="card-body">
+                  <div class="row">
+                    <div class="col-md-6">
+                      <div class="mb-3">
+                        <label class="form-label f-w-500">Company</label>
+                        <input class="form-control bg-white" type="text" placeholder="Company" value="CSCODETECH"
+                          readonly>
+                      </div>
+                    </div>
+                    <input class="form-control" type="hidden" placeholder="Company" name="editid"
+                      value="<%=proDetails[0].id%>">
+
+                    <div class="col-sm-6 col-md-6">
+                      <div class="mb-3">
+
+                        <label class="form-label f-w-500">Username</label>
+                        <input class="form-control bg-white" type="text" name="name" placeholder="Username"
+                          value="<%=proDetails[0].name%>">
+                      </div>
+                    </div>
+                    <div class="col-sm-6 col-md-6">
+                      <div class="mb-3">
+                        <label class="form-label f-w-500">Email address</label>
+                        <input class="form-control bg-white" type="email" name="email" placeholder="Email"
+                          value="<%=proDetails[0].email%>">
+                      </div>
+                    </div>
+                    <div class="col-md-6">
+                      <div class="mb-3">
+                        <label class="form-label f-w-500" name="country">Country</label>
+                        <input class="form-control bg-white" type="text" name="country" placeholder="Country"
+                          value="<%=proDetails[0].country%>">
+
+                      </div>
+                    </div>
+
+
+                    <div class="col-sm-6 col-md-6">
+                      <div class="mb-3">
+                        <label class="form-label f-w-500">Mobile Number</label>
+                        <input class="form-control bg-white" type="number" name="phone" placeholder="Mobile Number"
+                          value="<%=proDetails[0].phone%>">
+                      </div>
+                    </div>
+
+                    <div class="col-md-6 position-relative">
+                      <label class="form-label" for="validationCustom03">Upadate Password</label>
+
+                      <div class="input-group">
+                        <input class="form-control" id="passwordInput" type="password" placeholder="Enter New Password"
+                          name="password" >
+                        <span class="input-group-text">
+                          <i class="fa-regular fa-eye-slash" id="togglePassword" style="cursor: pointer;"></i>
+                        </span>
+                      </div>
+
+                      <div class="invalid-feedback">
+                        Please provide a strong password.
+                      </div>
+                    </div>
+
+                  </div>
+                </div>
+                <div class="card-footer text-start">
+                  <button class="btn btn-primary" type="submit">Update Profile</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Container-fluid Ends-->
+    </div>
+    </div>
+    </div>
+    <!-- Container-fluid Ends-->
+    </div>
+
+    <%- include('partials/footer.ejs') %>
+
+
+      <%- include('partials/script.ejs') %>
+        <!-- login js-->
+        <script>
+          $(document).ready(function () {
+            $('#togglePassword').click(function () {
+              const passwordInput = $('#passwordInput');
+              const type = passwordInput.attr('type') === 'password' ? 'text' : 'password';
+              passwordInput.attr('type', type);
+
+              // Toggle icon
+              $(this).toggleClass('fa-eye fa-eye-slash');
+            });
+          });
+        </script>
+</body>
+
+<!-- Mirrored from admin.pixelstrap.com/tivo/template/index.html by HTTrack Website Copier/3.x [XR&CO'2014], Mon, 20 Mar 2023 04:01:15 GMT -->
+
+</html>

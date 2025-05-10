@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<!-- Mirrored from admin.pixelstrap.com/tivo/template/index.html by HTTrack Website Copier/3.x [XR&CO'2014], Mon, 20 Mar 2023 04:00:15 GMT -->
+
+<head>
+  <%- include('partials/head.ejs') %>
+    <!-- Custom Styles -->
+
+
+</head>
+
+<body onload="startTime()">
+  <%- include('partials/sidebar.ejs') %>`
+    <div class="page-body">
+      <div class="container-fluid">
+        <div class="page-title">
+          <div class="row">
+            <div class="col-sm-6">
+              <h3>Employee List</h3>
+            </div>
+            <div class="col-sm-6">
+              <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="/admin"><i data-feather="home" class="me-2"></i>Dashboard</a></li>
+                <li class="breadcrumb-item active">Employee List</li>
+              </ol>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Container-fluid starts-->
+      <div class="container-fluid dashboard-default">
+        <div class="row">
+          <div class="col-sm-12">
+
+
+            <div class="card">
+              <div class="card-header pb-0">
+
+              </div>
+              <div class="card-body">
+                <div class="table-responsive theme-scrollbar">
+                  <div id="basic-1_wrapper" class="dataTables_wrapper no-footer">
+                    <table class="display dataTable no-footer" id="basic-1" role="grid" aria-describedby="basic-1_info">
+                      <thead>
+                        <tr role="row">
+                          <th class="sorting_asc" tabindex="0" aria-controls="basic-1" aria-sort="ascending"
+                            aria-label="Name: activate to sort column descending">No.</th>
+                          <th class="sorting" tabindex="0" aria-controls="basic-1"
+                            aria-label="Position: activate to sort column ascending">Profile Image
+                          </th>
+                          <th class="sorting" tabindex="0" aria-controls="basic-1"
+                            aria-label="Office: activate to sort column ascending" style="height: 50px;">Employee Name
+                          </th>
+                          <th class="sorting" tabindex="0" aria-controls="basic-1"
+                            aria-label="Age: activate to sort column ascending" style="height: 50px;">Email</th>
+                          <th class="sorting" tabindex="0" aria-controls="basic-1"
+                            aria-label="Start date: activate to sort column ascending" style="height: 50px;">Contact No.
+                          </th>
+                          <th class="sorting" tabindex="0" aria-controls="basic-1"
+                            aria-label="Salary: activate to sort column ascending" style="height: 50px;">Status</th>
+                          <th class="sorting" tabindex="0" aria-controls="basic-1"
+                            aria-label="Action: activate to sort column ascending" style="height: 50px;">Action</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <% employee?.map((val,i)=>{ %>
+                          <tr>
+                            <td class="tbrow">
+                              <%=i+=1%>
+                            </td>
+                            <td class="tbrow"><img src="/uploads/<%= val.profileimage%>" alt="" class="rounded-circle"
+                                style="height: 60px; width: 60px;"></td>
+                            <td class="tbrow">
+                              <%= val.firstName + ' ' + val.lastName %>
+                            </td>
+                            <td class="tbrow">
+                              <%= val.email %>
+                            </td>
+                            <td class="tbrow">
+                              <%= val.phoneNum %>
+                            </td>
+                            <td class="tbrow">
+                              <label class="switch">
+                                <input type="checkbox" id="stastusUp" value="<%= val.id %>" data-bs-original-title=""
+                                  title="" <%=val.status==='active' ? 'checked' : '' %>
+                                onclick="Upstatuas(<%= val.id %>)">
+                                  <span class="switch-state"></span>
+                              </label>
+                            </td>
+                            <td>
+                              <ul class="action">
+                                <li class="edit"> <a href="/admin/editem/<%=val.id%>" data-bs-original-title=""
+                                    title=""><i data-feather="edit" style="height: 16px; width: 16px;"
+                                      class="text-success"></i></a></li>
+                                <li class="delete ms-1"><a href="/admin/deleteem/<%=val.id%>" data-bs-original-title=""
+                                    title=""><i data-feather="trash" style="height: 16px; width: 16px;"
+                                      class="text-danger"></i></a></li>
+                              </ul>
+                            </td>
+                            <!-- <td> 
+                                <ul class="action"> 
+                                <li class="edit"> <a ><i class="icon-pencil-alt"></i></a></li>
+                                <li class="delete"><a href="/settings/delete_banner/<%= data.id %>"><i class="icon-trash"></i></a></li>
+                                </ul>
+                              </td> -->
+                          </tr>
+                          <% }) %>
+                      </tbody>
+                    </table>
+
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+    </div>
+    </div>
+    <!-- Container-fluid Ends-->
+    </div>
+
+    <%- include('partials/footer.ejs') %>
+
+      <%- include('partials/script.ejs') %>
+        <!-- login js-->
+
+        <script>
+          function Upstatuas(validID) {
+
+
+
+            $.ajax({
+              url: `/admin/status/${validID}`,
+              method: 'GET',
+              success: function (res) {
+                console.log(res);
+              },
+              error: function (err) {
+                console.error(err);
+              }
+            });
+          }
+        </script>
+
+
+</body>
+
+<!-- Mirrored from admin.pixelstrap.com/tivo/template/index.html by HTTrack Website Copier/3.x [XR&CO'2014], Mon, 20 Mar 2023 04:01:15 GMT -->
+
+</html>

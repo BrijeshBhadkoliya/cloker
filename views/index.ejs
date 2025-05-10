@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<!-- Mirrored from admin.pixelstrap.com/tivo/template/index.html by HTTrack Website Copier/3.x [XR&CO'2014], Mon, 20 Mar 2023 04:00:15 GMT -->
+
+<head>
+  <%- include('partials/head.ejs') %>
+</head>
+
+<body onload="startTime()">
+  <%- include('partials/sidebar.ejs') %>`
+    <div class="page-body">
+      <div class="container-fluid">
+        <div class="page-title">
+          <div class="row">
+            <div class="col-sm-6">
+              <h3>Default</h3>
+            </div>
+            <div class="col-sm-6">
+              <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="/admin"><i data-feather="home" class="me-2"></i>Dashboard</a></li>
+                <li class="breadcrumb-item active">Default</li>
+
+              </ol>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Container-fluid starts-->
+      <div class="container-fluid dashboard-default">
+        <div class="row">
+          <div class="col-xxl-6 col-xl-5 col-lg-6 dash-45 box-col-40">
+            <div class="card profile-greeting">
+              <div class="card-body">
+                <div class="d-sm-flex d-block justify-content-end">
+
+                
+                </div>
+                <div class="greeting-user">
+                  <div class="profile-vector">
+                    <ul class="dots-images">
+                      <li class="dot-small bg-info dot-1"></li>
+                      <li class="dot-medium bg-primary dot-2"></li>
+                      <li class="dot-medium bg-info dot-3"></li>
+                      <li class="semi-medium bg-primary dot-4"></li>
+                      <li class="dot-small bg-info dot-5"></li>
+                      <li class="dot-big bg-info dot-6"></li>
+                      <li class="dot-small bg-primary dot-7"></li>
+                      <li class="semi-medium bg-primary dot-8"></li>
+                      <li class="dot-big bg-info dot-9"></li>
+                    <!-- </ul><img class="img-fluid" src="../images/dashboard/default/profile.png" alt=""> -->
+                    </ul><img class="img-fluid" src="/uploads/<%=setting[0].dark_img%>" style="height: 150px; width: 150px;" alt="">
+
+                    <ul class="vector-image">
+                      <li> <img src="../images/dashboard/default/ribbon1.png" alt=""></li>
+                      <li> <img src="../images/dashboard/default/ribbon3.png" alt=""></li>
+                      <li> <img src="../images/dashboard/default/ribbon4.png" alt=""></li>
+                      <li> <img src="../images/dashboard/default/ribbon5.png" alt=""></li>
+                      <li> <img src="../images/dashboard/default/ribbon6.png" alt=""></li>
+                      <li> <img src="../images/dashboard/default/ribbon7.png" alt=""></li>
+                    </ul>
+                  </div>
+                  <h4><a href="#"><span>Welcome Back</span>
+                      <%=newdata[0].name%>
+                    </a><span class="right-circle"><i class="fa fa-check-circle font-primary f-14 middle"></i></span>
+                  </h4>
+
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-xl-6 col-md-6 box-col-40 xl-40">
+            <div class="card appointment-detail">
+              <div class="card-header pb-0">
+                <div class="d-flex justify-content-between">
+                  <div class="flex-grow-1">
+                    <p class="square-after f-w-600 header-text-primary">Today attendance
+                    </p>
+                    <h4>
+                      <%=mergedData.length%> Employee
+                    </h4>
+                  </div>
+                   
+                </div>
+              </div>
+              <div class="card-body">
+                <div class="table-responsive theme-scrollbar">
+                  <table class="table">
+                    <tbody>
+                      <% mergedData.map((val,i)=>{%>
+                        <tr>
+                          <td>
+                            <div class="d-flex"><img class="img-fluid align-top circle"
+                                src="/uploads/<%=val.profileimage%>" alt="">
+                              <div class="flex-grow-1"><a href="/admin/attendlist/<%=val.emplyeeId%>"><span>
+                                    <%=val.firstName+" "+val.lastName%></span></a>
+                              <p class=" mb-0">
+                                      <%=val.productive_time%>
+                                        </p>
+                              </div>
+                              <div class="active-status active-online"></div>
+                            </div>
+                          </td>
+                          <td>
+                            <%=val.date%>
+                          </td>
+                          <td class="text-end">
+                            
+
+
+                              <% if(val.attendens_status==='P' ) { %>
+                                <div
+                                  class="d-flex align-items-center justify-content-center px-2 py-1 rounded text-success fw-semibold"
+                                  style="width: 30px; height: 30px; background-color: rgba(25, 135, 84, 0.1); font-size: 12px;">
+                                  P
+                                </div>
+                                <% } else { %>
+                                  <div
+                                    class="d-flex align-items-center justify-content-center px-2 py-1 rounded text-danger fw-semibold"
+                                    style="width: 30px; height: 30px; background-color: rgba(220, 53, 69, 0.1); font-size: 12px;">
+                                    A
+                                  </div>
+                                  <% } %>
+
+                          </td>
+                        </tr>
+                        <%})%>
+                    </tbody>
+                  </table>
+                </div>
+                
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+      <!-- Container-fluid Ends-->
+    </div>
+
+    <%- include('partials/footer.ejs') %>
+
+
+      <%- include('partials/script.ejs') %>
+        <!-- login js-->
+</body>
+
+<!-- Mirrored from admin.pixelstrap.com/tivo/template/index.html by HTTrack Website Copier/3.x [XR&CO'2014], Mon, 20 Mar 2023 04:01:15 GMT -->
+
+</html>

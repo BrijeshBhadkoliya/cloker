@@ -1,0 +1,55 @@
+<% if(success_msg && success_msg.length > 0) { %>
+    <script>
+        function triggerNotification(type, message) {
+            let notifyType = type === 'error' ? 'danger' : 'success';  
+            $.notify({
+                message: message
+            }, {
+                type: notifyType,  
+                allow_dismiss: true,
+                delay: 3000,
+                timer: 300,
+                showProgressbar: true,
+                animate: {
+                    enter: 'animated fadeInUp',      
+                    exit: 'animated fadeOutDown'  
+                }
+            });
+        }
+    
+      
+        setTimeout(function() {
+            triggerNotification('success', '<%= success_msg %>');
+        }, 1000);
+    </script>
+ 
+
+<% } %>
+
+<% if(error_msg && error_msg.length > 0) { %> 
+    <script>
+        function triggerNotification(type, message) {
+            let notifyType = type === 'error' ? 'danger' : 'success';  
+            $.notify({
+                message: message
+            }, {
+                type: notifyType,  
+                allow_dismiss: true,
+                delay: 2000,
+                timer: 300,
+                showProgressbar: true,
+                animate: {
+                    enter: 'animated fadeInUp',  
+                    exit: 'animated fadeOutDown'   
+                }
+            });
+        }
+    
+        
+        setTimeout(function() {
+            triggerNotification('error', '<%= error_msg %>');
+        }, 1000);
+    </script>
+    
+    
+<% } %>

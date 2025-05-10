@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<!-- Mirrored from admin.pixelstrap.com/tivo/template/index.html by HTTrack Website Copier/3.x [XR&CO'2014], Mon, 20 Mar 2023 04:00:15 GMT -->
+
+<head>
+  <%- include('partials/head.ejs') %>
+</head>
+
+<body onload="startTime()">
+  <%- include('partials/sidebar.ejs') %>`
+    <div class="page-body">
+      <div class="container-fluid">
+        <div class="page-title">
+          <div class="row">
+            <div class="col-sm-6">
+              <h3>Add Employee</h3>
+            </div>
+            <div class="col-sm-6">
+              <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="/admin"><i data-feather="home" class="me-2"></i>Dashboard</a></li>
+                <li class="breadcrumb-item active">Add Employee</li>
+              </ol>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Container-fluid starts-->
+      <div class="container-fluid dashboard-default">
+        <div class="row">
+          <div class="col-sm-12">
+            <div class="card" style=" padding: 20px;">
+              <div class="card-header  relative" style="height: 100px; padding: 20px;">
+
+                <div class="border rounded-circle"
+                  style="padding: 5px; height: 120px; width: 120px; display: flex; justify-content: center; align-items: center;">
+                  <img src="/default/blank-avatar-photo-place-holder-600nw-1095249842.png" id="profilepri"
+                    alt="Profile Preview" class="rounded-circle"
+                    style="object-fit: cover; width: 100%; height: 100%; border-radius: 50%;">
+                </div>
+
+              </div>
+              <div class="card-body">
+                <div class="card relative">
+
+                </div>
+                <form class="needs-validation" action="/admin/add_data" method="post" enctype="multipart/form-data">
+                  <div class="row g-3 mb-3">
+
+
+                    <div class="col-md-4" style="height: 47px;">
+
+
+
+                      <label class="form-label" for="validationCustom01">Profile Image</label>
+                      <input class="form-control p-0 " style="padding: 12px 15px !important;" name="profileImag"
+                        onchange="document.getElementById('profilepri').src = window.URL.createObjectURL(this.files[0])"
+                        id="validationCustom01" type="file" placeholder="Mark" data-bs-original-title="" title=""
+                        required>
+                      <div class="valid-feedback">Looks good!</div>
+                    </div>
+                    <div class="col-md-4">
+                      <label class="form-label" for="validationCustom02">First name</label>
+                      <input class="form-control" id="validationCustom02" type="text" placeholder="Mark"
+                        name="firstName" data-bs-original-title="" title="" required>
+                      <div class="valid-feedback">Looks good!</div>
+                    </div>
+                    <div class="col-md-4">
+                      <label class="form-label" for="validationCustom03">Last name</label>
+                      <input class="form-control" id="validationCustom03" type="text" placeholder="Otto" name="lastName"
+                        data-bs-original-title="" title="" required>
+                      <div class="valid-feedback">Looks good!</div>
+                    </div>
+
+                  </div>
+                  <div class="row g-3">
+
+                    <div class="col-md-4 mb-3">
+                      <label class="form-label" for="validationCustomUsername">Username</label>
+                      <div class="input-group left-radius">
+                        <input class="form-control" id="validationCustomUsername" type="text" name="userName"
+                          placeholder="Username" aria-describedby="inputGroupPrepend" data-bs-original-title="" title=""
+                          required>
+                        <div class="invalid-feedback">Please Choose a Username.</div>
+                      </div>
+                    </div>
+
+                    <div class="col-md-4 mb-3">
+                      <label class="form-label" for="validationCustomUsername">Email address</label>
+                      <div class="input-group left-radius"><span class="input-group-text"
+                          id="inputGroupPrepend">@</span>
+                        <input class="form-control" id="validationCustomUsername" type="email" name="email"
+                          placeholder="name@example.com" aria-describedby="inputGroupPrepend" data-bs-original-title=""
+                          title="" required>
+                        <div class="invalid-feedback">Please provide a valid email.</div>
+                      </div>
+                    </div>
+
+                    <div class="col-md-4">
+                      <label class="form-label" for="validationCustom03">Contact No.</label>
+                      <input class="form-control" id="validationCustom03" type="number" placeholder="12345678"
+                        name="phoneNum" data-bs-original-title="" title="" required>
+                      <div class="invalid-feedback">Please provide a valid phone number.</div>
+                    </div>
+
+
+
+                  </div>
+                  <div class="row g-3">
+
+                    <div class="col-md-4 position-relative">
+                      <label class="form-label" for="validationCustom03">Password</label>
+
+                      <div class="input-group">
+                        <input class="form-control" id="passwordInput" type="password" placeholder="Password"
+                          name="password" required>
+                        <span class="input-group-text">
+                          <i class="fa-regular fa-eye-slash" id="togglePassword" style="cursor: pointer;"></i>
+                        </span>
+                      </div>
+
+                      <div class="invalid-feedback">
+                        Please provide a strong password.
+                      </div>
+                    </div>
+
+
+                    <div class="col-md-4 mb-3">
+                      <label class="form-label" for="validationCustom04">Birthday:</label>
+                      <input class="form-control" id="validationCustom04" name="birthDate" type="date"
+                        data-bs-original-title="" title="" required>
+                      <div class="invalid-feedback">Please add birthdate </div>
+                    </div>
+
+                    <div class="col-md-4 mb-3">
+                      <label class="form-label" for="validationCustom04">Joining Date:</label>
+                      <input class="form-control" id="validationCustom04" name="joindate" type="date"
+                        data-bs-original-title="" title="" required>
+                      <div class="invalid-feedback">Please add your joining date </div>
+                    </div>
+
+
+
+
+
+                  </div>
+
+
+                  <div class="row g-3">
+
+                    <div class="col-md-4" style="height: 47px;">
+                      <label class="form-label" for="validationCustom01">ID Image</label>
+                      <input class="form-control p-0 " style="padding: 12px 15px !important;" name="idImag"
+                        id="validationCustom01" type="file" placeholder="Mark" multiple data-bs-original-title=""
+                        title="" required>
+                      <div class="valid-feedback">Looks good!</div>
+                    </div>
+
+                    <div class="card-body animate-chk">
+                      <div class="row">
+                        <div class="col d-flex" style="align-items: center;">
+                          <label for="edo-ani" style="margin-right: 15px;">
+                            <input class="radio_animated" id="edo-ani" type="radio" name="status" value="active" checked
+                              required style="margin-right: 5px;">
+                            Active
+                          </label>
+                          <label for="edo-ani1">
+                            <input class="radio_animated" id="edo-ani1" type="radio" name="status" value="deactive"
+                              required style="margin-right: 5px;">
+                            Deactive
+                          </label>
+                        </div>
+
+                      </div>
+                    </div>
+                  </div>
+                  <button class="btn btn-primary" type="submit" data-bs-original-title="" title="">Submit form</button>
+                </form>
+              </div>
+            </div>
+          </div>
+
+
+        </div>
+
+      </div>
+    </div>
+    </div>
+    </div>
+    <!-- Container-fluid Ends-->
+    </div>
+
+    <%- include('partials/footer.ejs') %>
+
+
+      <%- include('partials/script.ejs') %>
+        <!-- login js-->
+        <script>
+          $(document).ready(function () {
+            $('#togglePassword').click(function () {
+              const passwordInput = $('#passwordInput');
+              const type = passwordInput.attr('type') === 'password' ? 'text' : 'password';
+              passwordInput.attr('type', type);
+
+              // Toggle icon
+              $(this).toggleClass('fa-eye fa-eye-slash');
+            });
+          });
+        </script>
+</body>
+
+<!-- Mirrored from admin.pixelstrap.com/tivo/template/index.html by HTTrack Website Copier/3.x [XR&CO'2014], Mon, 20 Mar 2023 04:01:15 GMT -->
+
+</html>
