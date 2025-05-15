@@ -2,7 +2,11 @@ const express = require("express");
 const router = express.Router();
 const fs = require("fs");
 const path = require("path");
-const { upload, uploadsetting } = require("../middleware/fileUploader");
+const {
+  upload,
+  uploadsetting,
+  UpdateIDUpload,
+} = require("../middleware/fileUploader");
 const bcrypt = require("bcrypt");
 const {
   DataFind,
@@ -10,6 +14,7 @@ const {
   DataUpdate,
   DataDelete,
 } = require("../config/databasrqurey");
+const { log } = require("console");
 const uploadFolderPath = path.join(__dirname, "../public/uploads");
 
 router.get("/add", async (req, res) => {
@@ -54,7 +59,25 @@ router.post("/add_data", upload, async (req, res) => {
     return res.redirect("/admin/list");
   }
 
+  const validUserName = await DataFind(
+    `SELECT * FROM employee WHERE userName = '${userName}'`
+  );
+  if (validUserName.length > 0) {
+    req.flash(
+      "error_msg",
+      "This User Name is already in use. Please check and try again."
+    );
+    return res.redirect("/admin/list");
+  }
+
   let hashpass = bcrypt.hashSync(password, 10);
+
+  let idimges = [];
+  if (req.params.length > 0) {
+    req.files.idImag.map((val) => {
+      idimges.push(val.filename);
+    });
+  }
 
   if (
     (await DataInsert(
@@ -62,11 +85,7 @@ router.post("/add_data", upload, async (req, res) => {
       `firstName,lastName,userName,email,phoneNum,password,birthDate,profileimage,idimage,status,joinDate`,
       `'${firstName}','${lastName}','${userName}','${email}','${phoneNum}','${hashpass}','${birthDate}','${
         req.files.profileImag[0].filename
-      }','${JSON.stringify(
-        req.files.idImag.map((val) => {
-          return val.filename;
-        })
-      )}','${status}','${joindate}'`,
+      }','${JSON.stringify(idimges)}','${status}','${joindate}'`,
 
       req.hostname,
       req.protocol
@@ -96,7 +115,7 @@ router.get("/deleteem/:id", async (req, res) => {
   if (
     (await DataDelete(
       `employee`,
-      `id = '${req.params.id}'`,
+      `id='${req.params.id}'`,
       req.hostname,
       req.protocol
     )) == -1
@@ -160,12 +179,15 @@ router.post("/updateEm", upload, async (req, res) => {
     joindate,
     editid,
   } = req.body;
+
   const user = await DataFind(`SELECT * FROM employee WHERE id = '${editid}'`);
 
   if (user[0].email !== email) {
     const validemail = await DataFind(
       `SELECT * FROM employee WHERE email = '${email}' AND id NOT IN (${editid})`
     );
+    console.log("validemail", validemail);
+
     if (validemail.length > 0) {
       req.flash(
         "error_msg",
@@ -177,8 +199,10 @@ router.post("/updateEm", upload, async (req, res) => {
 
   if (user[0].phoneNum !== phoneNum) {
     const validmobail = await DataFind(
-      `SELECT * FROM employee WHERE phoneNum = '${phoneNum}' AND id='${editid}' AND id NOT IN (${editid})`
+      `SELECT * FROM employee WHERE phoneNum='${phoneNum}' AND  id NOT IN (${editid})`
     );
+    console.log("validmobail", validmobail);
+
     if (validmobail.length > 0) {
       req.flash(
         "error_msg",
@@ -187,6 +211,20 @@ router.post("/updateEm", upload, async (req, res) => {
       return res.redirect("/admin/list");
     }
   }
+
+  if (user[0].userName !== userName) {
+    const validUserName = await DataFind(
+      `SELECT * FROM employee WHERE userName = '${userName}' AND id NOT IN (${editid})`
+    );
+    if (validUserName.length > 0) {
+      req.flash(
+        "error_msg",
+        "This User Name is already in use. Please check and try again."
+      );
+      return res.redirect("/admin/list");
+    }
+  }
+
   // const Olddata = ``;
   const Olddata = await DataFind(`SELECT * FROM employee WHERE id=${editid}`);
 
@@ -203,19 +241,11 @@ router.post("/updateEm", upload, async (req, res) => {
     profileimg = oldData.profileimage;
   }
 
-  let Idimg = "";
-  if (req.files?.idImag) {
-    const fileNames = req.files.idImag.map((val) => val.filename);
-    Idimg = JSON.stringify(fileNames);
-  } else {
-    Idimg = JSON.stringify(oldData.idimage);
-  }
-
   let hashpass = bcrypt.hashSync(password, 10);
   if (
     (await DataUpdate(
       `employee`,
-      `firstName = '${firstName}', lastName = '${lastName}', userName = '${userName}', email = '${email}', phoneNum = '${phoneNum}', password = '${hashpass}', birthDate = '${birthDate}', profileimage = '${profileimg}',  idimage = '${Idimg}', status = '${status}',joinDate='${joindate}'`,
+      `firstName = '${firstName}', lastName = '${lastName}', userName = '${userName}', email = '${email}', phoneNum = '${phoneNum}', password = '${hashpass}', birthDate = '${birthDate}', profileimage = '${profileimg}',  status = '${status}',joinDate='${joindate}'`,
       `id = '${editid}'`,
       req.hostname,
       req.protocol
@@ -452,12 +482,163 @@ router.post("/updateadmin/", async (req, res) => {
   }
 });
 
-router.get('/weekend/',async(req,res)=>{
-    const { admin, role } = req.user;
-    let setting = await DataFind(`SELECT * FROM tbl_setting LIMIT 1`);
+router.get("/UpIdpro/:id", async (req, res) => {
+  const { admin, role } = req.user;
+  let setting = await DataFind(`SELECT * FROM tbl_setting LIMIT 1`);
+  let IdProofImg = await DataFind(
+    `SELECT idimage, id FROM employee WHERE id=${req.params.id}`
+  );
 
-  res.render('weekend',{admin,role,setting})
-})
+  let IdimgObj = [];
+  if (IdProofImg.length > 0 && IdProofImg[0].idimage) {
+    try {
+      IdimgObj =
+        typeof IdProofImg[0].idimage === "string"
+          ? JSON.parse(IdProofImg[0].idimage)
+          : IdProofImg[0].idimage;
+    } catch (error) {
+      IdimgObj = [];
+    }
+  }
+
+  res.render("UpIdProof", {
+    role,
+    admin,
+    setting,
+    IdPic: IdimgObj,
+    Idarray: IdProofImg[0],
+  });
+});
+
+router.post("/IdDelete/:id/:imageName", async (req, res) => {
+  const { id, imageName } = req.params;
+  const fs = require("fs");
+  const path = require("path");
+
+  const filePath = path.join(__dirname, "public/uploads", imageName);
+  if (fs.existsSync(filePath)) {
+    fs.unlinkSync(filePath);
+  }
+
+  let IdProofImg = await DataFind(
+    `SELECT idimage ,id FROM employee WHERE id='${id}'`
+  );
+  const IDimg =
+    typeof IdProofImg[0].idimage === "string"
+      ? JSON.parse(IdProofImg[0].idimage)
+      : IdProofImg[0].idimage;
+  const newImageArray = IDimg.filter((val) => val !== imageName);
+
+  console.log("IDimg", IDimg);
+
+  const updated = await DataUpdate(
+    `employee`,
+    `idimage='${JSON.stringify(newImageArray)}'`,
+    `id = '${id}'`,
+    req.hostname,
+    req.protocol
+  );
+  if (updated === -1) throw new Error("Update failed");
+
+  res.redirect(`/admin/UpIdpro/${id}`);
+});
+
+router.post("/IdUpdate/:id/:imageName", UpdateIDUpload, async (req, res) => {
+  const { id, imageName } = req.params;
+
+  const fs = require("fs");
+  const path = require("path");
+
+  const filePath = path.join(__dirname, "../public/uploads", imageName);
+  if (fs.existsSync(filePath)) {
+    fs.unlinkSync(filePath);
+  }
+
+  let IdProofImg = await DataFind(
+    `SELECT   id, idimage FROM employee WHERE id='${id}'`
+  );
+  const IDimg =
+    typeof IdProofImg[0].idimage === "string"
+      ? JSON.parse(IdProofImg[0].idimage)
+      : IdProofImg[0].idimage;
+  IDimg[req.query.index] = req.file.filename;
+
+  //  console.log("IDimg",IDimg);
+  let ic = IDimg[req.query.index];
+  if (ic) {
+    const updated = await DataUpdate(
+      `employee`,
+      `idimage='${JSON.stringify(IDimg)}'`,
+      `id = '${id}'`,
+      req.hostname,
+      req.protocol
+    );
+    if (updated === -1) throw new Error("Update failed");
+  }
+
+  res.redirect(`/admin/UpIdpro/${id}`);
+});
+
+router.post("/addIDimg/:id", upload, async (req, res) => {
+  const { id } = req.params;
+  console.log(req.files);
+
+  const employeeData = await DataFind(
+    `SELECT * FROM employee WHERE id='${id}'`
+  );
+  const IDimg =
+    typeof employeeData[0].idimage === "string"
+      ? JSON.parse(employeeData[0].idimage)
+      : employeeData[0].idimage;
+
+  req.files.idImag.map((val) => {
+    IDimg.push(val.filename);
+  });
+
+  const updated = await DataUpdate(
+    `employee`,
+    `idimage='${JSON.stringify(IDimg)}'`,
+    `id = '${id}'`,
+    req.hostname,
+    req.protocol
+  );
+  if (updated === -1) throw new Error("Update failed");
+
+  res.redirect(`/admin/UpIdpro/${id}`);
+});
+
+router.get("/weekend/", async (req, res) => {
+  const { admin, role } = req.user;
+  let setting = await DataFind(`SELECT * FROM tbl_setting LIMIT 1`);
+  let weekendData = await DataFind(`SELECT * FROM tbl_weekend`);
+  console.log(weekendData);
+
+  res.render("weekend", { admin, role, setting, weekendData });
+});
+
+router.post("/weekends/", async (req, res) => {
+  console.log(req.body);
  
+ await DataFind(`DELETE FROM tbl_weekend`)
+
+  for (const [day, weeksArray] of Object.entries(req.body)) {
+    const weeks = weeksArray.join(",");
+
+    const result = await DataInsert(
+      `tbl_weekend`,
+      `days,weeks`,
+      `'${day}','${weeks}'`,
+      req.hostname,
+      req.protocol
+    );
+
+    if (result == -1) {
+      req.flash("errors", process.env.dataerror + ` for ${day}`);
+      return res.redirect("/valid_license");
+    }
+  }
+
+  res.redirect("/admin/weekend");
+});
 
 module.exports = router;

@@ -30,4 +30,7 @@ const UploadRosone = multer({ storage: storage }).fields([
     {name: "attachment"}
 ]);
 
-module.exports = {upload,uploadsetting,UploadRosone};
+ 
+
+const UpdateIDUpload = multer({ storage: storage }).single('idImag')
+module.exports = {upload,uploadsetting,UploadRosone,UpdateIDUpload};

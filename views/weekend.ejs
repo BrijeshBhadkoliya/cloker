@@ -1,208 +1,132 @@
 <!DOCTYPE html>
 <html lang="en">
 
-<!-- Mirrored from admin.pixelstrap.com/tivo/template/index.html by HTTrack Website Copier/3.x [XR&CO'2014], Mon, 20 Mar 2023 04:00:15 GMT -->
+
 
 <head>
-    <%- include('partials/head.ejs') %>
-      
-        <link rel="stylesheet" type="text/css" href="/css/vendors/daterange-picker.css">
- 
+  <%- include('partials/head.ejs') %>
+
+    <link rel="stylesheet" type="text/css" href="/css/vendors/daterange-picker.css">
+
 </head>
 
-<body onload="startTime()">
-    <%- include('partials/sidebar.ejs') %>`
-        <div class="page-body">
-            <div class="container-fluid">
-                <div class="page-title">
-                    <div class="row">
-                        <div class="col-sm-6">
-                            <h3>Set Weekend</h3>
-                        </div>
-                        <div class="col-sm-6">
-                            <ol class="breadcrumb">
-                                <li class="breadcrumb-item"><a
-                                        href="<%=role===2?'/employee/dashboard':'/admin/dashboard'%>"><i
-                                            data-feather="home" class="me-2"></i>Dashboard</a></li>
-                                <li class="breadcrumb-item active"><a
-                                        href="/admin/weekend"><i
-                                            data-feather="user-check" class="me-2"></i>Weekend</a></li>
-                            </ol>
-                        </div>
+<body> <%- include('partials/sidebar.ejs') %>`
+    <div class="page-body">
+      <div class="container-fluid">
+        <div class="page-title">
+          <div class="row">
+            <div class="col-sm-6">
+              <h3>Weekend Setup</h3>
+            </div>
+            <div class="col-sm-6">
+              <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="<%=role===2?'/employee/dashboard':'/admin/dashboard'%>"><i
+                      data-feather="home" class="me-2"></i>Dashboard</a></li>
+                <li class="breadcrumb-item active"><a href="/admin/weekend"><i data-feather="user-check"
+                      class="me-2"></i>Weekend</a></li>
+              </ol>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="container-fluid ">
+        <div class="row">
+          <div class="col-sm-12">
+            <div class="card">
+
+              <div class="card-body">
+                <div class="table-responsive theme-scrollbar">
+                  <form action="/admin/weekends/" method="post">
+                    <table class="table table-hover">
+                      <thead>
+                        <tr>
+                          <th class="text-center" rowspan="2" style="padding: 20px;">Day</th>
+                          <th class="text-center" colspan="6">Weeks</th>
+                        </tr>
+                        <tr>
+                          <th>1st</th>
+                          <th>2nd</th>
+                          <th>3rd</th>
+                          <th>4th</th>
+                          <th>5th</th>
+                          <th>Select All</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <% const days=['Sunday', 'Monday' , 'Tuesday' , 'Wednesday' , 'Thursday' , 'Friday' , 'Saturday'
+                          ]; %>
+                          <% days.forEach((day)=> { %>
+                            <tr>
+                              <td>
+                                <%= day %>
+                              </td>
+                              <% for (let i=1; i <=5; i++) { %>
+                                <td>
+                                  <input type="checkbox" name="<%= day %>[]" value="<%= i %>"
+                                    class="checkbox checkbox-<%= day.toLowerCase() %>"
+                                    id="<%= day.toLowerCase() %>_checkbox_<%= i %>" style="width: 15px; height: 15px;"
+                                    <%=weekendData.some(data=> data.days === day &&
+                                  data.weeks.split(',').includes(i.toString())) ? 'checked' : '' %>
+                                  onchange="checkAllSelected('<%= day.toLowerCase() %>')"
+                                    >
+                                    <label for="<%= day.toLowerCase() %>_checkbox_<%= i %>"></label>
+                                </td>
+                                <% } %>
+                                  <td>
+                                    <input type="checkbox" id="select_all_<%= day.toLowerCase() %>"
+                                      onclick="toggleSelectAll('<%= day.toLowerCase() %>')"
+                                      style="width: 15px; height: 15px;">
+                                    <label for="select_all_<%= day.toLowerCase() %>"></label>
+                                  </td>
+                            </tr>
+                            <% }); %>
+                      </tbody>
+
+                    </table>
+
+                    <div class="card-footer text-end">
+                      <button class="btn btn-outline-danger-2x" type="submit">Set Weekend</button>
                     </div>
+                  </form>
                 </div>
+              </div>
             </div>
-
-            <div class="container-fluid ">
-                <div class="row">
-                  
-                </div>
-                <!-- HTML (DOM) sourced data  Starts-->
-               
-                <!-- Container-fluid Ends-->
-            </div>
+          </div>
         </div>
-        </div>
+        <!-- HTML (DOM) sourced data  Starts-->
+
+        <!-- Container-fluid Ends-->
+      </div>
+    </div>
+    </div>
 
 
-        <%- include('partials/footer.ejs') %>
-            <%- include('partials/script.ejs') %>
+    <%- include('partials/footer.ejs') %>
+      <%- include('partials/script.ejs') %>
+        <script>
 
-                
+          function toggleSelectAll(day) {
+            const checkboxes = document.querySelectorAll(`.checkbox-${day}`);
+            const allChecked = Array.from(checkboxes).every(cb => cb.checked);
+            checkboxes.forEach(cb => cb.checked = !allChecked);
+            document.getElementById(`select_all_${day}`).checked = !allChecked;
+          }
 
-                <script src="/js/datepicker/daterange-picker/moment.min.js"></script>
-                <script src="/js/datepicker/daterange-picker/daterangepicker.js"></script>
-                <script src="/js/datepicker/daterange-picker/daterange-picker.custom.js"></script>
+          function checkAllSelected(day) {
+            const checkboxes = document.querySelectorAll(`.checkbox-${day}`);
+            const allChecked = Array.from(checkboxes).every(cb => cb.checked);
+            document.getElementById(`select_all_${day}`).checked = allChecked;
+          }
 
-               
-
-                <script>
-                    const today = new Date();
-                    const lastMonth = new Date();
-                    lastMonth.setMonth(today.getMonth() - 1);
-
-                    const formatDate = (date) => {
-                        const day = String(date.getDate()).padStart(2, '0');
-                        const month = String(date.getMonth() + 1).padStart(2, '0');
-                        const year = date.getFullYear();
-                        return `${month}/${day}/${year}`;
-                    };
-
-                    document.querySelector('input[name="daterange"]').value =
-                        `<i class="fa-solid fa-calendar-days"></i>${formatDate(lastMonth)} - ${formatDate(today)}`;
+          window.onload = function () {
+            const days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+            days.forEach(day => checkAllSelected(day));
+          };
 
 
-                    function DatePicker() {
-
-                        const id = document.getElementById('employeeId').value
-
-                        // format function start 
-                        function getDateRangeArray(startDateStr, endDateStr) {
-                            const dateArray = [];
-
-                        
-                            const [startMonth, startDay, startYear] = startDateStr.split('/');
-                            const [endMonth, endDay, endYear] = endDateStr.split('/'); 
-
-                            let currentDate = new Date(`${startYear}-${startMonth}-${startDay}`);
-                            const endDate = new Date(`${endYear}-${endMonth}-${endDay}`);
-
-                            while (currentDate <= endDate) {
-                                const day = String(currentDate.getDate()).padStart(2, '0');
-                                const month = String(currentDate.getMonth() + 1).padStart(2, '0');
-                                const year = currentDate.getFullYear();
-
-                                const formattedDate = `${day}-${month}-${year}`;
-                                dateArray.push(formattedDate);
-
-                                currentDate.setDate(currentDate.getDate() + 1);
-                            }
-
-                            return dateArray;
-                        }
-
-                        // format function end
-
-
-                        let datepic = document.getElementById('datarang').value;
-                        console.log("Input Date Range:", datepic);
-
-                        let datepicArr = datepic.split('-').map(val => val.trim());
-                        console.log("Split Date Array:", datepicArr);
-
-
-                        const startDate = datepicArr[0];
-                        const endDate = datepicArr[1];
-
-                        const dateRangeArray = getDateRangeArray(startDate, endDate);
-                        console.log("Date Range Array:", dateRangeArray);
-
-
-
-                        $.ajax({
-                            url: `/employee/workerList/${id}`,
-                            method: 'POST',
-                            data: { data: dateRangeArray },
-                            success: (function (res) {
-                                console.log(res);
-                                const tbody = document.getElementById("tbody");
-                                tbody.innerHTML = "";
-
-                                res.forEach((val, i) => {
-                                    const [day, month, year] = val.date.split('-');
-                                    const dateObj = new Date(`${year}-${month}-${day}`);
-                                    const weekday = dateObj.toLocaleDateString('en-US', { weekday: 'short' });
-                                    const monthName = dateObj.toLocaleDateString('en-US', { month: 'short' });
-                                    const formattedDate = `${weekday}, ${String(day).padStart(2, '0')} ${monthName}, ${year}`;
-
-
-                                    const statusDiv = val.day_status === 'FD' ? `
-                <div class="d-flex align-items-center justify-content-center px-2 py-1 rounded text-success fw-semibold"
-                    style="width: 40px; height: 28px; background-color: rgba(25, 135, 84, 0.1);">FD
-                </div>` : `
-                <div class="d-flex align-items-center justify-content-center px-2 py-1 rounded text-info fw-semibold"
-                    style="width: 40px; height: 28px; background-color: rgba(13, 202, 240, 0.1);">WK
-                </div>`;
-
-
-                                    const attendanceIcon = val.clockOut_time === '' ? `
-                <div class="d-flex align-items-center justify-content-center px-2 py-1 rounded text-primary fw-semibold"
-                    style="width: 20px; height: 20px; background-color: rgba(25, 76, 135, 0.1); font-size: 12px;" 
-                    title="Warning!">
-                    <i class="fa-solid fa-triangle-exclamation"></i>
-                </div>` : val.attendens_status === 'P' ? `
-                <div class="d-flex align-items-center justify-content-center px-2 py-1 rounded text-success fw-semibold"
-                    style="width: 20px; height: 20px; background-color: rgba(25, 135, 84, 0.1); font-size: 12px;">P
-                </div>` : `
-                <div class="d-flex align-items-center justify-content-center px-2 py-1 rounded text-danger fw-semibold"
-                    style="width: 20px; height: 20px; background-color: rgba(220, 53, 69, 0.1); font-size: 12px;">A
-                </div>`;
-
-
-                                    const actionLink = val.attendens_status === 'P' ? `
-                <ul class="action">
-                    <li class="edit"><a href="/employee/entry/${val.id}" title="">
-                        <i class="fa-light fa-eye me-2 text-primary"></i></a>
-                    </li>
-                </ul>` : `
-                <ul class="action">
-                    <span>-</span>
-                </ul>`;
-
-
-                                    tbody.innerHTML += `
-                <tr class="odd">
-                    <td class="d-none">${i + 1}</td>
-                    <td>${formattedDate}</td>
-                    <td>${statusDiv}</td>
-                    <td>${attendanceIcon}</td>
-                    <td>${val.clockIn_time}</td>
-                    <td>${val.clockOut_time}</td>
-                    <td>${val.total_time}</td>
-                    <td>${val.break_time}</td>
-                    <td>${val.productive_time}</td>
-                    <td>${val.extra_time}</td>
-                    <td>${val.clockIn_ip}</td>
-                    <td>${val.clockOut_ip}</td>
-                    <td>${actionLink}</td>
-                </tr>`;
-                                });
-                            })
-                        })
-
-
-
-
-                    } 
-                </script>
-
-               
-
-
+        </script>
 
 </body>
-
-
-<!-- Mirrored from admin.pixelstrap.com/tivo/template/index.html by HTTrack Website Copier/3.x [XR&CO'2014], Mon, 20 Mar 2023 04:01:15 GMT -->
 
 </html>

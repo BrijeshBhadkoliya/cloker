@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+
+
+
+<head>
+  <%- include('partials/head.ejs') %>
+</head>
+
+<body> <%- include('partials/sidebar.ejs') %>`
+    <div class="page-body">
+      <div class="container-fluid">
+        <div class="page-title">
+          <div class="row">
+            <div class="col-sm-6">
+              <h3>Revise ID</h3>
+            </div>
+            <div class="col-sm-6">
+              <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="/admin/dashboard"><i data-feather="home"
+                      class="me-2"></i>Dashboard</a></li>
+                <li class="breadcrumb-item"><a href="/admin/list">Employee List</a></li>
+                <li class="breadcrumb-item active">Update ID
+
+                </li>
+              </ol>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Container-fluid starts-->
+      <div class="container-fluid dashboard-default    form-validate ">
+        <div class="row">
+
+          <div class="col-sm-12">
+            <div class="card">
+              <div class="card-body">
+                <form class="needs-validation" action="/admin/addIDimg/<%=Idarray.id%>" method="post" enctype="multipart/form-data">
+                  <div class="row g-3">
+                   
+                      <div class="col-md-3 mb-3">
+                        <label class="form-label" for="validationCustomUsername"></label>
+                        <div class="input-group left-radius">
+                          <input class="form-control" id="validationCustomUsername" type="file" name="idImag" placeholder="Username"
+                            aria-describedby="inputGroupPrepend" multiple>
+                        </div>
+                      </div>
+                      <div class="col-md-2 mb-3 ms-2">
+                        <div class="mt-3">
+                          <button class="btn btn-primary" type="submit">Add</button>
+                        </div>
+                      </div>
+                    
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+          <div class="col-xl-12 col-md-6 box-col-40 xl-40">
+            <div class="card appointment-detail">
+              <div class="card-header pb-0">
+                <div class="d-flex justify-content-between">
+                  <div class="flex-grow-1">
+                    <p class="square-after f-w-600 header-text-primary">ID poorf table<i class="fa fa-circle"></i></p>
+                  </div>
+                </div>
+              </div>
+              <div class="card-body">
+                <div class="table-responsive theme-scrollbar">
+                  <table class="table">
+                    <tbody>
+                      <% const type=typeof IdPic ; %>
+                        <p>
+                          <% type %>
+                        </p>
+
+                        <% IdPic?.map((val,i)=>{%>
+                          <tr class="border-bottom">
+                            <td style="width: 1000px;">
+                              <div class="d-flex justify-content-center p-3">
+                                <img class="img-fluid" src="/uploads/<%=val%>" style="height: 200px; width: auto;"
+                                  alt="">
+                              </div>
+
+                            </td>
+                            <td class="text-end"  style="width: 600px;" >
+                              <div class="d-flex justify-content-center p-3">
+                                <form action="/admin/IdDelete/<%= Idarray.id %>/<%= val %>" method="POST">
+                                  <button class="btn btn-danger me-2" type="submit">Delete</button>
+                                </form>
+
+                                <!-- <a href="/admin/IdDelete/<%= Idarray.id %>/<%= val %>"><button class="btn btn-danger me-2" type="submit">Delete</button></a> -->
+
+                                <form action="/admin/IdUpdate/<%= Idarray.id %>/<%= val %>?index=<%= i %>" method="POST"
+                                  enctype="multipart/form-data" id="form-<%= i %>">
+                                  <input type="file" name="idImag" style="display: none;" id="fileInput-<%= i %>"
+                                    onchange="document.getElementById('form-<%= i %>').submit()">
+                                  <button class="btn btn-success" type="button"
+                                    onclick="document.getElementById('fileInput-<%= i %>').click()">Update</button>
+                                </form>
+
+                              </div>
+                            </td>
+                          </tr>
+                          <%})%>
+                    </tbody>
+                  </table>
+                </div>
+
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    </div>
+    </div>
+    <!-- Container-fluid Ends-->
+    </div>
+
+    <%- include('partials/footer.ejs') %>
+
+      <%- include('partials/script.ejs') %>
+        <!-- login js-->
+
+
+</body>
+
+
+
+</html>

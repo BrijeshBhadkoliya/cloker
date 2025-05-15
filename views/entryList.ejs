@@ -1,26 +1,28 @@
 <!DOCTYPE html>
 <html lang="en">
 
-<!-- Mirrored from admin.pixelstrap.com/tivo/template/index.html by HTTrack Website Copier/3.x [XR&CO'2014], Mon, 20 Mar 2023 04:00:15 GMT -->
+
 
 <head>
     <%- include('partials/head.ejs') %>
 </head>
 
-<body onload="startTime()">
-    <%- include('partials/sidebar.ejs') %>`
+<body>    <%- include('partials/sidebar.ejs') %>`
         <div class="page-body">
             <div class="container-fluid mb-3">
                 <div class="page-title">
                     <div class="row">
                         <div class="col-sm-6">
-                            <h3 class="d-flex">Employee Activity In <%= date %></h3>
+                            <h3 class="d-flex">Employee Activity In <%= date %>
+                            </h3>
                         </div>
                         <div class="col-sm-6">
                             <ol class="breadcrumb">
-                                <li class="breadcrumb-item"><a href="<%=role===2 ?'/employee/dashboard':'/admin/dashboard'%>"><i data-feather="home"
-                                            class="me-2"></i>Dashboard</a></li>
-                                <li class="breadcrumb-item active"><a href="<%=role===2 ?'/employee/attendlist':'/admin/attendance'%>"><i
+                                <li class="breadcrumb-item"><a
+                                        href="<%=role===2 ?'/employee/dashboard':'/admin/dashboard'%>"><i
+                                            data-feather="home" class="me-2"></i>Dashboard</a></li>
+                                <li class="breadcrumb-item active"><a
+                                        href="<%=role===2 ?'/employee/attendlist':'/admin/attendance'%>"><i
                                             data-feather="user-check" class="me-2"></i>Attendance List</a></li>
                                 <li class="breadcrumb-item active"><a href="">Entry List</a></li>
                             </ol>
@@ -38,14 +40,15 @@
                                     <div class="card-header pb-0">
                                         <div class="d-flex">
                                             <div class="flex-grow-1">
-                                                <p class=" f-w-600 header-text-primary">Total Working <i
+                                                <p class=" f-w-600 header-text-primary">Total Working Times <i
                                                         class="fa fa-circle"> </i></p>
                                                 <h4>
                                                     <%=TotalWorkingTime%>
                                                 </h4>
                                             </div>
                                             <div class="d-flex static-widget">
-                                                <i class="fa-solid fa-business-time" style="font-size: 44px; color: #5c61f2;"></i>
+                                                <i class="fa-solid fa-business-time"
+                                                    style="font-size: 44px; color: #5c61f2;"></i>
                                             </div>
                                         </div>
                                     </div>
@@ -65,13 +68,15 @@
                                     <div class="card-header pb-0">
                                         <div class="d-flex">
                                             <div class="flex-grow-1">
-                                            <p class=" f-w-600 text-success">Total Break<i class="fa fa-circle"> </i></p>
+                                                <p class=" f-w-600 text-success">Total Break Times<i class="fa fa-circle">
+                                                    </i></p>
                                                 <h4>
                                                     <%=TotalBreakTime%>
                                                 </h4>
                                             </div>
                                             <div class="d-flex static-widget">
-                                                <i class="fa-duotone fa-solid fa-mug-tea-saucer text-success" style="font-size: 44px;"></i>
+                                                <i class="fa-duotone fa-solid fa-mug-tea-saucer text-success"
+                                                    style="font-size: 44px;"></i>
                                             </div>
                                         </div>
                                     </div>
@@ -92,12 +97,15 @@
                                     <div class="card-header pb-0">
                                         <div class="d-flex">
                                             <div class="flex-grow-1">
-                                                <p class=" f-w-600 text-warning ">Clock In<i
-                                                        class="fa fa-circle"> </i></p>
-                                                <h4><%=ClockIn%></h4>
+                                                <p class=" f-w-600 text-warning ">Clock In Times<i class="fa fa-circle"> </i>
+                                                </p>
+                                                <h4>
+                                                    <%=ClockIn%>
+                                                </h4>
                                             </div>
                                             <div class="d-flex static-widget">
-                                                <i class="fa-duotone fa-solid fa-alarm-plus text-warning"  style="font-size: 44px;"></i>
+                                                <i class="fa-duotone fa-solid fa-alarm-plus text-warning"
+                                                    style="font-size: 44px;"></i>
                                             </div>
                                         </div>
                                     </div>
@@ -117,13 +125,15 @@
                                     <div class="card-header pb-0">
                                         <div class="d-flex">
                                             <div class="flex-grow-1">
-                                                <p class=" f-w-600 text-info">Clock Out<i
-                                                        class="fa fa-circle"> </i></p>
-                                                <h4><%=ClockOut%></h4>
+                                                <p class=" f-w-600 text-info">Clock Out Times<i class="fa fa-circle"> </i></p>
+                                                <h4>
+                                                    <%=ClockOut%>
+                                                </h4>
                                             </div>
                                             <div class="d-flex static-widget">
-                                                <i class="fa-duotone fa-solid fa-alarm-exclamation text-info" style="font-size: 44px;"></i>
-                                                
+                                                <i class="fa-duotone fa-solid fa-alarm-exclamation text-info"
+                                                    style="font-size: 44px;"></i>
+
                                             </div>
                                         </div>
                                     </div>
@@ -153,6 +163,8 @@
                                                 <th>In Time</th>
                                                 <th>Out Time</th>
                                                 <th>Total Time</th>
+                                                <th>InTime Ip</th>
+                                                <th>OutTime Ip</th>
                                                 <th>Comment</th>
                                             </tr>
                                         </thead>
@@ -169,19 +181,27 @@
                                                         </span>
                                                     </td>
                                                     <td>
-                                                        <%= isNaN(new Date(val.intime)) ? '-' : new
-                                                            Date(val.intime).toLocaleTimeString("en-US", {
-                                                            hour: "2-digit" , minute: "2-digit" , second: "2-digit" ,
+                                                        <%= isNaN(new Date(val.intime)) ? '-' : new Date(new
+                                                            Date(val.intime).toLocaleString("en-US", {
+                                                            timeZone: "Asia/Kolkata" })) .toLocaleTimeString("en-US", {
+                                                            hour: "2-digit" , minute: "2-digit"  ,
                                                             hour12: true }) %>
                                                     </td>
                                                     <td class="sorting_1">
-                                                        <%= isNaN(new Date(val.outtime)) ? '-' : new
-                                                            Date(val.outtime).toLocaleTimeString("en-US", {
-                                                            hour: "2-digit" , minute: "2-digit" , second: "2-digit" ,
+                                                        <%= isNaN(new Date(val.outtime)) ? '-' : new Date(new
+                                                            Date(val.outtime).toLocaleString("en-US", {
+                                                            timeZone: "Asia/Kolkata" })) .toLocaleTimeString("en-US", {
+                                                            hour: "2-digit" , minute: "2-digit" ,
                                                             hour12: true }) %>
                                                     </td>
                                                     <td>
                                                         <%=totalTime[i]==="Invalid date format" ? '-' : totalTime[i] %>
+                                                    </td>
+                                                     <td>
+                                                        <%=val.InTimeIP ==='' ? '-' : val.InTimeIP%>
+                                                    </td>
+                                                     <td>
+                                                        <%=val.OutTimeIP%>
                                                     </td>
                                                     <td>
                                                         <%="-"%>
@@ -210,6 +230,6 @@
 </body>
 
 
-<!-- Mirrored from admin.pixelstrap.com/tivo/template/index.html by HTTrack Website Copier/3.x [XR&CO'2014], Mon, 20 Mar 2023 04:01:15 GMT -->
+
 
 </html>

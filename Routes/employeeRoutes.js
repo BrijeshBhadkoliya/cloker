@@ -1,6 +1,5 @@
 const express = require("express");
 const router = express.Router();
-const { isAuth, isAdmin } = require("../middleware/jwtAuth");
 const {
   DataFind,
   DataInsert,
@@ -8,402 +7,261 @@ const {
   DataUpdate,
 } = require("../config/databasrqurey");
 const os = require("os");
-const moment = require("moment");
+const moment =  require('../middleware/momentZone')
 
 const { UploadRosone } = require("../middleware/fileUploader");
 const { randomFill } = require("crypto");
 
 router.post("/attendence/:id", async (req, res) => {
   const date = moment().format("DD-MM-YYYY");
-  const currantData = await DataFind(
-    `SELECT * FROM tbl_employee_attndence WHERE emplyeeId='${req.params.id}' AND date='${date}'`
-  );
 
-  // day diffrence
+  try {
+    const currantData = await DataFind(
+      `SELECT * FROM tbl_employee_attndence WHERE emplyeeId='${req.params.id}' AND date='${date}'`
+    );
 
-  const OldData = await DataFind(
-    `SELECT * FROM tbl_employee_attndence WHERE emplyeeId='${req.params.id}' AND  date!= '${date}' `
-  );
-  console.log(OldData[OldData.length - 1]);
-
-  const date2 = moment(OldData[OldData.length - 1]?.date, "DD-MM-YYYY");
-  const date1 = moment(date, "DD-MM-YYYY");
-  console.log(date2);
-  console.log(date1);
-
-  const diffDays = date1.diff(date2, "days");
-  console.log("Difference in days:", diffDays);
-
-  // day diffrence end
-
-  if (diffDays > 1) {
-    const dateArray = [];
-
-    // Clone date2 to avoid mutating original
-    let tempDate = date2.clone().add(1, "days");
-
-    while (tempDate.isSameOrBefore(date1)) {
-      dateArray.push(tempDate.format("DD-MM-YYYY"));
-      tempDate.add(1, "days");
+    let OldData = [];
+    try {
+      OldData = await DataFind(
+       ` SELECT * FROM tbl_employee_attndence WHERE emplyeeId='${req.params.id}' AND date!='${date}'`
+      );
+    } catch (err) {
+      return res.status(500).json({ error: "Error fetching old attendance data" });
     }
 
-    console.log("Missing Dates:", dateArray);
+    if (OldData[0]) {
+      OldData[0].all_time = typeof OldData[0].all_time === "string" ? JSON.parse(OldData[0].all_time) : OldData[0].all_time;
+    }
 
-    if (dateArray.length > 0) {
-      res.status(200).json({
+    const date2 = moment(OldData[OldData.length - 1]?.date, "DD-MM-YYYY");
+    const date1 = moment(date, "DD-MM-YYYY");
+
+    const diffDays = date1.diff(date2, "days");
+
+    if (diffDays > 1) {
+      const dateArray = [];
+      let tempDate = date2.clone().add(1, "days");
+
+      while (tempDate.isSameOrBefore(date1)) {
+        dateArray.push(tempDate.format("DD-MM-YYYY"));
+        tempDate.add(1, "days");
+      }
+
+      return res.status(200).json({
         Break: "00:00:00",
         WorkingTime: "00:00:00",
         MissingDates: dateArray,
       });
-    }
-  } else if (currantData.length > 0 && currantData[0].clockOut_time === "") {
-    // All Time entrys  S
+    } else if (currantData.length > 0 && currantData[0].clockOut_time === "") {
+      currantData[0].all_time = typeof currantData[0].all_time === "string" ? JSON.parse(currantData[0].all_time) : currantData[0].all_time;
+        const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
 
-    let Laststatus =
-      currantData[0].all_time[currantData[0].all_time.length - 1].status;
+      const all_time = currantData[0].all_time;
+      let lastStatus = all_time[all_time.length - 1].status;
 
-    if (Laststatus !== "") {
-      currantData[0].all_time[currantData[0].all_time.length - 1].outtime =
-        new Date().toISOString();
-      let status =
-        currantData[0].all_time[currantData[0].all_time.length - 1].status === 1
-          ? 2
-          : 1;
-      let obj = {
-        intime: new Date().toISOString(),
-        status: status,
-        outtime: "",
-      };
-
-      currantData[0].all_time.push(obj);
-    } else {
-      let obj2 = {
-        intime: new Date().toISOString(),
-        status: 1,
-        outtime: "",
-      };
-
-      currantData[0].all_time.push(obj2);
-    }
-    // Show Working Time And Break Time
-
-    const WorkingTime = [];
-    const BreakTime = [];
-    currantData[0].all_time.map((val, i) => {
-      if (val.status === 1) {
-        WorkingTime.push(val);
+      if (lastStatus !== "") {
+        all_time[all_time.length - 1].outtime = new Date().toISOString();
+        all_time[all_time.length - 1].OutTimeIP = ip
+        let status = lastStatus === 1 ? 2 : 1;
+        all_time.push({ intime: new Date().toISOString(), status, outtime: "", InTimeIP:ip,OutTimeIP:""});
       } else {
-        BreakTime.push(val);
+        all_time.push({ intime: new Date().toISOString(), status: 1, outtime: "", InTimeIP:ip,OutTimeIP:""});
       }
-    });
 
-    // ProductiveTime
+      // Working Time & Break Time
+      const WorkingTime = all_time.filter((t) => t.status === 1);
+      const BreakTime = all_time.filter((t) => t.status === 2);
 
-    let totalWorkigDuration = moment.duration();
-    WorkingTime.map((val, i) => {
-      let enddate = moment(val.outtime);
-      let startdate = moment(val.intime);
-      if (!startdate.isValid() || !enddate.isValid()) {
-        console.warn(`Skipping invalid date at index ${i}`);
-        return;
-      }
-      let duration = moment.duration(enddate.diff(startdate));
-      totalWorkigDuration.add(duration);
-    });
-
-    let totalWorkingHours = Math.floor(totalWorkigDuration.asHours());
-    let totalWorkingMinutes = totalWorkigDuration.minutes();
-    let totalWorkingSeconds = totalWorkigDuration.seconds();
-
-    let ProductiveTime = `${totalWorkingHours}:${totalWorkingMinutes}:${totalWorkingSeconds}`;
-    console.log("ProductiveTime :", ProductiveTime);
-
-    // BreakTime
-
-    let totalBreakDuration = moment.duration();
-
-    BreakTime.map((val, i) => {
-      let enddate = moment(val.outtime);
-      let startdate = moment(val.intime);
-      if (!startdate.isValid() || !enddate.isValid()) {
-        console.warn(`Skipping invalid date at index ${i}`);
-        return;
-      }
-      let duration = moment.duration(enddate.diff(startdate));
-      totalBreakDuration.add(duration);
-    });
-
-    let totalBreakHours = Math.floor(totalBreakDuration.asHours());
-    let totalBreakMinutes = totalBreakDuration.minutes();
-    let totaBreakSeconds = totalBreakDuration.seconds();
-
-    let totalBreakTime = `${totalBreakHours}:${totalBreakMinutes}:${totaBreakSeconds}`;
-    // console.log("Break Time :",totalBreakTime);
-
-    // Uddate  Qureys
-
-    if (
-      (await DataUpdate(
-        `tbl_employee_attndence`,
-        `all_time='${JSON.stringify(
-          currantData[0].all_time
-        )}',productive_time='${ProductiveTime}',break_time='${totalBreakTime}'`,
-        `emplyeeId = '${req.params.id}' AND date='${date}' `,
-        req.hostname,
-        req.protocol
-      )) == -1
-    ) {
-      req.flash("errors", process.env.dataerror);
-      return res.redirect("/valid_license");
-    }
-
-    res.status(200).json({
-      Break: `${totalBreakTime}`,
-      WorkingTime: `${ProductiveTime}`,
-      MissingDates: [],
-    });
-  } else if (currantData.length > 0) {
-    const attendence = currantData[0];
-    console.log(attendence);
-
-    let Laststatus =
-      attendence.all_time[attendence.all_time.length - 1]?.status;
-    console.log(
-      "Status:",
-      attendence.all_time[attendence.all_time.length - 1]?.status
-    );
-
-    if (Laststatus !== "") {
-      attendence.all_time[attendence.all_time.length - 1].outtime =
-        new Date().toISOString();
-      let status =
-        attendence.all_time[attendence.all_time.length - 1].status === 1
-          ? 2
-          : 1;
-      let obj = {
-        intime: new Date().toISOString(),
-        status: status,
-        outtime: "",
+      const calculateDuration = (arr) => {
+        return arr.reduce((acc, val) => {
+          let start = moment(val.intime), end = moment(val.outtime);
+          if (start.isValid() && end.isValid()) {
+            acc.add(moment.duration(end.diff(start)));
+          }
+          return acc;
+        }, moment.duration());
       };
 
-      attendence.all_time.push(obj);
-    } else {
-      let obj2 = {
-        intime: new Date().toISOString(),
-        status: 1,
-        outtime: "",
-      };
+      let workDur = calculateDuration(WorkingTime);
+      let breakDur = calculateDuration(BreakTime);
 
-      attendence.all_time.push(obj2);
-    }
-
-    if (
-      (await DataUpdate(
-        `tbl_employee_attndence`,
-        `all_time='${JSON.stringify(
-          attendence.all_time
-        )}',clockOut_time='${""}',clockOut_ip='${""}', extra_time='${""}', total_time='${""}'`,
-        `emplyeeId = '${req.params.id}' AND date='${date}' `,
-        req.hostname,
-        req.protocol
-      )) == -1
-    ) {
-      req.flash("errors", process.env.dataerror);
-      return res.redirect("/valid_license");
-    }
-    let Break_time = attendence.break_time;
-    let Productive_time = attendence.productive_time;
-    console.log("Productive_time", Productive_time);
-
-    res.status(200).json({
-      Break: `${Break_time}`,
-      WorkingTime: `${Productive_time}`,
-      MissingDates: [],
-    });
-  } else {
-    const date = moment().format("DD-MM-YYYY");
-    const clockIn_time = moment().format("hh:mm:ss A");
-
-    const lastdayEntry = await DataFind(
-      `SELECT * FROM tbl_employee_attndence WHERE emplyeeId='${req.params.id}' AND  date!= '${date}' `
-    );
-    let NoClockOut =
-      lastdayEntry[lastdayEntry.length - 1] === undefined
-        ? ""
-        : lastdayEntry[lastdayEntry.length - 1];
-
-    console.log("NoClockOut", NoClockOut);
-
-    // stat last date Clock Out
-    if (NoClockOut.clockOut_time === "") {
-      // ***************** functions *******************************
-
-      function getTimeDifference(start, end) {
-        const startTime = new Date(start);
-        const endTime = new Date(end);
-
-        let diffMs = endTime - startTime;
-
-        const hours = String(Math.floor(diffMs / (1000 * 60 * 60))).padStart(
-          2,
-          "0"
-        );
-        diffMs %= 1000 * 60 * 60;
-        const minutes = String(Math.floor(diffMs / (1000 * 60))).padStart(
-          2,
-          "0"
-        );
-        diffMs %= 1000 * 60;
-        const seconds = String(Math.floor(diffMs / 1000)).padStart(2, "0");
-
-        return `${hours}:${minutes}:${seconds}`;
-      }
-
-      function timeStringToSeconds(timeStr) {
-        const [hours, minutes, seconds] = timeStr.split(":").map(Number);
-        return hours * 3600 + minutes * 60 + seconds;
-      }
-
-      function secondsToTimeString(totalSeconds) {
-        const hours = String(Math.floor(totalSeconds / 3600)).padStart(2, "0");
-        const minutes = String(Math.floor((totalSeconds % 3600) / 60)).padStart(
-          2,
-          "0"
-        );
-        const seconds = String(totalSeconds % 60).padStart(2, "0");
-        return `${hours}:${minutes}:${seconds}`;
-      }
-
-      function sumTime(time1, time2) {
-        const totalSeconds =
-          timeStringToSeconds(time1) + timeStringToSeconds(time2);
-        return secondsToTimeString(totalSeconds);
-      }
-
-      // extratime find helper function
-
-      const hmsToSeconds = (hms) => {
-        const [h, m, s] = hms.split(":").map(Number);
-        return h * 3600 + m * 60 + s;
-      };
-
-      const secondsToHMS = (secs) => {
-        const sign = secs < 0 ? "-" : "";
-        secs = Math.abs(secs);
-        const h = String(Math.floor(secs / 3600)).padStart(2, "0");
-        const m = String(Math.floor((secs % 3600) / 60)).padStart(2, "0");
-        const s = String(secs % 60).padStart(2, "0");
-        return `${sign}${h}:${m}:${s}`;
-      };
-
-      function convertTo12HourWithSeconds(time24) {
-        const [hour, minute, second] = time24.split(":").map(Number);
-        const period = hour >= 12 ? "PM" : "AM";
-        const hour12 = hour % 12 || 12;
-        return `${hour12}:${String(minute).padStart(2, "0")}:${String(
-          second === undefined ? "00" : second
-        ).padStart(2, "0")} ${period}`;
-      }
-
-      // ***************** functions end *******************************
-
-      NoClockOut.all_time[
-        NoClockOut.all_time.length - 1
-      ].outtime = `${NoClockOut.date
-        .split("-")
-        .reverse()
-        .join("-")}T14:00:00.000Z`;
-
-      //  set ip addrerss
-      const network = os.networkInterfaces();
-      const ip =
-        network.Ethernet?.filter((val) => val.family === "IPv4")[0]?.address ||
-        "0.0.0.0";
-
-      //  set Break Time and Productive Time
-
-      let breakTime =
-        NoClockOut.break_time === "" ? "00:00:00" : NoClockOut.break_time;
-      let productiveTime =
-        NoClockOut.productive_time === ""
-          ? "00:00:00"
-          : NoClockOut.productive_time;
-      const currantTime = `${NoClockOut.date
-        .split("-")
-        .reverse()
-        .join("-")}T14:00:00.000Z`;
-
-      const lastEntry = NoClockOut.all_time[NoClockOut.all_time.length - 1];
-      if (lastEntry.status === 1) {
-        let difrence = getTimeDifference(lastEntry.intime, currantTime);
-        console.log(difrence);
-        productiveTime = sumTime(productiveTime, difrence);
-        console.log("productiveTime", productiveTime);
-      } else if (lastEntry.status === 2) {
-        let difrence = getTimeDifference(lastEntry.intime, currantTime);
-        console.log(difrence);
-        breakTime = sumTime(breakTime, difrence);
-        console.log("breakTime", breakTime);
-      }
-
-      //  set Total Time
-
-      let total_time = sumTime(productiveTime, breakTime);
-      console.log("total_time", total_time);
-
-      // set Extra Time
-      const settingData = await DataFind("SELECT * FROM tbl_setting LIMIT 1");
-
-      const MinimumTime = hmsToSeconds(settingData[0].employee_worktime);
-      const ProductiveTimesecons = hmsToSeconds(productiveTime);
-
-      let extra_time = secondsToHMS(ProductiveTimesecons - MinimumTime);
-      let ClockOut_time = convertTo12HourWithSeconds(settingData[0].shift_end);
-      NoClockOut.all_time.push({ intime: "", status: "", outtime: "" });
-
-      if (
-        (await DataUpdate(
-          `tbl_employee_attndence`,
-          `all_time='${JSON.stringify(
-            NoClockOut.all_time
-          )}',clockOut_time='${ClockOut_time}',clockOut_ip='${ip}', extra_time='${extra_time}', total_time='${total_time}', productive_time='${productiveTime}',break_time ='${breakTime}'`,
-          `id =${NoClockOut.id} AND date='${NoClockOut.date}'`,
+      let ProductiveTime = `${Math.floor(workDur.asHours())}:${workDur.minutes()}:${workDur.seconds()}`;
+      let totalBreakTime = `${Math.floor(breakDur.asHours())}:${breakDur.minutes()}:${breakDur.seconds()}`;
+      let clockIn_ip = all_time[all_time.length-1].status === 1?  ip : currantData[0].clockIn_ip;
+      try {
+        const updated = await DataUpdate(`
+          tbl_employee_attndence `,
+          `all_time='${JSON.stringify(all_time)}',productive_time='${ProductiveTime}',break_time='${totalBreakTime}', clockIn_Ip='${clockIn_ip}'`,
+          `emplyeeId = '${req.params.id}' AND date='${date}'`,
           req.hostname,
           req.protocol
-        )) == -1
-      ) {
-        req.flash("errors", process.env.dataerror);
-        return res.redirect("/valid_license");
+        );
+
+        if (updated === -1) throw new Error("Failed to update data");
+
+        return res.status(200).json({
+          Break: totalBreakTime,
+          WorkingTime: ProductiveTime,
+          MissingDates: [],
+        });
+      } catch (err) {
+        return res.status(500).json({ error: "Error updating working/break time" });
       }
-      // console.log("NoClockOut:",NoClockOut);
+    } else if (currantData.length > 0) {
+      currantData[0].all_time = typeof currantData[0].all_time === "string" ? JSON.parse(currantData[0].all_time) : currantData[0].all_time;
+
+      let attendence = currantData[0];
+
+      let all_time = attendence.all_time;
+      let Laststatus = all_time[all_time.length - 1]?.status;
+      const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+
+     if (Laststatus !== "") {
+        all_time[all_time.length - 1].outtime = new Date().toISOString();
+        all_time[all_time.length - 1].OutTimeIP = ip
+        let status = lastStatus === 1 ? 2 : 1;
+        all_time.push({ intime: new Date().toISOString(), status, outtime: "", InTimeIP:ip,OutTimeIP:""});
+      } else {
+        all_time.push({ intime: new Date().toISOString(), status: 1, outtime: "", InTimeIP:ip,OutTimeIP:""});
+      }
+
+      try {
+        const updated = await DataUpdate(`tbl_employee_attndence`,`all_time='${JSON.stringify(all_time)}',clockOut_time='',clockOut_ip='', extra_time='', total_time=''`,`emplyeeId = '${req.params.id}' AND date='${date}'`,req.hostname,req.protocol);
+
+        if (updated === -1) throw new Error("Update failed");
+
+        return res.status(200).json({
+          Break: attendence.break_time,
+          WorkingTime: attendence.productive_time,
+          MissingDates: [],
+        });
+      } catch (err) {
+        return res.status(500).json({ error: "Error updating clock-out details" });
+      }
+    } else {
+      
+      // No entry today
+      const clockIn_time = moment().format("hh:mm:ss A");
+
+      let lastdayEntry = [];
+      try {
+        lastdayEntry = await DataFind(`
+          SELECT * FROM tbl_employee_attndence WHERE emplyeeId='${req.params.id}' AND date!='${date}'`
+        );
+      } catch (err) {
+        return res.status(500).json({ error: "Failed to get previous attendance" });
+      }
+
+ 
+
+      if(lastdayEntry.length>0){
+      if (lastdayEntry[0]) {
+        lastdayEntry[0].all_time = typeof lastdayEntry[0].all_time === "string" ? JSON.parse(lastdayEntry[0].all_time) : lastdayEntry[0].all_time;
+      }
+
+      const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+      const NoClockOut = lastdayEntry[lastdayEntry.length - 1] ?? null;
+
+      if (NoClockOut && NoClockOut.clockOut_time === "") {
+        try {
+          const getTimeDifference = (start, end) => {
+            const startTime = new Date(start);
+            const endTime = new Date(end);
+            const diff = endTime - startTime;
+            const h = Math.floor(diff / 3600000);
+            const m = Math.floor((diff % 3600000) / 60000);
+            const s = Math.floor((diff % 60000) / 1000);
+            return `${h}:${m}:${s}`;
+          };
+
+          const timeToSeconds = (time) => time.split(":").reduce((acc, t, i) => acc + Number(t) * [3600, 60, 1][i], 0);
+
+          const secondsToTime = (secs) => {
+            const h = Math.floor(secs / 3600).toString().padStart(2, "0");
+            const m = Math.floor((secs % 3600) / 60).toString().padStart(2, "0");
+            const s = (secs % 60).toString().padStart(2, "0");
+            return `${h}:${m}:${s}`;
+          };
+
+          const convertTo12Hour = (time) => {
+            const [hour, minute, second] = time.split(":").map(Number);
+            const suffix = hour >= 12 ? "PM" : "AM";
+            const h = hour % 12 || 12;
+            return `${h}:${minute.toString().padStart(2, "0")}:${(second || 0).toString().padStart(2, "0")} ${suffix}`;
+          };
+
+          const endTime = `${NoClockOut.date.split("-").reverse().join("-")}T14:00:00.000Z`;
+          NoClockOut.all_time[NoClockOut.all_time.length - 1].outtime = endTime;
+          NoClockOut.all_time[NoClockOut.all_time.length - 1].OutTimeIP = ip;
+
+          let breakTime = NoClockOut.break_time || "00:00:00";
+          let productiveTime = NoClockOut.productive_time || "00:00:00";
+
+          const lastEntry = NoClockOut.all_time[NoClockOut.all_time.length - 1];
+          const diff = getTimeDifference(lastEntry.intime, endTime);
+          if (lastEntry.status === 1) {
+            productiveTime = secondsToTime(timeToSeconds(productiveTime) + timeToSeconds(diff));
+          } else {
+            breakTime = secondsToTime(timeToSeconds(breakTime) + timeToSeconds(diff));
+          }
+
+          const total_time = secondsToTime(timeToSeconds(productiveTime) + timeToSeconds(breakTime));
+          const settingData = await DataFind("SELECT * FROM tbl_setting LIMIT 1");
+          const minSeconds = timeToSeconds(settingData[0].employee_worktime);
+          const actualSeconds = timeToSeconds(productiveTime);
+          const extra_time = secondsToTime(actualSeconds - minSeconds);
+          const ClockOut_time = convertTo12Hour(settingData[0].shift_end);
+
+          NoClockOut.all_time.push({ intime: "", status: "", outtime: "" ,InTimeIP:"",OutTimeIP:""});
+
+           const updated = await DataUpdate(`tbl_employee_attndence`,
+            `all_time='${JSON.stringify(NoClockOut.all_time)}',clockOut_time='${ClockOut_time}',clockOut_ip='${ip}', extra_time='${extra_time}', total_time='${total_time}', productive_time='${productiveTime}',break_time ='${breakTime}'`,
+            `id =${NoClockOut.id} AND date='${NoClockOut.date}'`,
+            req.hostname,
+            req.protocol
+          );
+
+          if (updated === -1) throw new Error("Failed to update old record");
+        } catch (err) {
+          return res.status(500).json({ error: "Error finalizing old attendance" });
+        }
+      }
+}
+
+ 
+ 
+      const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+
+      const all_time = [{ intime: new Date().toISOString(), outtime: "", status: 1 ,InTimeIP:ip,OutTimeIP:""}];
+
+      try {
+        const inserted = await DataInsert(
+          `tbl_employee_attndence`,
+         ` emplyeeId, date, all_time, clockIn_time, clockOut_time, break_time, productive_time, extra_time, total_time, clockIn_ip, clockOut_ip, day_status,attendens_status, leave_resone, leave_type`,
+          `'${req.params.id}', '${date}', '${JSON.stringify(all_time)}', '${clockIn_time}','${""}','${""}','${""}','${""}','${""}','${ip}','${""}','FD', 'P', '', ''`,
+          req.hostname,
+          req.protocol
+        );
+
+        if (inserted === -1) throw new Error("Insert failed");
+
+        return res.status(200).json({
+          Break: "00:00:00",
+          WorkingTime: "00:00:00",
+          MissingDates: [],
+        });
+      } catch (err) {
+        return res.status(500).json({ error: "Error inserting new attendance" });
+      }
     }
-
-    const network = os.networkInterfaces();
-    const ip = network.Ethernet.filter((val, i) => val.family === "IPv4")[0]
-      .address;
-
-    let all_time = [
-      { intime: new Date().toISOString(), outtime: "", status: 1 },
-    ];
-
-    if (
-      (await DataInsert(
-        `tbl_employee_attndence`,
-        `emplyeeId, date, all_time, clockIn_time, clockOut_time, break_time, productive_time, extra_time, total_time, clockIn_ip, clockOut_ip, day_status,attendens_status, leave_resone, leave_type`,
-        `'${req.params.id}', '${date}', '${JSON.stringify(
-          all_time
-        )}', '${clockIn_time}','${""}','${""}','${""}','${""}','${""}','${ip}','${""}','${"FD"}', '${"P"}', '${""}', '${""}'`,
-        req.hostname,
-        req.protocol
-      )) == -1
-    ) {
-      req.flash("errors", process.env.dataerror);
-      return res.redirect("/valid_license");
-    }
+  } catch (err) {
+    console.error("Unexpected error:", err);
+    res.status(500).json({ error: "Internal server error" });
   }
 });
 
 router.post("/clockout/:id", async (req, res) => {
+
   // *****************functions *******************************
 
   function getTimeDifference(start, end) {
@@ -472,15 +330,14 @@ router.post("/clockout/:id", async (req, res) => {
   );
 
   if (currantData.length > 0) {
-    // set LastOutTime
-    currantData[0].all_time[currantData[0].all_time.length - 1].outtime =
-      currentTimeISO;
 
+    // set LastOutTime
+    const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+
+    currantData[0].all_time = typeof  currantData[0].all_time === 'string' ? JSON.parse(currantData[0].all_time): currantData[0].all_time;
+    currantData[0].all_time[currantData[0].all_time.length - 1].outtime = currentTimeISO;
     //  set ip addrerss
-    const network = os.networkInterfaces();
-    const ip =
-      network.Ethernet?.filter((val) => val.family === "IPv4")[0]?.address ||
-      "0.0.0.0";
+   currantData[0].all_time[currantData[0].all_time.length - 1].OutTimeIP = ip
 
     //  set Break Time and Productive Time
 
@@ -518,7 +375,7 @@ router.post("/clockout/:id", async (req, res) => {
 
     let extra_time = secondsToHMS(ProductiveTimesecons - MinimumTime);
 
-    currantData[0].all_time.push({ intime: "", status: "", outtime: "" });
+    currantData[0].all_time.push({ intime: "", status: "", outtime: currentTimeISO,InTimeIP:"",OutTimeIP:"" });
 
     // update qureys
     const updated = await DataUpdate(
@@ -606,9 +463,7 @@ router.post("/rersonRoutes/:id", UploadRosone, async (req, res) => {
         req.params.id
       }', '${leavedate}', '{}', '-', '-', '-', '-', '-', '-', '-', '-', 'FD', 'A', '${
         req.body.reason
-      }', '${req.body.leavetype}','${JSON.stringify(
-  (req.files?.attachment || []).map(val => val.filename)
-)}'`,
+      }', '${req.body.leavetype}','${JSON.stringify((req.files?.attachment || []).map(val => val.filename))}'`,
       req.hostname,
       req.protocol
     );
@@ -626,6 +481,7 @@ router.get("/entry/:id", async (req, res) => {
   const userData = await DataFind(
     `SELECT * FROM tbl_employee_attndence WHERE id=${req.params.id}`
   );
+   userData[0].all_time = typeof  userData[0].all_time === 'string' ? JSON.parse(userData[0].all_time): userData[0].all_time;
 
   //*******************  function  ******************
   function timeDifference(startTime, endTime) {
@@ -635,6 +491,8 @@ router.get("/entry/:id", async (req, res) => {
       return "Invalid date format";
     }
     const timeDiff = Math.abs(end - start);
+    const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+    console.log(ip);
 
     const seconds = String(Math.floor((timeDiff / 1000) % 60)).padStart(2, "0");
     const minutes = String(Math.floor((timeDiff / (1000 * 60)) % 60)).padStart(
@@ -734,7 +592,7 @@ router.get("/entry/:id", async (req, res) => {
   res.render("entryList", {
     employee,
     role,
-    Allentrys,
+    Allentrys:Allentrys,
     totalTime: filterTime,
     TotalWorkingTime,
     TotalBreakTime,
@@ -770,5 +628,90 @@ console.log("proDetails",proDetails);
 
   res.render('emProfile',{role,employee,proDetails,setting})
 })
+
+
+router.get('/hiddenChange/:id', async (req, res) => {
+  try {
+    const { employee, role } = req.user;
+    const id = req.params.id;
+
+    const employeedetails = await DataFind(`SELECT * FROM employee WHERE id=${id}`);
+    const date = moment().format("DD-MM-YYYY");
+
+    const employeeData = await DataFind(
+      `SELECT * FROM tbl_employee_attndence WHERE emplyeeId = '${id}' AND date = '${date}'`
+    );
+
+    const setting = await DataFind(`SELECT * FROM tbl_setting LIMIT 1`);
+
+    if (employeeData.length === 0) {
+      return res.json({
+        Break: "00:00:00",
+        Working: "00:00:00",
+        status: "",
+      });
+    }
+
+    employeeData[0].all_time = typeof employeeData[0].all_time === 'string'
+      ? JSON.parse(employeeData[0].all_time)
+      : employeeData[0].all_time;
+
+    function getTimeDifference(start, end) {
+      const startTime = new Date(start);
+      const endTime = new Date(end);
+      let diffMs = endTime - startTime;
+
+      const hours = String(Math.floor(diffMs / (1000 * 60 * 60))).padStart(2, "0");
+      diffMs %= 1000 * 60 * 60;
+      const minutes = String(Math.floor(diffMs / (1000 * 60))).padStart(2, "0");
+      diffMs %= 1000 * 60;
+      const seconds = String(Math.floor(diffMs / 1000)).padStart(2, "0");
+
+      return `${hours}:${minutes}:${seconds}`;
+    }
+
+    function timeStringToSeconds(timeStr) {
+      const [hours, minutes, seconds] = timeStr.split(":").map(Number);
+      return hours * 3600 + minutes * 60 + seconds;
+    }
+
+    function secondsToTimeString(totalSeconds) {
+      const hours = String(Math.floor(totalSeconds / 3600)).padStart(2, "0");
+      const minutes = String(Math.floor((totalSeconds % 3600) / 60)).padStart(2, "0");
+      const seconds = String(totalSeconds % 60).padStart(2, "0");
+      return `${hours}:${minutes}:${seconds}`;
+    }
+
+    function sumTime(time1, time2) {
+      const totalSeconds = timeStringToSeconds(time1) + timeStringToSeconds(time2);
+      return secondsToTimeString(totalSeconds);
+    }
+
+    const lastEntry = employeeData[0].all_time[employeeData[0].all_time.length - 1];
+    const currantTime = new Date().toISOString();
+
+    let breakTime = employeeData[0].break_time || "00:00:00";
+    let productiveTime = employeeData[0].productive_time || "00:00:00";
+
+    if (lastEntry.status === 1) {
+      const dif = getTimeDifference(lastEntry.intime, currantTime);
+      productiveTime = sumTime(productiveTime, dif);
+    } else if (lastEntry.status === 2) {
+      const dif = getTimeDifference(lastEntry.intime, currantTime);
+      breakTime = sumTime(breakTime, dif);
+    }
+
+    res.json({
+      Break: breakTime,
+      Working: productiveTime,
+      status: lastEntry.status === 1 ? "true" : "false",
+    });
+  } catch (error) {
+    console.error("Error in /hiddenChange/:id:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
+
 
 module.exports = router;

@@ -1,8 +1,10 @@
 const express = require("express");
 const router = express.Router();
 const bcrypt = require("bcrypt");
-const moment = require("moment");
+const moment =  require('../middleware/momentZone')
 const jwt = require("jsonwebtoken");
+ 
+
 
 const { isAuth, isAdmin } = require("../middleware/jwtAuth");
 const { DataFind, DataInsert } = require("../config/databasrqurey");
@@ -16,11 +18,23 @@ router.get("/admin/dashboard", isAuth, isAdmin, async (req, res) => {
 
   console.log(newdata);
 
+
+  // BrithDay Array 
+ const month = moment().format("MM")
+
+    const BrithDayArr = await DataFind(`SELECT firstName, lastName, birthDate, profileimage,
+           TIMESTAMPDIFF(YEAR, birthDate, CURDATE()) AS age
+    FROM employee
+    WHERE birthDate LIKE CONCAT('____-${month}-%')`)
+
+    console.log("BrithDayArr",BrithDayArr);
+
+
   const currantDate = new Date().toISOString().split('T')[0].split('-').reverse().join('-');
   console.log(currantDate);
 
-const formattedDate = new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short' });
-console.log(formattedDate);
+  const formattedDate = new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short' });
+  console.log(formattedDate);
 
 
   let employeeData = await DataFind("SELECT * FROM employee");
@@ -49,7 +63,7 @@ console.log(formattedDate);
 
   //  console.log(data);
 
-  res.render("index", { data: data.admin, role: data.role, setting, newdata ,mergedData});
+  res.render("index", { data: data.admin, role: data.role, setting, newdata ,mergedData,BrithDayArr});
 });
 
 router.get("/employee/dashboard", isAuth, async (req, res) => {
@@ -61,10 +75,24 @@ router.get("/employee/dashboard", isAuth, async (req, res) => {
   const employeeData = await DataFind(
     `SELECT * FROM tbl_employee_attndence WHERE emplyeeId = '${employee.id}' AND date = '${date}'`
   );
+
   let setting = await DataFind(`SELECT * FROM tbl_setting LIMIT 1`);
+
+
+   const month = moment().format("MM")
+
+    const BrithDayArr = await DataFind(`SELECT firstName, lastName, birthDate, profileimage,
+           TIMESTAMPDIFF(YEAR, birthDate, CURDATE()) AS age
+    FROM employee
+    WHERE birthDate LIKE CONCAT('____-${month}-%')`)
+
+    console.log("BrithDayArr",BrithDayArr);
+
+
 
   if (employeeData.length > 0) {
     // *****************functions *******************************
+   employeeData[0].all_time = typeof  employeeData[0].all_time === 'string' ? JSON.parse(employeeData[0].all_time): employeeData[0].all_time;
 
     function getTimeDifference(start, end) {
       const startTime = new Date(start);
@@ -108,9 +136,8 @@ router.get("/employee/dashboard", isAuth, async (req, res) => {
 
     // *****************functions end *******************************
 
-
-    const curMonthHour = await DataFind
-
+  
+    
 
 
     let breakTime = employeeData[0].break_time;
@@ -119,8 +146,7 @@ router.get("/employee/dashboard", isAuth, async (req, res) => {
 
     console.log(productiveTime);
 
-    const lastEntry =
-      employeeData[0].all_time[employeeData[0].all_time.length - 1];
+    const lastEntry = employeeData[0].all_time[employeeData[0].all_time.length - 1];
     // console.log(employeeData[0]);
 
     if (lastEntry.status === 1) {
@@ -158,8 +184,10 @@ router.get("/employee/dashboard", isAuth, async (req, res) => {
           : "",
       setting,
       employeedetais,
+      BrithDayArr
     });
   } else {
+ 
     res.render("emPnale", {
       data: employee,
       role,
@@ -168,6 +196,7 @@ router.get("/employee/dashboard", isAuth, async (req, res) => {
       status: "",
       setting,
       employeedetais,
+      BrithDayArr
     });
   }
 });
@@ -205,9 +234,9 @@ router.post("/login_data", async (req, res) => {
     });
   }
 
-  const adminResult = await DataFind(
-    `SELECT * FROM tbl_admin WHERE email = '${email}'`
-  );
+    const adminResult = await DataFind(
+      `SELECT * FROM tbl_admin WHERE email = '${email}' OR name = '${email}'`
+    );
   if (adminResult.length > 0) {
     let role = 1;
 
@@ -218,17 +247,17 @@ router.post("/login_data", async (req, res) => {
       // const token = jwt.sign({admin,role},process.env.JWT_TOKEN_KEY,{expiresIn:'2h'});
       const token = jwt.sign({ admin, role }, process.env.JWT_TOKEN_KEY);
 
-      res.cookie("token", token);
+      res.cookie("token", token,{maxAge:1000*60*60*24*30});
 
       req.flash("success_msg", "Login successfully");
-      res.redirect("/admin/dashboard");
+      res.redirect("/admin/dashboard"); 
     }
 
     req.flash("error_msg", "Invalid password");
     res.redirect("/");
   } else {
     const sqlEmployee = await DataFind(
-      `SELECT * FROM employee WHERE email = '${email}'`
+      `SELECT * FROM employee WHERE email = '${email}' OR userName = '${email}'`
     );
     let role = 2;
     if (sqlEmployee.length > 0) {
@@ -241,7 +270,7 @@ router.post("/login_data", async (req, res) => {
         if (validPass) {
           // const token = jwt.sign({employee,role},process.env.JWT_TOKEN_KEY,{expiresIn:'2h'});
           const token = jwt.sign({ employee, role }, process.env.JWT_TOKEN_KEY);
-          res.cookie("token", token);
+          res.cookie("token", token,{maxAge:1000*60*60*24*30});
 
           req.flash("success_msg", "Login successfully");
           return res.redirect("/employee/dashboard");

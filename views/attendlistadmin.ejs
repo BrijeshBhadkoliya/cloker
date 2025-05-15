@@ -1,17 +1,16 @@
 <!DOCTYPE html>
 <html lang="en">
 
-<!-- Mirrored from admin.pixelstrap.com/tivo/template/index.html by HTTrack Website Copier/3.x [XR&CO'2014], Mon, 20 Mar 2023 04:00:15 GMT -->
+
 
 <head>
     <%- include('partials/head.ejs') %>
-      
+
         <link rel="stylesheet" type="text/css" href="/css/vendors/daterange-picker.css">
- 
+
 </head>
 
-<body onload="startTime()">
-    <%- include('partials/sidebar.ejs') %>`
+<body> <%- include('partials/sidebar.ejs') %>`
         <div class="page-body">
             <div class="container-fluid">
                 <div class="page-title">
@@ -45,11 +44,13 @@
                                 <div class="card-body d-flex justify-content-between align-items-center gap-3">
                                     <div class="date-range-picker d-flex align-items-center gap-2">
                                         <div class="theme-form">
-                                        <input type="hidden" value="<%=employeeId===''?'':employeeId%>" id="employeeId">
- 
-                                            <input class="form-control text-primary" b type="text" id="datarang" name="daterange"
-                                                placeholder="Select Date Range" value="02/15/2023 - 2/3/2023"
-                                                style="width: 250px;" oninput="DatePicker()" onchange="DatePicker()">
+                                            <input type="hidden" value="<%=employeeId===''?'':employeeId%>"
+                                                id="employeeId">
+
+                                            <input class="form-control text-primary" b type="text" id="datarang"
+                                                name="daterange" placeholder="Select Date Range"
+                                                value="02/15/2023 - 2/3/2023" style="width: 250px;"
+                                                oninput="DatePicker()" onchange="DatePicker()">
                                         </div>
                                     </div>
                                     <div class="action-buttons d-flex gap-2">
@@ -134,60 +135,79 @@
                                                                 <div class="d-flex align-items-center justify-content-center px-2 py-1 rounded text-primary fw-semibold"
                                                                     style="width: 20px; height: 20px; background-color: rgba(25, 76, 135, 0.1); font-size: 12px;"
                                                                     data-bs-toggle="tooltip" data-bs-placement="top"
-                                                                    title="Warning!">
+                                                                    title="On Going!">
                                                                     <i class="fa-solid fa-triangle-exclamation"></i>
                                                                 </div>
+
                                                                 <% }else if(val.attendens_status==='P' ) { %>
                                                                     <div class="d-flex align-items-center justify-content-center px-2 py-1 rounded text-success fw-semibold"
-                                                                        style="width: 20px; height: 20px; background-color: rgba(25, 135, 84, 0.1); font-size: 12px;">
+                                                                        style="width: 20px; height: 20px; background-color: rgba(25, 135, 84, 0.1); font-size: 12px;"
+                                                                        data-bs-toggle="tooltip" data-bs-placement="top"
+                                                                        title="Present">
                                                                         P
                                                                     </div>
                                                                     <% } else { %>
                                                                         <div class="d-flex align-items-center justify-content-center px-2 py-1 rounded text-danger fw-semibold"
-                                                                            style="width: 20px; height: 20px; background-color: rgba(220, 53, 69, 0.1); font-size: 12px;">
+                                                                            style="width: 20px; height: 20px; background-color: rgba(220, 53, 69, 0.1); font-size: 12px;"
+                                                                            data-bs-toggle="tooltip"
+                                                                            data-bs-placement="top" title="Absent">
                                                                             A
                                                                         </div>
                                                                         <% } %>
                                                     </td>
-                                                    <td>
-                                                        <%=val.clockIn_time%>
-                                                    </td>
-                                                    <td>
-                                                        <%=val.clockOut_time%>
-                                                    </td>
-                                                    <td>
-                                                        <%=val.total_time%>
-                                                    </td>
-                                                    <td>
-                                                        <%=val.break_time%>
-                                                    </td>
-                                                    <td>
-                                                        <%=val.productive_time%>
-                                                    </td>
-                                                    <td>
-                                                        <%=val.extra_time%>
-                                                    </td>
-                                                    <td>
-                                                        <%=val.clockIn_ip%>
-                                                    </td>
-                                                    <td>
-                                                        <%=val.clockOut_ip%>
-                                                    </td>
-                                                    <td>
-                                                        <%if(val.attendens_status==='P' ){%>
-                                                            <ul class="action">
-                                                                <li class="edit"><a href="/employee/entry/<%=val.id%>"
-                                                                        data-bs-original-title="" title="">
-                                                                        <i
-                                                                            class="fa-light fa-eye me-2 text-primary"></i></a>
-                                                                </li>
-                                                            </ul>
-                                                            <%}else{%>
-                                                                <ul class="action">
-                                                                    <span>-</span>
-                                                                </ul>
-                                                                <%}%>
-                                                    </td>
+                                                    <% function SecondTime(t) { if (val.attendens_status==='P' && t
+                                                        !=='-' ) { if (!t || typeof t !=='string' ) { return '00:00' ; }
+                                                        const [h, m]=t.split(':'); const ampm=t.includes('AM') ? 'AM'
+                                                        : 'PM' ; return `${h.padStart(2, '0' )}:${m.padStart(2, '0' )}
+                                                        ${ampm}`; }else{ return '-' ; } }%>
+                                                        <td>
+                                                            <%=SecondTime(val.clockIn_time)%>
+                                                        </td>
+                                                        <td>
+                                                            <%=SecondTime(val.clockOut_time)%>
+                                                        </td>
+                                                        <% function formatTime(t) { if (val.attendens_status==='P' && t
+                                                            !=='-' ) { if (!t || typeof t !=='string' ) { return '00:00'
+                                                            ; } const parts=t.split(':').map(part=> part.padStart(2,
+                                                            '0'));
+                                                            while (parts.length < 2) parts.unshift('00'); return
+                                                                parts.slice(0, 2).join(':'); } else { return '-' ; } }%>
+                                                                <td>
+                                                                    <%=formatTime(val.total_time)%>
+                                                                </td>
+
+
+                                                                <td>
+                                                                    <%= formatTime(val.break_time) %>
+                                                                </td>
+                                                                <td>
+                                                                    <%= formatTime(val.productive_time) %>
+                                                                </td>
+                                                                <td>
+                                                                    <%= formatTime(val.extra_time) %>
+                                                                </td>
+                                                                <td>
+                                                                    <%=val.clockIn_ip%>
+                                                                </td>
+                                                                <td>
+                                                                    <%=val.clockOut_ip%>
+                                                                </td>
+                                                                <td>
+                                                                    <%if(val.attendens_status==='P' ){%>
+                                                                        <ul class="action">
+                                                                            <li class="edit"><a
+                                                                                    href="/employee/entry/<%=val.id%>"
+                                                                                    data-bs-original-title="" title="">
+                                                                                    <i
+                                                                                        class="fa-light fa-eye me-2 text-primary"></i></a>
+                                                                            </li>
+                                                                        </ul>
+                                                                        <%}else{%>
+                                                                            <ul class="action">
+                                                                                <span>-</span>
+                                                                            </ul>
+                                                                            <%}%>
+                                                                </td>
                                                 </tr>
                                                 <%})%>
                                     </tbody>
@@ -206,13 +226,14 @@
         <%- include('partials/footer.ejs') %>
             <%- include('partials/script.ejs') %>
 
-                
+
 
                 <script src="/js/datepicker/daterange-picker/moment.min.js"></script>
                 <script src="/js/datepicker/daterange-picker/daterangepicker.js"></script>
                 <script src="/js/datepicker/daterange-picker/daterange-picker.custom.js"></script>
+                <script src="/js/tooltip-init.js"></script>
 
-               
+
 
                 <script>
                     const today = new Date();
@@ -238,9 +259,9 @@
                         function getDateRangeArray(startDateStr, endDateStr) {
                             const dateArray = [];
 
-                        
+
                             const [startMonth, startDay, startYear] = startDateStr.split('/');
-                            const [endMonth, endDay, endYear] = endDateStr.split('/'); 
+                            const [endMonth, endDay, endYear] = endDateStr.split('/');
 
                             let currentDate = new Date(`${startYear}-${startMonth}-${startDay}`);
                             const endDate = new Date(`${endYear}-${endMonth}-${endDay}`);
@@ -263,17 +284,19 @@
 
 
                         let datepic = document.getElementById('datarang').value;
-                        console.log("Input Date Range:", datepic);
+
 
                         let datepicArr = datepic.split('-').map(val => val.trim());
-                        console.log("Split Date Array:", datepicArr);
+
+
 
 
                         const startDate = datepicArr[0];
                         const endDate = datepicArr[1];
 
                         const dateRangeArray = getDateRangeArray(startDate, endDate);
-                        console.log("Date Range Array:", dateRangeArray);
+
+
 
 
 
@@ -282,11 +305,40 @@
                             method: 'POST',
                             data: { data: dateRangeArray },
                             success: (function (res) {
-                                console.log(res);
+
+
                                 const tbody = document.getElementById("tbody");
                                 tbody.innerHTML = "";
 
                                 res.forEach((val, i) => {
+
+                                    function formatTime(t) {
+                                        if (val.attendens_status === 'P' && t !== '-') {
+                                            if (!t || typeof t !== 'string') {
+                                                return '00:00'
+                                                    ;
+                                            }
+                                            const parts = t.split(':').map(part => part.padStart(2,
+                                                '0'));
+                                            while (parts.length < 2) parts.unshift('00');
+                                            return parts.slice(0, 2).join(':');
+                                        } else { return '-'; }
+                                    }
+
+
+                                    function SecondTime(t) {
+                                        if (val.attendens_status === 'P' && t !== '-') {
+                                            if (!t || typeof t !== 'string') {
+                                                return '00:00';
+                                            }
+                                            const [h, m] = t.split(':');
+                                            const ampm = t.includes('AM') ? 'AM' : 'PM';
+                                            return `${h.padStart(2, '0')}:${m.padStart(2, '0')} ${ampm}`;
+                                        } else {
+                                            return '-';
+                                        }
+                                    }
+
                                     const [day, month, year] = val.date.split('-');
                                     const dateObj = new Date(`${year}-${month}-${day}`);
                                     const weekday = dateObj.toLocaleDateString('en-US', { weekday: 'short' });
@@ -304,17 +356,31 @@
 
 
                                     const attendanceIcon = val.clockOut_time === '' ? `
-                <div class="d-flex align-items-center justify-content-center px-2 py-1 rounded text-primary fw-semibold"
-                    style="width: 20px; height: 20px; background-color: rgba(25, 76, 135, 0.1); font-size: 12px;" 
-                    title="Warning!">
-                    <i class="fa-solid fa-triangle-exclamation"></i>
-                </div>` : val.attendens_status === 'P' ? `
-                <div class="d-flex align-items-center justify-content-center px-2 py-1 rounded text-success fw-semibold"
-                    style="width: 20px; height: 20px; background-color: rgba(25, 135, 84, 0.1); font-size: 12px;">P
-                </div>` : `
-                <div class="d-flex align-items-center justify-content-center px-2 py-1 rounded text-danger fw-semibold"
-                    style="width: 20px; height: 20px; background-color: rgba(220, 53, 69, 0.1); font-size: 12px;">A
-                </div>`;
+                  <div
+                     class="d-flex align-items-center justify-content-center px-2 py-1 rounded text-primary fw-semibold"
+                     style="width: 20px; height: 20px; background-color: rgba(25, 76, 135, 0.1); font-size: 12px;"
+                     data-bs-toggle="tooltip" data-bs-placement="top"
+                     title="On Going!" >
+                     <i class="fa-solid fa-triangle-exclamation"></i>
+                    </div>` : val.attendens_status === 'P' ? `
+                 <div
+                 class="d-flex align-items-center justify-content-center px-2 py-1 rounded text-success fw-semibold"
+                 style="width: 20px; height: 20px; background-color: rgba(25, 135, 84, 0.1); font-size: 12px;"
+                 data-bs-toggle="tooltip"
+                 data-bs-placement="top"
+                title="Present"
+                 >
+                 P
+              </div>` : `
+                 <div
+                 class="d-flex align-items-center justify-content-center px-2 py-1 rounded text-danger fw-semibold"
+                 style="width: 20px; height: 20px; background-color: rgba(220, 53, 69, 0.1); font-size: 12px;"
+                 data-bs-toggle="tooltip"
+                 data-bs-placement="top"
+                  title="Absent"
+                 >
+                 A
+               </div>`;
 
 
                                     const actionLink = val.attendens_status === 'P' ? `
@@ -334,17 +400,18 @@
                     <td>${formattedDate}</td>
                     <td>${statusDiv}</td>
                     <td>${attendanceIcon}</td>
-                    <td>${val.clockIn_time}</td>
-                    <td>${val.clockOut_time}</td>
-                    <td>${val.total_time}</td>
-                    <td>${val.break_time}</td>
-                    <td>${val.productive_time}</td>
-                    <td>${val.extra_time}</td>
+                    <td>${SecondTime(val.clockIn_time)}</td>
+                    <td>${SecondTime(val.clockOut_time)}</td>
+                    <td>${formatTime(val.total_time)}</td>
+                    <td>${formatTime(val.break_time)}</td>
+                    <td>${formatTime(val.productive_time)}</td>
+                    <td>${formatTime(val.extra_time)}</td>
                     <td>${val.clockIn_ip}</td>
                     <td>${val.clockOut_ip}</td>
                     <td>${actionLink}</td>
                 </tr>`;
                                 });
+                                $('[data-bs-toggle="tooltip"]').tooltip();
                             })
                         })
 
@@ -354,13 +421,13 @@
                     } 
                 </script>
 
-               
+
 
 
 
 </body>
 
 
-<!-- Mirrored from admin.pixelstrap.com/tivo/template/index.html by HTTrack Website Copier/3.x [XR&CO'2014], Mon, 20 Mar 2023 04:01:15 GMT -->
+
 
 </html>

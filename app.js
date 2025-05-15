@@ -13,7 +13,7 @@ const flash = require('connect-flash')
 const {connection} = require('./config/db')
 // Serve static files (fonts, images, etc.)
 app.use(express.static(path.join(__dirname, "public")));
-
+app.use(express.static(path.join(__dirname,'../public/uploads'))) 
 // Body parser middleware
 // app.use(session({
 //   secret:'message',
