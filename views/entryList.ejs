@@ -7,7 +7,7 @@
     <%- include('partials/head.ejs') %>
 </head>
 
-<body>    <%- include('partials/sidebar.ejs') %>`
+<body> <%- include('partials/sidebar.ejs') %>`
         <div class="page-body">
             <div class="container-fluid mb-3">
                 <div class="page-title">
@@ -68,7 +68,8 @@
                                     <div class="card-header pb-0">
                                         <div class="d-flex">
                                             <div class="flex-grow-1">
-                                                <p class=" f-w-600 text-success">Total Break Times<i class="fa fa-circle">
+                                                <p class=" f-w-600 text-success">Total Break Times<i
+                                                        class="fa fa-circle">
                                                     </i></p>
                                                 <h4>
                                                     <%=TotalBreakTime%>
@@ -97,7 +98,8 @@
                                     <div class="card-header pb-0">
                                         <div class="d-flex">
                                             <div class="flex-grow-1">
-                                                <p class=" f-w-600 text-warning ">Clock In Times<i class="fa fa-circle"> </i>
+                                                <p class=" f-w-600 text-warning ">Clock In Times<i class="fa fa-circle">
+                                                    </i>
                                                 </p>
                                                 <h4>
                                                     <%=ClockIn%>
@@ -125,7 +127,8 @@
                                     <div class="card-header pb-0">
                                         <div class="d-flex">
                                             <div class="flex-grow-1">
-                                                <p class=" f-w-600 text-info">Clock Out Times<i class="fa fa-circle"> </i></p>
+                                                <p class=" f-w-600 text-info">Clock Out Times<i class="fa fa-circle">
+                                                    </i></p>
                                                 <h4>
                                                     <%=ClockOut%>
                                                 </h4>
@@ -184,28 +187,68 @@
                                                         <%= isNaN(new Date(val.intime)) ? '-' : new Date(new
                                                             Date(val.intime).toLocaleString("en-US", {
                                                             timeZone: "Asia/Kolkata" })) .toLocaleTimeString("en-US", {
-                                                            hour: "2-digit" , minute: "2-digit"  ,
-                                                            hour12: true }) %>
+                                                            hour: "2-digit" , minute: "2-digit" , hour12: true }) %>
                                                     </td>
                                                     <td class="sorting_1">
                                                         <%= isNaN(new Date(val.outtime)) ? '-' : new Date(new
                                                             Date(val.outtime).toLocaleString("en-US", {
                                                             timeZone: "Asia/Kolkata" })) .toLocaleTimeString("en-US", {
-                                                            hour: "2-digit" , minute: "2-digit" ,
-                                                            hour12: true }) %>
+                                                            hour: "2-digit" , minute: "2-digit" , hour12: true }) %>
                                                     </td>
                                                     <td>
                                                         <%=totalTime[i]==="Invalid date format" ? '-' : totalTime[i] %>
                                                     </td>
-                                                     <td>
-                                                        <%=val.InTimeIP ==='' ? '-' : val.InTimeIP%>
+                                                    <td>
+                                                        <%=val.InTimeIP==='' ? '-' : val.InTimeIP%>
                                                     </td>
-                                                     <td>
+                                                    <td>
                                                         <%=val.OutTimeIP%>
                                                     </td>
                                                     <td>
-                                                        <%="-"%>
+                                                        <% if (val.comment && val.comment.trim() !=='' ) { %>
+
+                                                            <% if (val.comment.length> 15) { %>
+                                                                <!-- Shortened text with modal trigger -->
+                                                                <span data-bs-toggle="modal"
+                                                                    data-bs-target="#resoneModal<%= val.id %>"
+                                                                    style="cursor: pointer;">
+                                                                    <%= val.comment.substring(0, 15) %>...
+                                                                        <i
+                                                                            class="fa-regular fa-circle-info text-primary ms-1"></i>
+                                                                </span>
+
+                                                                <!-- Modal for full comment -->
+                                                                <div class="modal fade" id="resoneModal<%= val.id %>"
+                                                                    tabindex="-1"
+                                                                    aria-labelledby="resoneModalLabel<%= val.id %>"
+                                                                    aria-hidden="true">
+                                                                    <div class="modal-dialog modal-dialog-centered">
+                                                                        <div class="modal-content">
+                                                                            <div class="modal-header">
+                                                                                <h5 class="modal-title"
+                                                                                    id="resoneModalLabel<%= val.id %>">
+                                                                                    Leave Reason</h5>
+                                                                                <button type="button" class="btn-close"
+                                                                                    data-bs-dismiss="modal"
+                                                                                    aria-label="Close"></button>
+                                                                            </div>
+                                                                            <div class="modal-body">
+                                                                                <%= val.comment %>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+
+                                                                <% } else { %>
+                                                                    <!-- Directly show short comment -->
+                                                                    <%= val.comment %>
+                                                                        <% } %>
+
+                                                                            <% } else { %>
+                                                                                -
+                                                                                <% } %>
                                                     </td>
+
                                                 </tr>
                                                 <% }) %>
                                         </tbody>

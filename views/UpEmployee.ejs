@@ -7,7 +7,7 @@
   <%- include('partials/head.ejs') %>
 </head>
 
-<body>  <%- include('partials/sidebar.ejs') %>`
+<body> <%- include('partials/sidebar.ejs') %>`
     <div class="page-body">
       <div class="container-fluid">
         <div class="page-title">
@@ -140,6 +140,37 @@
 
 
 
+
+                  </div>
+                  <div class="row g-3">
+                    <div class="col-md-4 mb-3">
+                      <label class="form-label">Job Designation</label>
+                      <select name="designation" id="designation" class="form-control">
+                        <option value="" <%=data.designation==='' ? 'selected' : '' %>>Select Designation</option>
+                        <option value="Developer" <%=data.designation==='Developer' ? 'selected' : '' %>>Developer
+                        </option>
+                        <option value="Designer" <%=data.designation==='Designer' ? 'selected' : '' %>>Designer</option>
+                        <option value="Manager" <%=data.designation==='Manager' ? 'selected' : '' %>>Manager</option>
+                        <option value="Team Lead" <%=data.designation==='Team Lead' ? 'selected' : '' %>>Team Lead
+                        </option>
+                         <option value="HR" <%=data.designation==='Team Lead' ? 'selected' : '' %>>HR
+                        </option>
+                      </select>
+                    </div>
+
+                    <div class="col-md-4 mb-3">
+                      <label class="form-label">Employment Type</label>
+                      <select name="duration" id="duration" class="form-control">
+                        <option value="" <%=data.duration==='' ? 'selected' : '' %>>Select Employment Type</option>
+                        <option value="Full-Time" <%=data.duration==='Full-Time' ? 'selected' : '' %>>Full-Time</option>
+                        <option value="Part-Time" <%=data.duration==='Part-Time' ? 'selected' : '' %>>Part-Time</option>
+                        <option value="Intern" <%=data.duration==='Intern' ? 'selected' : '' %>>Intern</option>
+                        <option value="Contractual" <%=data.duration==='Contractual' ? 'selected' : '' %>>Contractual
+                        </option>
+                        <option value="Freelancer" <%=data.duration==='Freelancer' ? 'selected' : '' %>>Freelancer
+                        </option>
+                      </select>
+                    </div>
 
                   </div>
                   <div class="row g-3">

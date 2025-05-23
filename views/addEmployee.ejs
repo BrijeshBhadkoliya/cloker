@@ -7,7 +7,7 @@
   <%- include('partials/head.ejs') %>
 </head>
 
-<body>  <%- include('partials/sidebar.ejs') %>`
+<body> <%- include('partials/sidebar.ejs') %>`
     <div class="page-body">
       <div class="container-fluid">
         <div class="page-title">
@@ -146,15 +146,37 @@
 
 
                   <div class="row g-3">
+                   
+                      <div class="col-md-4 " style="height: 47px;">
+                        <label class="form-label">ID Image</label>
+                        <input class="form-control p-0 " style="padding: 12px 15px !important;" name="idImag"
+                          id="validationCustom01" type="file" placeholder="Mark" multiple data-bs-original-title=""
+                          title="">
+                        <div class="valid-feedback">Looks good!</div>
+                      </div>
 
-                    <div class="col-md-4" style="height: 47px;">
-                      <label class="form-label" for="validationCustom01">ID Image</label>
-                      <input class="form-control p-0 " style="padding: 12px 15px !important;" name="idImag"
-                        id="validationCustom01" type="file" placeholder="Mark" multiple data-bs-original-title=""
-                        title="">
-                      <div class="valid-feedback">Looks good!</div>
+                     <div class="col-md-4 mb-3">
+                      <label class="form-label">Job Designation</label>
+                      <select name="designation" id="designation" class="form-control">
+                        <option value="" selected>Select Designation</option>
+                         <%durationtypes.map((val)=>{%>
+                        <option value="<%=val.type_values%>" ><%=val.type_values%></option>
+                        
+                        <%})%>
+                      </select>
                     </div>
 
+                    <div class="col-md-4 mb-3">
+                      <label class="form-label">Employment Type</label>
+                      <select name="duration" id="duration" class="form-control">
+                        <option value="" selected>Select Employment Type</option>
+                            <%designationtypes.map((val)=>{%>
+                        <option value="<%=val.type_values%>" ><%=val.type_values%></option>
+                        
+                        <%})%>
+                      </select>
+                    </div>
+                  
                     <div class="card-body animate-chk">
                       <div class="row">
                         <div class="col d-flex" style="align-items: center;">

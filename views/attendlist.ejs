@@ -115,12 +115,15 @@
                                                     <td>
                                                         <% if(val.day_status==='FD' ){ %>
                                                             <div class="d-flex align-items-center justify-content-center px-2 py-1 rounded text-success fw-semibold"
-                                                                style="width: 40px; height: 28px; background-color: rgba(25, 135, 84, 0.1);">
+                                                                style="width: 40px; height: 28px; font-weight: 600; color: rgb(96, 177, 88) !important;
+    background: rgba(96, 177, 88, 0.1) !important; " data-bs-toggle="tooltip" data-bs-placement="Top" title="Full Day">
                                                                 FD
                                                             </div>
                                                             <% } else { %>
                                                                 <div class="d-flex align-items-center justify-content-center px-2 py-1 rounded text-info fw-semibold"
-                                                                    style="width: 40px; height: 28px; background-color: rgba(13, 202, 240, 0.1); ">
+                                                                    style="width: 40px; height: 28px; background-color: rgba(0, 122, 255, 0.1); color: rgb(0, 122, 255) !important; font-weight: 600;"
+                                                                    data-bs-toggle="tooltip" data-bs-placement="Top"
+                                                                    title="Weekend">
                                                                     WK
                                                                 </div>
                                                                 <% } %>
@@ -133,44 +136,87 @@
                                                             formattedDate2=`${dayDate}-${monthDate}-${yearDate}`;%>
                                                             <% if(val.clockOut_time==='' ) {%>
 
-                                                               
+
                                                                 <div class="d-flex align-items-center justify-content-center px-2 py-1 rounded text-primary fw-semibold"
-                                                                    style="width: 20px; height: 20px; background-color: rgba(25, 76, 135, 0.1); font-size: 12px;"
+                                                                    style="width: 28px; height: 28px; background-color: rgba(25, 76, 135, 0.1); font-size: 12px; font-weight: 600;"
                                                                     data-bs-toggle="tooltip" data-bs-placement="top"
                                                                     title="On Going!">
                                                                     <i class="fa-solid fa-triangle-exclamation"></i>
                                                                 </div>
-                                                                <% }else if(val.attendens_status==='P' ) { %>
-                                                                    <div class="d-flex align-items-center justify-content-center px-2 py-1 rounded text-success fw-semibold"
-                                                                        style="width: 20px; height: 20px; background-color: rgba(25, 135, 84, 0.1); font-size: 12px;"
+                                                                <% }else if(val.attendens_status==='P' ||
+                                                                    val.attendens_status==='C' ) { %>
+                                                                    <div class="d-flex align-items-center justify-content-center px-2 py-1 rounded text-success fw-semibold position-relative"
+                                                                        style="width: 28px; height: 28px; background-color: rgba(25, 135, 84, 0.1); font-size: 12px; font-weight: 600;"
                                                                         data-bs-toggle="tooltip" data-bs-placement="top"
-                                                                        title="Present">
-                                                                        P
+                                                                        title="<%= val.attendens_status === 'C' ? 'Missing Clock Out' : 'Present' %>">
+
+                                                                        <span>P</span>
+
+                                                                        <% if (val.attendens_status==='C' ) { %>
+                                                                            <div class="position-absolute top-0 start-100 translate-middle badge text-primary"
+                                                                                style="font-size: 10px;">
+                                                                                <i
+                                                                                    class="fa-duotone fa-solid fa-alarm-exclamation"></i>
+                                                                            </div>
+                                                                            <% } %>
+
                                                                     </div>
-                                                                    <% } else { %>
-                                                                        <div class="d-flex align-items-center justify-content-center px-2 py-1 rounded text-danger fw-semibold"
-                                                                            style="width: 20px; height: 20px; background-color: rgba(220, 53, 69, 0.1); font-size: 12px;"
-                                                                            data-bs-toggle="tooltip"
-                                                                            data-bs-placement="top" title="Absent">
-                                                                            A
-                                                                        </div>
-                                                                        <% } %>
+                                                                    <% } else if(val.day_status !=='WK' ) { %>
+                                                                        <% if (val.leave_status==="Pending" ) { %>
+                                                                            <div class="d-flex align-items-center justify-content-center px-2 py-1 rounded text-danger fw-semibold"
+                                                                                style="width: 28px; height: 28px; font-size: 12px; font-weight: 600; color: #dc3545; background-color: rgba(220, 53, 69, 0.1);"
+                                                                                data-bs-toggle="tooltip"
+                                                                                data-bs-placement="top" title="Leave Pending">
+                                                                               A
+                                                                            </div>
+                                                                            <% } else { %>
+                                                                                <div class="d-flex align-items-center justify-content-center position-relative"
+                                                                                    style="width: 28px; height: 28px; font-size: 12px; font-weight: 600; color: #dc3545; background-color: rgba(220, 53, 69, 0.1);"
+                                                                                    data-bs-toggle="tooltip"
+                                                                                    data-bs-placement="top"
+                                                                                    title="<%= val.leave_status === 'Appove' ? 'Leave Approved' : val.leave_status === 'Reject' ? 'Leave Rejected' : 'Absent' %>">
+                                                                                    A
+                                                                                    <%if(val.leave_status==="Appove" ){
+                                                                                        %>
+                                                                                        <div class="position-absolute top-0 start-100 translate-middle badge text-success"
+                                                                                            style="font-size: 10px;">
+                                                                                            <i
+                                                                                                class="fa-solid fa-thumbs-up"></i>
+                                                                                        </div>
+                                                                                        <%}else
+                                                                                            if(val.leave_status==="Reject"
+                                                                                            ){%>
+                                                                                            ? `<div
+                                                                                                class="position-absolute top-0 start-100 translate-middle badge text-danger"
+                                                                                                style="font-size: 10px;">
+                                                                                                <i
+                                                                                                    class="fa-solid fa-ban"></i>
+                                                                                            </div>`
+                                                                                            : ""
+                                                                                            <% } %>
+                                                                                </div>
+                                                                                <% } %>
+                                                                                    <% }else{ %>
+                                                                                        <div>-</div>
+                                                                                        <%}%>
                                                     </td>
 
-                                                    <% function SecondTime(t) { if (val.attendens_status==='P' && t
-                                                        !=='-' ) { if (!t || typeof t !=='string' ) { return '00:00' ; }
-                                                        const [h, m]=t.split(':'); const ampm=t.includes('AM') ? 'AM'
-                                                        : 'PM' ; return `${h.padStart(2, '0' )}:${m.padStart(2, '0' )}
-                                                        ${ampm}`; }else{ return '-' ; } }%>
+                                                    <% function SecondTime(t) { if (val.attendens_status==='P' ||
+                                                        val.attendens_status==='C' && t !=='-' ) { if (!t || typeof t
+                                                        !=='string' ) { return ' ' ; } const [h, m]=t.split(':'); const
+                                                        ampm=t.includes('AM') ? 'AM' : 'PM' ; return
+                                                        `${h.padStart(2, '0' )}:${m.padStart(2, '0' )} ${ampm}`; }else{
+                                                        return '-' ; } }%>
                                                         <td>
                                                             <%=SecondTime(val.clockIn_time)%>
                                                         </td>
                                                         <td>
                                                             <%=SecondTime(val.clockOut_time)%>
                                                         </td>
-                                                        <% function formatTime(t) { if (val.attendens_status==='P' && t
-                                                            !=='-' ) { if (!t || typeof t !=='string' ) { return '00:00'
-                                                            ; } const parts=t.split(':').map(part=> part.padStart(2,
+                                                        <% function formatTime(t) { if (val.attendens_status==='P' ||
+                                                            val.attendens_status==='C' && t !=='-' ) { if (!t || typeof
+                                                            t !=='string' ) { return ' ' ; } const
+                                                            parts=t.split(':').map(part=> part.padStart(2,
                                                             '0'));
                                                             while (parts.length < 2) parts.unshift('00'); return
                                                                 parts.slice(0, 2).join(':'); } else { return '-' ; } }%>
@@ -303,6 +349,15 @@
                             data: { data: dateRangeArray },
                             success: (function (res) {
 
+
+
+
+                                if ($.fn.DataTable.isDataTable('#basic-1')) {
+                                    $('#basic-1').DataTable().destroy();
+                                }
+
+
+
                                 const tbody = document.getElementById("tbody");
                                 tbody.innerHTML = "";
 
@@ -310,9 +365,9 @@
 
 
                                     function formatTime(t) {
-                                        if (val.attendens_status === 'P' && t !== '-') {
+                                        if (val.attendens_status === 'P' || val.attendens_status === 'C' && t !== '-') {
                                             if (!t || typeof t !== 'string') {
-                                                return '00:00';
+                                                return ' ';
                                             }
                                             const parts = t.split(':').map(part => part.padStart(2, '0'));
                                             while (parts.length < 2) parts.unshift('00');
@@ -323,9 +378,9 @@
                                     }
 
                                     function SecondTime(t) {
-                                        if (val.attendens_status === 'P' && t !== '-') {
+                                        if (val.attendens_status === 'P' || val.attendens_status === 'C' && t !== '-') {
                                             if (!t || typeof t !== 'string') {
-                                                return '00:00';
+                                                return ' ';
                                             }
                                             const [h, m] = t.split(':');
                                             const ampm = t.includes('AM') ? 'AM' : 'PM';
@@ -344,42 +399,75 @@
 
                                     const statusDiv = val.day_status === 'FD' ? `
                 <div class="d-flex align-items-center justify-content-center px-2 py-1 rounded text-success fw-semibold"
-                    style="width: 40px; height: 28px; background-color: rgba(25, 135, 84, 0.1);">FD
+                    style="width: 40px; height: 28px; font-weight: 600; color: rgb(96, 177, 88) !important;
+                    background: rgba(96, 177, 88, 0.1) !important;" data-bs-toggle="tooltip"
+                                                                            data-bs-placement="Top"
+                                                                            title="Full Day" >FD
                 </div>` : `
                 <div class="d-flex align-items-center justify-content-center px-2 py-1 rounded text-info fw-semibold"
-                    style="width: 40px; height: 28px; background-color: rgba(13, 202, 240, 0.1);">WK
+                    style="width: 40px; height: 28px; background-color: rgba(0, 122, 255, 0.1); color: rgb(0, 122, 255) !important; font-weight: 600;" data-bs-toggle="tooltip"
+                                                                            data-bs-placement="Top"
+                                                                            title="Weekend">WK
                 </div>`;
 
 
                                     const attendanceIcon = val.clockOut_time === '' ? `
-                  <div
+                 <div
                      class="d-flex align-items-center justify-content-center px-2 py-1 rounded text-primary fw-semibold"
-                     style="width: 20px; height: 20px; background-color: rgba(25, 76, 135, 0.1); font-size: 12px;"
+                     style="width: 20px; height: 20px; background-color: rgba(25, 76, 135, 0.1); font-size: 12px; font-weight: 600;"
                      data-bs-toggle="tooltip" data-bs-placement="top"
                      title="On Going!" >
                      <i class="fa-solid fa-triangle-exclamation"></i>
-                    </div>` : val.attendens_status === 'P' ? `
-                 <div
-                 class="d-flex align-items-center justify-content-center px-2 py-1 rounded text-success fw-semibold"
-                 style="width: 20px; height: 20px; background-color: rgba(25, 135, 84, 0.1); font-size: 12px;"
-                 data-bs-toggle="tooltip"
-                 data-bs-placement="top"
-                title="Present"
-                 >
-                 P
-              </div>` : `
-                 <div
+                    </div>
+        ` : val.attendens_status === 'P' || val.attendens_status === 'C' ? `
+              <div
+    class="d-flex align-items-center justify-content-center px-2 py-1 rounded text-success fw-semibold position-relative"
+    style="width: 28px; height: 28px; background-color: rgba(25, 135, 84, 0.1); font-size: 12px; font-weight: 600;"
+    data-bs-toggle="tooltip"
+    data-bs-placement="top"
+    title="${val.attendens_status === 'C' ? 'Missing Clock Out' : 'Present'}">
+    
+    P
+
+    ${val.attendens_status === 'C' ? `
+      <div class="position-absolute top-0 start-100 translate-middle badge text-primary"
+           style="font-size: 10px;">
+       <i class="fa-duotone fa-solid fa-alarm-exclamation"></i>
+      </div>` : ''}
+  </div>
+        `: val.day_status !== 'WK' ? `${val.leave_status === "Pending" ? `  <div
                  class="d-flex align-items-center justify-content-center px-2 py-1 rounded text-danger fw-semibold"
-                 style="width: 20px; height: 20px; background-color: rgba(220, 53, 69, 0.1); font-size: 12px;"
+                 style="width: 28px; height: 28px; font-size: 12px; font-weight: 600; color: #dc3545; background-color: rgba(220, 53, 69, 0.1);"
                  data-bs-toggle="tooltip"
                  data-bs-placement="top"
-                  title="Absent"
+                  title="Leave Pending"
                  >
-                 A
-               </div>`;
+                  A</div>`: `
+            <div
+  class="d-flex align-items-center justify-content-center position-relative"
+  style="width: 28px; height: 28px; font-size: 12px; font-weight: 600; color: #dc3545; background-color: rgba(220, 53, 69, 0.1);"
+  data-bs-toggle="tooltip"
+  data-bs-placement="top"
+  title="${val.leave_status === 'Appove' ? 'Leave Approved' : val.leave_status === 'Reject' ? 'Leave Rejected' : 'Absent'}"
+>
+ A
+  ${val.leave_status === "Appove"
+                                        ? `<div class="position-absolute top-0 start-100 translate-middle badge text-success"
+           style="font-size: 10px;">
+       <i class="fa-solid fa-thumbs-up"></i>
+      </div>`
+                                        : val.leave_status === "Reject"
+                                            ? `<div class="position-absolute top-0 start-100 translate-middle badge text-danger"
+           style="font-size: 10px;">
+       <i class="fa-solid fa-ban"></i>
+      </div>`
+                                            : ""
+                                    }
+</div>
+        `}` : `<div>-</div>`;
 
 
-                                    const actionLink = val.attendens_status === 'P' ? `
+                                    const actionLink = val.attendens_status === 'P' || val.attendens_status === 'C' ? `
                 <ul class="action">
                     <li class="edit"><a href="/employee/entry/${val.id}" title="">
                         <i class="fa-light fa-eye me-2 text-primary"></i></a>
@@ -408,6 +496,14 @@
                 </tr>`;
                                 });
                                 $('[data-bs-toggle="tooltip"]').tooltip();
+                                $('#basic-1').DataTable({
+                                    pageLength: 10,
+                                    destroy: true,
+                                    retrieve: true
+                                });
+
+
+
 
                             })
                         })

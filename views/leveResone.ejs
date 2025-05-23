@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="en">
+
+
+
+<head>
+  <%- include('partials/head.ejs') %>
+
+    <link rel="stylesheet" type="text/css" href="/css/vendors/daterange-picker.css">
+
+</head>
+
+<body> <%- include('partials/sidebar.ejs') %>`
+    <div class="page-body">
+      <div class="container-fluid">
+        <div class="page-title">
+          <div class="row">
+            <div class="col-sm-6">
+              <h3>Leave Requst</h3>
+            </div>
+            <div class="col-sm-6">
+              <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="<%=role===2?'/employee/dashboard':'/admin/dashboard'%>"><i
+                      data-feather="home" class="me-2"></i>Dashboard</a></li>
+                <li class="breadcrumb-item active"><a href="/admin/leavereson"><i data-feather="user-check"
+                      class="me-2"></i>Leave Requst</a></li>
+              </ol>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="container-fluid">
+        <div class="row">
+
+
+
+
+          <div class="col-sm-12">
+
+
+            <div class="card">
+              <div class="card-body">
+                <div class="table-responsive theme-scrollbar">
+                  <div id="basic-1_wrapper" class="dataTables_wrapper no-footer">
+                    <table class="display dataTable no-footer" id="basic-1" role="grid" aria-describedby="basic-1_info">
+                      <thead>
+                        <tr style="padding: 12px 30px 12px !important;">
+                          <th class="d-none">#</th>
+                          <th>Name</th>
+                          <th>Start Date</th>
+                          <th>End Date</th>
+                          <th>Total Days</th>
+                          <th>Insert Date</th>
+                          <th>Leave Resone</th>
+                          <th>Leave Type</th>
+                          <th class=" d-flex justify-content-center">Action</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <% attendDate.map((val,i)=>{ const employeeData = JSON.stringify(val) %>
+                          <tr>
+                          <th class="d-none"><%=i++%></th>
+                            <td>
+                              <img class="img-fluid table-avtar rounded-circle ms-2" style="width: 35px;"
+                                src="/uploads/<%=val.profileimage%>" alt="">
+                              <%= val.firstName + " " + val.lastName %>
+                            </td>
+                            <td>
+                              <%= val.start_date %>
+                            </td>
+                            <td>
+                              <%= val.end_date %>
+                            </td>
+                            <td>
+                              <%= val.total_days %>
+                            </td>
+                            <td>
+                              <%= val.innsert_date.split("T")[0].split("-").reverse().join("-") %>
+                            </td>
+                            <td>
+                              <% if (val.leave_resone.length> 15) { %>
+                                <span data-bs-toggle="modal" data-bs-target="#resoneModal<%= val.id %>"
+                                  style="cursor: pointer;">
+                                  <%= val.leave_resone.substring(0, 15) %>...
+                                    <i class="fa-regular fa-circle-info text-primary ms-1"></i>
+                                </span>
+
+                                <!-- Leave Reason Modal -->
+                                <div class="modal fade" id="resoneModal<%= val.id %>" tabindex="-1"
+                                  aria-labelledby="resoneModalLabel<%= val.id %>" aria-hidden="true">
+                                  <div class="modal-dialog modal-dialog-centered">
+                                    <div class="modal-content">
+                                      <div class="modal-header">
+                                        <h5 class="modal-title" id="resoneModalLabel<%= val.id %>">Leave Reason</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                          aria-label="Close"></button>
+                                      </div>
+                                      <div class="modal-body">
+                                        <%= val.leave_resone %>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                                <% } else { %>
+                                  <%= val.leave_resone %>
+                                    <% } %>
+
+                                      <% if (val.leave_attachment && val.leave_attachment.length> 0) { %>
+                                        <span data-bs-toggle="modal" data-bs-target="#attachmentModal<%= val.id %>"
+                                          style="cursor: pointer;" class="ms-2" data-bs-toggle="tooltip"
+                                          title="View Attachment">
+                                          <i class="fa-solid fa-paperclip text-warning"></i>
+                                        </span>
+
+                                        
+                                        <div class="modal fade" id="attachmentModal<%= val.id %>" tabindex="-1"
+                                          aria-labelledby="attachmentModalLabel<%= val.id %>" aria-hidden="true">
+                                          <div class="modal-dialog modal-dialog-centered modal-lg">
+                                            <div class="modal-content">
+                                              <div class="modal-header">
+                                                <h5 class="modal-title" id="attachmentModalLabel<%= val.id %>">
+                                                  Attachment</h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                                  aria-label="Close"></button>
+                                              </div>
+                                              <div class="modal-body">
+                                                <% val.leave_attachment.forEach((file, index)=> { %>
+                                                  <div class="mb-2">
+                                                    <strong>File <%= index + 1 %>:</strong><br>
+                                                    <img src="/uploads/<%= file %>" style="width: 150px;" alt="Attachment"
+                                                      class="img-fluid rounded border">
+                                                  </div>
+                                                  <% }) %>
+                                              </div>
+                                            </div>
+                                          </div>
+                                        </div>
+                                        <% } %>
+                            </td>
+
+
+                            <td>
+                              <%= val.leave_type %>
+                            </td>
+
+
+
+                            <% if (val.leave_status==="Pending" ) { %>
+                              <td>
+                                <ul class="action d-flex justify-content-center gap-3 my-2">
+                                  <li class="edit">
+                                    <button
+                                      class="btn btn-success btn-square rounded d-flex align-items-center px-3 py-2 approveBtn"
+                                      data-bs-toggle="modal" data-bs-target="#approveModel"
+                                      data-leave-id="<%= val.id %>" data-emp-id="<%= val.emp_Id %>">
+                                      Approve
+                                    </button>
+
+
+                                  </li>
+                                  <li class="delete">
+                                    <button
+                                      class="btn btn-danger btn-square rounded d-flex align-items-center px-3 py-2 rejectBtn"
+                                      data-bs-toggle="modal" data-bs-target="#rejectModel" data-leave-id="<%= val.id %>"
+                                      data-emp-id="<%= val.emp_Id %>">
+                                      Reject
+                                    </button>
+
+
+                                  </li>
+                                </ul>
+                              </td>
+                              <% } else if (val.leave_status==="Appove" ) { %>
+                                <td class="d-flex justify-content-center">
+                                  <button class="btn btn-success btn-square rounded d-flex align-items-center px-3 py-2"
+                                    data-bs-toggle="modal" data-bs-target="#resoneModal<%= val.id %>A"
+                                    style="cursor: pointer;">
+                                    Approved
+                                  </button>
+
+                                  <div class="modal fade" id="resoneModal<%= val.id %>A" tabindex="-1"
+                                    aria-labelledby="resoneModalLabel" aria-hidden="true">
+                                    <div class="modal-dialog modal-dialog-centered">
+                                      <div class="modal-content">
+                                        <div class="modal-header">
+                                          <h5 class="modal-title" id="resoneModalLabel">Host Approve Comment</h5>
+                                          <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                            aria-label="Close"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                          <%= val.host_comment %>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  </div>
+
+                                </td>
+                                <% } else if (val.leave_status==="Reject" ) { %>
+                                  <td class="d-flex justify-content-center">
+                                    <button
+                                      class="btn btn-danger btn-square rounded d-flex align-items-center px-3 py-2"
+                                      data-bs-toggle="modal" data-bs-target="#resoneModal<%= val.id %>R"
+                                      style="cursor: pointer;">
+                                      Rejected
+                                    </button>
+
+
+
+                                    <div class="modal fade" id="resoneModal<%= val.id %>R" tabindex="-1"
+                                      aria-labelledby="resoneModalLabel" aria-hidden="true">
+                                      <div class="modal-dialog modal-dialog-centered">
+                                        <div class="modal-content">
+                                          <div class="modal-header">
+                                            <h5 class="modal-title" id="resoneModalLabel">Host Reject Comment</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                              aria-label="Close"></button>
+                                          </div>
+                                          <div class="modal-body">
+                                            <%= val.host_comment %>
+                                          </div>
+                                        </div>
+                                      </div>
+                                    </div>
+
+                                  </td>
+                                  <% } %>
+                          </tr>
+                          <%})%>
+                      </tbody>
+                    </table>
+
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Container-fluid starts-->
+      <!-- <div class="container-fluid">
+            <div class="email-wrap bookmark-wrap">
+              <div class="row">
+              
+                <div class="col-xl-12 col-md-12 box-col-8 box-col-70">
+                  <div class="email-right-aside bookmark-tabcontent contacts-tabs">
+                    <div class="card email-body">
+                      <div class="ps-0">
+                        <div class="tab-content">
+                          <div class="tab-pane fade active show" id="pills-personal" role="tabpanel" aria-labelledby="pills-personal-tab">
+                            <div class="card mb-0">
+                              <div class="card-header d-flex">
+                                <h5>Personal</h5><span class="f-14 pull-right mt-0">5 Contacts</span>
+                              </div>
+                              <div class="card-body p-0">
+                                <div class="row list-persons" id="addcon">
+                                  <div class="col-xxl-3 col-xl-5 col-md-5 box-col-5">
+
+                                    <div class="nav flex-column nav-pills" id="v-pills-tab" role="tablist" aria-orientation="vertical">
+                                 <% attendDate.map((val,i)=>{  const employeeData = JSON.stringify(val) %>
+
+                                      <a class="contact-tab-<%=i%> nav-link" id="#<%=val.id %>" data-bs-toggle="pill" onclick="activeDiv(<%=i%>)" href="#<%=val.id %>" role="tab" aria-controls="v-pills-user" aria-selected="true">
+                                        <div class="d-flex">
+                                          <img class="img-50 img-fluid m-r-20 rounded-circle update_img_<%=i%>" src="/uploads/<%=val.profileimage%>" alt="">
+                                          <div class="flex-grow-1">
+                                            <h6><span class="first_name_<%=i%>"><%= val.firstName %> </span><span class="last_name_<%=i%>"><%= val.lastName %></span></h6>
+                                            <p class="email_add_<%=i%>">Total Days<%= val.total_days %></p>
+                                          </div>
+                                          <div><%= `${new Date(val.innsert_date).getDate()}, ${new Date(val.innsert_date).toLocaleString('en-US', { month: 'short' })}` %></div>
+                                        </div>
+                                      </a>
+                                     
+                               <%})%>
+                                      </div>
+                                  </div>
+                                  <div class="col-xxl-9 col-xl-7 col-md-7 box-col-7">
+                                    <div class="tab-content" id="v-pills-tabContent">
+                                   <% attendDate.map((val,i)=>{  const employeeData = JSON.stringify(val) %>
+
+                                      <div class="tab-pane contact-tab-<%=i%> tab-content-child fade " id="#<%=val.id %>" role="tabpanel" aria-labelledby="v-pills-user-tab">
+                                        <div class="profile-mail">
+                                          <div class="d-flex align-items-center"><img class="img-100 img-fluid m-r-20 rounded-circle update_img_<%=i%>" src="/uploads/<%=val.profileimage%>" alt="">
+                                            <input class="updateimg" type="file" name="img" onchange="readURL(this,<%=i%>)">
+                                            <div class="flex-grow-1 mt-0">
+                                              <h5><span class="first_name_<%=i%>"><%= val.firstName %>  </span><span class="last_name_<%=i%>"><%= val.lastName %></span></h5>
+                                              <p class="email_add_<%=i%>">Total Days<%= val.total_days %></p>
+                                          <div><%= `${new Date(val.innsert_date).getDate()}, ${new Date(val.innsert_date).toLocaleString('en-US', { month: 'short' })}` %></div>
+
+                                              <ul>
+                                                <li><a href="javascript:void(0)" onclick="editContact(<%=i%>)">Edit</a></li>
+                                                <li><a href="javascript:void(0)" onclick="deleteContact(<%=i%>)">Delete</a></li>
+                                                <li><a href="javascript:void(0)" onclick="history(<%=i%>)">History</a></li>
+                                                <li><a href="javascript:void(0)" onclick="printContact(<%=i%>)" data-bs-toggle="modal" data-bs-target="#printModal">Print</a></li>
+                                              </ul>
+                                            </div>
+                                          </div>
+                                          <div class="email-general">
+                                            <h6 class="mb-3">General</h6>
+                                            <ul>
+                                              <li>Name <span class="font-primary first_name_<%=i%>">Bucky</span></li>
+                                              <li>Gender <span class="font-primary">Male</span></li>
+                                              <li>Birthday<span class="font-primary"> <span class="birth_day_<%=i%>">18</span><span class="birth_month_<%=i%> ms-1">May</span><span class="birth_year_<%=i%> ms-1">1994</span></span></li>
+                                              <li>Personality<span class="font-primary personality_<%=i%>">Cool</span></li>
+                                            </ul>
+                                          </div>
+                                        </div>
+                                      </div>
+                               <%})%>
+                                       
+                                    </div>
+                                    
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                           
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div> -->
+
+    </div>
+
+
+    <div class="modal fade" id="approveModel" tabindex="-1" aria-labelledby="resoneModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header bg-success text-white">
+            <h5 class="modal-title" id="resoneModalLabel">Approve</h5>
+            <button type="button" class="btn-close" style="filter: brightness(0) invert(1);" data-bs-dismiss="modal"
+              aria-label="Close"></button>
+          </div>
+          <form action="/admin/hostmessage/" method="post">
+            <div class="modal-body">
+              <div class="mb-3">
+                <label class="col-form-label" for="message-text">Approve Messages</label>
+                <textarea class="form-control" id="message-text" name="hostmessage">Approved</textarea>
+                <input type="hidden" value="Appove" name="hoststaus">
+                <input type="hidden" name="editId" id="leaveid">
+                <input type="hidden" name="empId" id="empId">
+
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button class="btn btn-secondary" type="button" data-bs-dismiss="modal" data-bs-original-title=""
+                title="">Close</button>
+              <button class="btn btn-primary" type="submit" data-bs-original-title="" title="">Submit</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal fade" id="rejectModel" tabindex="-1" aria-labelledby="resoneModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header bg-danger text-white">
+            <h5 class="modal-title" id="resoneModalLabel">Reject</h5>
+            <button type="button" class="btn-close" style="filter: brightness(0) invert(1);" data-bs-dismiss="modal"
+              aria-label="Close"></button>
+          </div>
+          <form action="/admin/hostmessage/" method="post">
+            <div class="modal-body">
+              <div class="mb-3">
+                <label class="col-form-label" for="message-text">Reject Messages</label>
+                <textarea class="form-control" id="message-text" name="hostmessage">Rejected</textarea>
+                <input type="hidden" value="Reject" name="hoststaus">
+                <input type="hidden" name="editId" id="leaveidreject">
+                <input type="hidden" name="empId" id="empIdrej">
+
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button class="btn btn-secondary" type="button" data-bs-dismiss="modal" data-bs-original-title=""
+                title="">Close</button>
+              <button class="btn btn-primary" type="submit" data-bs-original-title="" title="">Submit</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+
+
+    <%- include('partials/footer.ejs') %>
+      <%- include('partials/script.ejs') %>
+
+        <!-- <script src="/js/contacts/custom.js"></script>
+             <script src="/js/script.js"></script>
+             <script src="/js/theme-customizer/customizer.js">  </script> -->
+
+        <script>
+          $(document).ready(function () {
+
+            $(document).on('click', '.approveBtn', function () {
+              const leaveId = $(this).data('leave-id');
+              $('#leaveid').val(leaveId);
+
+              const empId = $(this).data('emp-id');
+              $('#empId').val(empId);
+
+              $("#approveModel").modal("show");
+            });
+
+
+            $(document).on('click', '.rejectBtn', function () {
+
+              const leaveId = $(this).data('leave-id');
+              $('#leaveidreject').val(leaveId);
+
+              const empId = $(this).data('emp-id');
+              $('#empIdrej').val(empId);
+
+              $("#rejectModel").modal("show");
+            });
+          });
+        </script>
+                <script src="/js/tooltip-init.js"></script>
+
+</body>
+
+</html>

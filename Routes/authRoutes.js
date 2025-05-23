@@ -1,10 +1,8 @@
 const express = require("express");
 const router = express.Router();
 const bcrypt = require("bcrypt");
-const moment =  require('../middleware/momentZone')
+const moment = require("../middleware/momentZone");
 const jwt = require("jsonwebtoken");
- 
-
 
 const { isAuth, isAdmin } = require("../middleware/jwtAuth");
 const { DataFind, DataInsert } = require("../config/databasrqurey");
@@ -18,56 +16,75 @@ router.get("/admin/dashboard", isAuth, isAdmin, async (req, res) => {
 
   console.log(newdata);
 
+  // BrithDay Array
+  const month = moment().format("MM");
 
-  // BrithDay Array 
- const month = moment().format("MM")
-
-    const BrithDayArr = await DataFind(`SELECT firstName, lastName, birthDate, profileimage,
+  const BrithDayArr =
+    await DataFind(`SELECT firstName, lastName, birthDate, profileimage,
            TIMESTAMPDIFF(YEAR, birthDate, CURDATE()) AS age
     FROM employee
-    WHERE birthDate LIKE CONCAT('____-${month}-%')`)
+    WHERE birthDate LIKE CONCAT('____-${month}-%')`);
 
-    console.log("BrithDayArr",BrithDayArr);
+  console.log("BrithDayArr", BrithDayArr);
 
-
-  const currantDate = new Date().toISOString().split('T')[0].split('-').reverse().join('-');
+  const currantDate = new Date()
+    .toISOString()
+    .split("T")[0]
+    .split("-")
+    .reverse()
+    .join("-");
   console.log(currantDate);
 
-  const formattedDate = new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short' });
+  const formattedDate = new Date().toLocaleDateString("en-GB", {
+    day: "2-digit",
+    month: "short",
+  });
   console.log(formattedDate);
-
 
   let employeeData = await DataFind("SELECT * FROM employee");
   // console.log("employeeData",employeeData);
-  let todayAttend = await DataFind(`SELECT * FROM tbl_employee_attndence WHERE date='${currantDate}'`)
+  let todayAttend = await DataFind(
+    `SELECT * FROM tbl_employee_attndence WHERE date='${currantDate}'`
+  );
   // console.log("todayAttend",todayAttend);
 
+  const mergedData = employeeData.map((emp) => {
+    const attendance = todayAttend.find(
+      (att) => att.emplyeeId === String(emp.id)
+    );
 
-  const mergedData = employeeData.map(emp => {
+    return {
+      emplyeeId: emp.id,
+      profileimage: emp.profileimage,
+      firstName: emp.firstName,
+      lastName: emp.lastName,
+      productive_time:
+        attendance && attendance.productive_time
+          ? attendance.productive_time
+          : "00:00:00",
+      attendens_status: attendance ? attendance.attendens_status : "A",
+      date: formattedDate,
+    };
+  });
 
-  const attendance = todayAttend.find(att => att.emplyeeId === String(emp.id));
-
-  return {
-    emplyeeId:emp.id,
-    profileimage: emp.profileimage,
-    firstName: emp.firstName,
-    lastName: emp.lastName,
-    productive_time: attendance && attendance.productive_time ? attendance.productive_time : '00:00:00',
-    attendens_status: attendance ? attendance.attendens_status : 'A',
-    date: formattedDate
-  };
-});
-
-// console.log(mergedData);
-
+  // console.log(mergedData);
 
   //  console.log(data);
 
-  res.render("index", { data: data.admin, role: data.role, setting, newdata ,mergedData,BrithDayArr});
+  res.render("index", {
+    data: data.admin,
+    role: data.role,
+    setting,
+    newdata,
+    mergedData,
+    BrithDayArr,
+  });
 });
 
 router.get("/employee/dashboard", isAuth, async (req, res) => {
   const { employee, role } = req.user;
+      //  console.log("employee",employee);
+        
   const employeedetais = await DataFind(
     `SELECT * FROM employee WHERE id=${employee.id}`
   );
@@ -78,21 +95,26 @@ router.get("/employee/dashboard", isAuth, async (req, res) => {
 
   let setting = await DataFind(`SELECT * FROM tbl_setting LIMIT 1`);
 
+  const month = moment().format("MM");
 
-   const month = moment().format("MM")
-
-    const BrithDayArr = await DataFind(`SELECT firstName, lastName, birthDate, profileimage,
+  const BrithDayArr =
+    await DataFind(`SELECT firstName, lastName, birthDate, profileimage,
            TIMESTAMPDIFF(YEAR, birthDate, CURDATE()) AS age
     FROM employee
-    WHERE birthDate LIKE CONCAT('____-${month}-%')`)
+    WHERE birthDate LIKE CONCAT('____-${month}-%')`);
 
-    console.log("BrithDayArr",BrithDayArr);
+  // console.log("BrithDayArr", BrithDayArr);
 
-
+  let leaveType = await DataFind(
+    `SELECT * FROM tbl_type_setting WHERE type_name="leaveType" AND status="active"`
+  );
 
   if (employeeData.length > 0) {
     // *****************functions *******************************
-   employeeData[0].all_time = typeof  employeeData[0].all_time === 'string' ? JSON.parse(employeeData[0].all_time): employeeData[0].all_time;
+    employeeData[0].all_time =
+      typeof employeeData[0].all_time === "string"
+        ? JSON.parse(employeeData[0].all_time)
+        : employeeData[0].all_time;
 
     function getTimeDifference(start, end) {
       const startTime = new Date(start);
@@ -133,12 +155,7 @@ router.get("/employee/dashboard", isAuth, async (req, res) => {
       return secondsToTimeString(totalSeconds);
     }
 
-
     // *****************functions end *******************************
-
-  
-    
-
 
     let breakTime = employeeData[0].break_time;
     let productiveTime = employeeData[0].productive_time;
@@ -146,7 +163,11 @@ router.get("/employee/dashboard", isAuth, async (req, res) => {
 
     console.log(productiveTime);
 
-    const lastEntry = employeeData[0].all_time[employeeData[0].all_time.length - 1];
+    const lastEntry =
+      employeeData[0].all_time[employeeData[0].all_time.length - 1] !==
+      undefined
+        ? employeeData[0].all_time[employeeData[0].all_time.length - 1]
+        : [];
     // console.log(employeeData[0]);
 
     if (lastEntry.status === 1) {
@@ -184,10 +205,10 @@ router.get("/employee/dashboard", isAuth, async (req, res) => {
           : "",
       setting,
       employeedetais,
-      BrithDayArr
+      BrithDayArr,
+      leaveType,
     });
   } else {
- 
     res.render("emPnale", {
       data: employee,
       role,
@@ -196,7 +217,8 @@ router.get("/employee/dashboard", isAuth, async (req, res) => {
       status: "",
       setting,
       employeedetais,
-      BrithDayArr
+      BrithDayArr,
+      leaveType,
     });
   }
 });
@@ -228,15 +250,13 @@ router.post("/login_data", async (req, res) => {
   const { email, password } = req.body;
 
   if (!email || !password) {
-    return res.render("loginForm", {
-      error_msg: "Please fill in all fields",
-      success_msg: "",
-    });
+    req.flash("error_msg", "File All fields");
+    res.redirect("/admin/dashboard");
   }
 
-    const adminResult = await DataFind(
-      `SELECT * FROM tbl_admin WHERE email = '${email}' OR name = '${email}'`
-    );
+  const adminResult = await DataFind(
+    `SELECT * FROM tbl_admin WHERE email = '${email}' OR name = '${email}'`
+  );
   if (adminResult.length > 0) {
     let role = 1;
 
@@ -247,10 +267,10 @@ router.post("/login_data", async (req, res) => {
       // const token = jwt.sign({admin,role},process.env.JWT_TOKEN_KEY,{expiresIn:'2h'});
       const token = jwt.sign({ admin, role }, process.env.JWT_TOKEN_KEY);
 
-      res.cookie("token", token,{maxAge:1000*60*60*24*30});
+      res.cookie("token", token, { maxAge: 1000 * 60 * 60 * 24 * 30 });
 
       req.flash("success_msg", "Login successfully");
-      res.redirect("/admin/dashboard"); 
+      res.redirect("/admin/dashboard");
     }
 
     req.flash("error_msg", "Invalid password");
@@ -270,7 +290,7 @@ router.post("/login_data", async (req, res) => {
         if (validPass) {
           // const token = jwt.sign({employee,role},process.env.JWT_TOKEN_KEY,{expiresIn:'2h'});
           const token = jwt.sign({ employee, role }, process.env.JWT_TOKEN_KEY);
-          res.cookie("token", token,{maxAge:1000*60*60*24*30});
+          res.cookie("token", token, { maxAge: 1000 * 60 * 60 * 24 * 30 });
 
           req.flash("success_msg", "Login successfully");
           return res.redirect("/employee/dashboard");
@@ -290,14 +310,14 @@ router.post("/login_data", async (req, res) => {
 });
 
 router.get("/logout", (req, res) => {
-req.user = null;
+  req.user = null;
   res.clearCookie("token", {
     httpOnly: true,
     secure: true,
     sameSite: "strict",
   });
 
-    if (req.session) {
+  if (req.session) {
     req.session.destroy((err) => {
       if (err) {
         console.log("Session destroy error:", err);

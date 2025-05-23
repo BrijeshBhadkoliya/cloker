@@ -19,9 +19,20 @@ const uploadFolderPath = path.join(__dirname, "../public/uploads");
 
 router.get("/add", async (req, res) => {
   let setting = await DataFind(`SELECT * FROM tbl_setting LIMIT 1`);
-
+  let durationtypes = await DataFind(
+    `SELECT * FROM tbl_type_setting WHERE type_name="durationType" AND status="active"`
+  );
+  let designationtypes = await DataFind(
+    `SELECT * FROM tbl_type_setting WHERE type_name="designationType" AND status="active"`
+  );
   const data = req.user;
-  res.render("addEmployee", { data: data.admin, role: data.role, setting });
+  res.render("addEmployee", {
+    data: data.admin,
+    role: data.role,
+    setting,
+    durationtypes,
+    designationtypes,
+  });
 });
 
 router.post("/add_data", upload, async (req, res) => {
@@ -35,6 +46,8 @@ router.post("/add_data", upload, async (req, res) => {
     birthDate,
     joindate,
     status,
+    designation,
+    duration,
   } = req.body;
 
   const validemail = await DataFind(
@@ -82,10 +95,12 @@ router.post("/add_data", upload, async (req, res) => {
   if (
     (await DataInsert(
       `employee`,
-      `firstName,lastName,userName,email,phoneNum,password,birthDate,profileimage,idimage,status,joinDate`,
+      `firstName,lastName,userName,email,phoneNum,password,birthDate,profileimage,idimage,status,joinDate,designation,duration`,
       `'${firstName}','${lastName}','${userName}','${email}','${phoneNum}','${hashpass}','${birthDate}','${
         req.files.profileImag[0].filename
-      }','${JSON.stringify(idimges)}','${status}','${joindate}'`,
+      }','${JSON.stringify(
+        idimges
+      )}','${status}','${joindate}','${designation}','${duration}'`,
 
       req.hostname,
       req.protocol
@@ -178,6 +193,8 @@ router.post("/updateEm", upload, async (req, res) => {
     status,
     joindate,
     editid,
+    duration,
+    designation,
   } = req.body;
 
   const user = await DataFind(`SELECT * FROM employee WHERE id = '${editid}'`);
@@ -245,7 +262,7 @@ router.post("/updateEm", upload, async (req, res) => {
   if (
     (await DataUpdate(
       `employee`,
-      `firstName = '${firstName}', lastName = '${lastName}', userName = '${userName}', email = '${email}', phoneNum = '${phoneNum}', password = '${hashpass}', birthDate = '${birthDate}', profileimage = '${profileimg}',  status = '${status}',joinDate='${joindate}'`,
+      `firstName = '${firstName}', lastName = '${lastName}', userName = '${userName}', email = '${email}', phoneNum = '${phoneNum}', password = '${hashpass}', birthDate = '${birthDate}', profileimage = '${profileimg}',  status = '${status}',joinDate='${joindate}',duration='${duration}',designation='${designation}'`,
       `id = '${editid}'`,
       req.hostname,
       req.protocol
@@ -277,6 +294,7 @@ router.get("/setting", async (req, res) => {
       return res.redirect("/valid_license");
     }
   }
+
   let setting = await DataFind(`SELECT * FROM tbl_setting LIMIT 1`);
 
   const data = req.user;
@@ -337,6 +355,7 @@ router.post("/settingProfile/:id", uploadsetting, async (req, res) => {
     req.files && req.files.lightlogo && req.files.lightlogo[0]
       ? req.files.lightlogo[0].filename
       : setting?.[0]?.light_img || "";
+  console.log(req.body);
 
   if (
     (await DataUpdate(
@@ -346,7 +365,10 @@ router.post("/settingProfile/:id", uploadsetting, async (req, res) => {
      employee_worktime = '${req.body.workingtime}', 
      site_titel='${req.body.sitetitle}',
      shift_start='${req.body.shiftStart}',
-     shift_end='${req.body.shiftEnd}'`,
+     shift_end='${req.body.shiftEnd}',
+     payroll_date='${req.body.payroll}',
+     break_time='${req.body.breaktime}',
+     notice_period='${req.body.noticperiod}'`,
       `id = '${req.params.id}'`,
       req.hostname,
       req.protocol
@@ -618,8 +640,8 @@ router.get("/weekend/", async (req, res) => {
 
 router.post("/weekends/", async (req, res) => {
   console.log(req.body);
- 
- await DataFind(`DELETE FROM tbl_weekend`)
+
+  await DataFind(`DELETE FROM tbl_weekend`);
 
   for (const [day, weeksArray] of Object.entries(req.body)) {
     const weeks = weeksArray.join(",");
@@ -639,6 +661,191 @@ router.post("/weekends/", async (req, res) => {
   }
 
   res.redirect("/admin/weekend");
+});
+
+router.get("/typesetting/", async (req, res) => {
+  const { admin, role } = req.user;
+
+  let setting = await DataFind(`SELECT * FROM tbl_setting LIMIT 1`);
+
+  let levetypes = await DataFind(
+    `SELECT * FROM tbl_type_setting WHERE type_name="leaveType"`
+  );
+
+  let durationtypes = await DataFind(
+    `SELECT * FROM tbl_type_setting WHERE type_name="durationType"`
+  );
+
+  let designationtypes = await DataFind(
+    `SELECT * FROM tbl_type_setting WHERE type_name="designationType"`
+  );
+
+  res.render("typesetting", {
+    setting,
+    admin,
+    role,
+    levetypes,
+    durationtypes,
+    designationtypes,
+  });
+});
+
+router.post("/typeadd/", async (req, res) => {
+  const { typeName, typeValue, editId } = req.body;
+  console.log(req.body);
+
+  if (!editId || editId === "") {
+    if (
+      (await DataInsert(
+        `tbl_type_setting`,
+        `type_name, type_values,status`,
+        `'${typeName}', '${typeValue}','${"active"}'`,
+        req.hostname,
+        req.protocol
+      )) == -1
+    ) {
+      req.flash("errors", process.env.dataerror);
+      return res.redirect("/valid_license");
+    }
+    res.redirect("/admin/typesetting");
+  } else {
+    const updateResult = await DataUpdate(
+      `tbl_type_setting`,
+      `type_values='${typeValue}'`,
+      `id='${editId}'`,
+      req.hostname,
+      req.protocol
+    );
+    if (updateResult === -1) {
+      req.flash("errors", process.env.dataerror);
+      return res.redirect("/valid_license");
+    }
+    res.redirect("/admin/typesetting");
+  }
+});
+
+router.get("/deletetype/:id", async (req, res) => {
+  console.log(req.params.id);
+  if (
+    (await DataDelete(
+      `tbl_type_setting`,
+      `id='${req.params.id}'`,
+      req.hostname,
+      req.protocol
+    )) == -1
+  ) {
+    req.flash("errors", process.env.dataerror);
+    return res.redirect("/valid_license");
+  }
+
+  res.redirect("/admin/typesetting");
+});
+
+router.get("/typestatus/:id", async (req, res) => {
+  const tyestatus = await DataFind(
+    `SELECT * FROM tbl_type_setting WHERE id=${req.params.id}`
+  );
+
+  if (tyestatus) {
+    let currantsta = tyestatus[0].status;
+
+    let updatesta = currantsta === "active" ? "deactive" : "active";
+    if (
+      (await DataUpdate(
+        `tbl_type_setting`,
+        `status='${updatesta}'`,
+        `id = '${req.params.id}'`,
+        req.hostname,
+        req.protocol
+      )) == -1
+    ) {
+      req.flash("errors", process.env.dataerror);
+      return res.redirect("/valid_license");
+    }
+  }
+  return res.status(200).send(`Employee status updated to`);
+});
+
+router.get("/leavereson/", async (req, res) => {
+  const { admin, role } = req.user;
+  let setting = await DataFind(`SELECT * FROM tbl_setting LIMIT 1`);
+
+  // let attendDate = await DataFind(`SELECT att.emplyeeId, lea.start_date, lea.end_date, lea.leave_attachment,lea.leave_type,lea.leave_resone,lea.leave_status,lea.emp_Id, lea.innsert_date , emp.firstName, emp.lastName ,emp.profileimage FROM tbl_employee_attndence AS att JOIN employee AS emp ON att.emplyeeId = emp.id JOIN tbl_leave_resons AS lea ON att.leave_resone_id = lea.id WHERE att.attendens_status='A' ANd att.leave_status = 'Pending'`)
+
+  const EmployeeId = await DataFind(
+    `SELECT DISTINCT emplyeeId FROM tbl_employee_attndence WHERE attendens_status="A" AND leave_status IN ('Pending', 'Appove', 'Reject');`
+  );
+  // console.log(EmployeeId);
+
+  // let attendDate =
+  //   await DataFind(`SELECT att.emplyeeId, lea.start_date,lea.emp_Id, lea.host_comment , lea.total_days, lea.end_date, lea.leave_attachment,lea.leave_type,lea.leave_resone,lea.leave_status,lea.id,
+  //                                       lea.innsert_date , emp.firstName, emp.lastName ,emp.profileimage
+  //                                       FROM tbl_leave_resons AS lea
+  //                                       JOIN employee AS emp ON lea.emp_Id = emp.id
+  //                                       JOIN tbl_employee_attndence AS att ON att.emplyeeId= lea.emp_Id
+  //                                       WHERE lea.emp_Id IN (${EmployeeId.map(
+  //                                         (val) => `'${val.emplyeeId}'`
+  //                                       ).join(", ")})
+  //                                       GROUP BY lea.id , lea.start_date
+  //                                       ORDER BY lea.start_date DESC
+  //                                       `);
+
+  let attendDate = await DataFind(`SELECT att.emplyeeId,
+                                        lea.start_date,
+                                        lea.emp_Id, lea.host_comment, lea.total_days, 
+                                        lea.end_date,
+                                        lea.leave_attachment, lea.leave_type,
+                                        lea.leave_resone, lea.leave_status, lea.id,
+                                        lea.innsert_date, emp.firstName, emp.lastName, emp.profileimage 
+                                 FROM tbl_leave_resons AS lea 
+                                 JOIN employee AS emp ON lea.emp_Id = emp.id 
+                                 JOIN tbl_employee_attndence AS att ON att.emplyeeId = lea.emp_Id
+                                 WHERE lea.emp_Id IN (${EmployeeId.map(
+                                   (val) => `'${val.emplyeeId}'`
+                                 ).join(", ")})
+                                 GROUP BY lea.id, lea.start_date
+                                 ORDER BY lea.start_date DESC`);
+
+  attendDate = attendDate.map((item) => {
+    try {
+      item.leave_attachment = JSON.parse(item.leave_attachment || "[]");
+    } catch (e) {
+      item.leave_attachment = [];
+    }
+    return item;
+  });
+
+  console.log("attendDate", attendDate);
+
+  res.render("leveResone", { setting, admin, role, attendDate });
+});
+
+router.post("/hostmessage/", async (req, res) => {
+  console.log(req.body);
+  const updateResult = await DataUpdate(
+    `tbl_leave_resons`,
+    `host_comment='${req.body.hostmessage}',leave_status='${req.body.hoststaus}'`,
+    `id='${req.body.editId}'`,
+    req.hostname,
+    req.protocol
+  );
+  if (updateResult === -1) {
+    req.flash("errors", process.env.dataerror);
+    return res.redirect("/valid_license");
+  }
+
+  const attendleavSta = await DataUpdate(
+    `tbl_employee_attndence`,
+    `leave_status='${req.body.hoststaus}'`,
+    `emplyeeId='${req.body.empId}' AND leave_resone_id='${req.body.editId}'`,
+    req.hostname,
+    req.protocol
+  );
+  if (attendleavSta === -1) {
+    req.flash("errors", process.env.dataerror);
+    return res.redirect("/valid_license");
+  }
+  return res.redirect("/admin/leavereson");
 });
 
 module.exports = router;

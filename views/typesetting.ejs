@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+
+
+
+<head>
+    <%- include('partials/head.ejs') %>
+
+        <link rel="stylesheet" type="text/css" href="/css/vendors/daterange-picker.css">
+
+</head>
+
+<body> <%- include('partials/sidebar.ejs') %>`
+        <div class="page-body">
+            <div class="container-fluid">
+                <div class="page-title">
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <h3>Type Setting</h3>
+                        </div>
+                        <div class="col-sm-6">
+                            <ol class="breadcrumb">
+                                <li class="breadcrumb-item"><a
+                                        href="<%=role===2?'/employee/dashboard':'/admin/dashboard'%>"><i
+                                            data-feather="home" class="me-2"></i>Dashboard</a></li>
+                                <li class="breadcrumb-item active"><a href="/admin/weekend"><i data-feather="user-check"
+                                            class="me-2"></i>Weekend</a></li>
+                            </ol>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="container-fluid">
+                <div class="row">
+
+
+                    <div class="col-xl-6 col-lg-6 col-sm-12">
+                        <div class="card browser-table">
+
+                            <div class="card-header">
+                                <div class="d-flex flex-wrap align-items-center justify-content-start">
+                                    <h5 class="mb-0">Leave Types</h5>
+                                </div>
+                                <div class="d-flex flex-wrap align-items-center justify-content-end">
+                                    <div class="col-md-6 mt-2 mt-md-0">
+                                        <form class="input-group" action="/admin/typeadd" method="post" id="leaveForm">
+                                            <input type="text" class="form-control" name="typeValue" id="leaveinput"
+                                                placeholder="Enter Leave Type" required />
+                                            <input type="hidden" name="typeName" value="leaveType" />
+                                            <div id="hiddentype"></div>
+                                            <button class="btn btn-primary" type="submit" id="leaveBtn">Add</button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="card-body">
+                                <div class="table-responsive theme-scrollbar mb-0">
+                                    <table class="table">
+                                        <thead>
+                                            <tr>
+                                                <th>id</th>
+                                                <th>Types</th>
+                                                <th>Status</th>
+                                                <th style="text-align: left !important;">Action</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <% levetypes.map((val,i=0)=>{ %>
+                                                <% if(val.type_name==="leaveType" ) {%>
+                                                    <tr>
+                                                        <td>
+                                                            <%= i=i+1 %>
+                                                        </td>
+                                                        <td>
+                                                            <%=val.type_values%>
+                                                        </td>
+                                                        <td class="tbrow">
+                                                            <label class="switch">
+                                                                <input type="checkbox" id="stastusUp"
+                                                                    value="<%= val.id %>" data-bs-original-title=""
+                                                                    title="" <%=val.status==='active' ? 'checked' : ''
+                                                                    %>
+                                                                onclick="Upstatuas(<%= val.id %>)">
+                                                                    <span class="switch-state"></span>
+                                                            </label>
+                                                        </td>
+                                                        <td>
+                                                            <ul class="action">
+                                                                <li class="edit"> <a id="leavetype"
+                                                                        onclick="editleavetype('<%= val.id %>', '<%= val.type_values %>')"
+                                                                        data-bs-original-title="" title=""><i
+                                                                            data-feather="edit"
+                                                                            style="height: 16px; width: 16px; cursor: pointer;"
+                                                                            class="text-success"></i></a></li>
+                                                                <li class="delete ms-1"><a
+                                                                        href="/admin/deletetype/<%=val.id%>"
+                                                                        data-bs-original-title="" title=""><i
+                                                                            data-feather="trash"
+                                                                            style="height: 16px; width: 16px;"
+                                                                            class="text-danger"></i></a></li>
+                                                            </ul>
+                                                        </td>
+                                                    </tr>
+                                                    <%}%>
+                                                        <%})%>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+
+
+
+
+
+
+
+                    <div class="col-xl-6 col-lg-6 col-sm-12">
+                        <div class="card browser-table">
+                            <div class="card-header">
+                                <div class="d-flex flex-wrap align-items-center justify-content-start">
+                                    <h5 class="mb-0">Duration Types</h5>
+                                </div>
+                                <div class="d-flex flex-wrap align-items-center justify-content-end">
+                                    <div class="col-md-6 mt-2 mt-md-0">
+                                        <form class="input-group" action="/admin/typeadd" method="post"
+                                            id="durationForm">
+                                            <input type="text" class="form-control" name="typeValue" id="durationinput"
+                                                placeholder="Enter Duration Type" required />
+                                            <input type="hidden" name="typeName" value="durationType" />
+                                            <div id="hiddendurationtype"></div>
+                                            <button class="btn btn-primary" type="submit" id="durationBtn">Add</button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="table-responsive theme-scrollbar mb-0">
+                                    <table class="table">
+                                        <thead>
+                                            <tr>
+                                                <th>id</th>
+                                                <th>Types</th>
+                                                <th>Status</th>
+                                                <th style="text-align: left !important;">Action</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <% durationtypes.map((val,k=0)=>{ %>
+                                                <% if(val.type_name==="durationType" ) {%>
+                                                    <tr>
+                                                        <td>
+                                                            <%= k=k+1 %>
+                                                        </td>
+                                                        <td>
+                                                            <%=val.type_values%>
+                                                        </td>
+
+                                                        <td class="tbrow">
+                                                            <label class="switch">
+                                                                <input type="checkbox" id="stastusUp"
+                                                                    value="<%= val.id %>" data-bs-original-title=""
+                                                                    title="" <%=val.status==='active' ? 'checked' : ''
+                                                                    %>
+                                                                onclick="Upstatuas(<%= val.id %>)">
+                                                                    <span class="switch-state"></span>
+                                                            </label>
+                                                        </td>
+                                                        <td>
+                                                            <ul class="action">
+                                                                <li class="edit"> <a
+                                                                        onclick="durationType('<%= val.id %>', '<%= val.type_values %>')"
+                                                                        data-bs-original-title="" title=""><i
+                                                                            data-feather="edit"
+                                                                            style="height: 16px; width: 16px; cursor: pointer;"
+                                                                            class="text-success"></i></a></li>
+                                                                <li class="delete ms-1"><a
+                                                                        href="/admin/deletetype/<%=val.id%>"
+                                                                        data-bs-original-title="" title=""><i
+                                                                            data-feather="trash"
+                                                                            style="height: 16px; width: 16px;"
+                                                                            class="text-danger"></i></a></li>
+
+                                                            </ul>
+                                                        </td>
+
+                                                    </tr>
+                                                    <%}%>
+                                                        <%})%>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-xl-6 col-lg-6 col-sm-12">
+                        <div class="card browser-table">
+                            <div class="card-header">
+                                <div class="d-flex flex-wrap align-items-center justify-content-start">
+                                    <h5 class="mb-0">Designation Types</h5>
+                                </div>
+                                <div class="d-flex flex-wrap align-items-center justify-content-end">
+                                    <div class="col-md-6 mt-2 mt-md-0">
+                                        <form class="input-group" action="/admin/typeadd" method="post"
+                                            id="designationForm">
+                                            <input type="text" class="form-control" name="typeValue"
+                                                id="designationInput" placeholder="Enter Designation Type" required />
+                                            <input type="hidden" name="typeName" value="designationType" />
+                                            <div id="hiddendesignationtype"></div>
+                                            <button class="btn btn-primary" type="submit"
+                                                id="designationBtn">Add</button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="table-responsive theme-scrollbar mb-0">
+                                    <table class="table">
+                                        <thead>
+                                            <tr>
+                                                <th>id</th>
+                                                <th>Types</th>
+                                                <th>Status</th>
+                                                <th style="text-align: left !important;">Action</th>
+
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <% designationtypes.map((val,j=0)=>{ %>
+                                                <% if(val.type_name==="designationType" ) {%>
+                                                    <tr>
+                                                        <td>
+                                                            <%= j=j+1 %>
+                                                        </td>
+                                                        <td>
+                                                            <%=val.type_values%>
+                                                        </td>
+                                                     
+                                                        <td class="tbrow">
+                                                            <label class="switch">
+                                                                <input type="checkbox" id="stastusUp"
+                                                                    value="<%= val.id %>" data-bs-original-title=""
+                                                                    title="" <%=val.status==='active' ? 'checked' : ''
+                                                                    %>
+                                                                onclick="Upstatuas(<%= val.id %>)">
+                                                                    <span class="switch-state"></span>
+                                                            </label>
+                                                        </td>
+                                                       
+                                                        <td>
+                                                            <ul class="action">
+                                                                <li class="edit"> <a
+                                                                        onclick="designationType('<%= val.id %>', '<%= val.type_values %>')"
+                                                                        data-bs-original-title="" title=""><i
+                                                                            data-feather="edit"
+                                                                            style="height: 16px; width: 16px; cursor: pointer;"
+                                                                            class="text-success"></i></a></li>
+                                                                <li class="delete ms-1"><a
+                                                                        href="/admin/deletetype/<%=val.id%>"
+                                                                        data-bs-original-title="" title=""><i
+                                                                            data-feather="trash"
+                                                                            style="height: 16px; width: 16px;"
+                                                                            class="text-danger"></i></a></li>
+                                                            </ul>
+                                                        </td>
+                                                    </tr>
+                                                    <%}%>
+                                                        <%})%>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+        </div>
+
+
+        <%- include('partials/footer.ejs') %>
+            <%- include('partials/script.ejs') %>
+
+                <script>
+                    function resetAllInputs(except) {
+                        const ids = ['leaveinput', 'durationinput', 'designationInput'];
+                        const divs = ['hiddentype', 'hiddendurationtype', 'hiddendesignationtype'];
+                        const btns = ['leaveBtn', 'durationBtn', 'designationBtn'];
+
+                        ids.forEach(id => {
+                            if (id !== except) document.getElementById(id).value = '';
+                        });
+
+                        divs.forEach(div => {
+                            document.getElementById(div).innerHTML = '';
+                        });
+
+                        btns.forEach(btnId => {
+                            const btn = document.getElementById(btnId);
+                            btn.innerText = "Add";
+                            btn.classList.remove("btn-success");
+                            btn.classList.add("btn-primary");
+                        });
+                    }
+
+                    // Input event listeners
+                    // ['leaveinput', 'durationinput', 'designationInput'].forEach(inputId => {
+                    //     document.getElementById(inputId).addEventListener('input', function () {
+                    //         const val = this.value.trim();
+                    //         if (val === '') {
+                    //             resetAllInputs(); // All inputs blank → reset editIds
+                    //         } else {
+                    //             resetAllInputs(inputId); // Clear others
+                    //         }
+                    //     });
+                    // });
+
+                    // Edit Handlers
+                    function editleavetype(id, value) {
+                        resetAllInputs('leaveinput');
+                        document.getElementById('leaveinput').value = value;
+                        document.getElementById('hiddentype').innerHTML = `<input type="hidden" name="editId" value="${id}" />`;
+
+                        const btn = document.getElementById('leaveBtn');
+                        btn.innerText = "Update";
+                        btn.classList.remove("btn-primary");
+                        btn.classList.add("btn-success");
+                    }
+
+                    function durationType(id, value) {
+                        resetAllInputs('durationinput');
+                        document.getElementById('durationinput').value = value;
+                        document.getElementById('hiddendurationtype').innerHTML = `<input type="hidden" name="editId" value="${id}" />`;
+
+                        const btn = document.getElementById('durationBtn');
+                        btn.innerText = "Update";
+                        btn.classList.remove("btn-primary");
+                        btn.classList.add("btn-success");
+                    }
+
+                    function designationType(id, value) {
+                        resetAllInputs('designationInput');
+                        document.getElementById('designationInput').value = value;
+                        document.getElementById('hiddendesignationtype').innerHTML = `<input type="hidden" name="editId" value="${id}" />`;
+
+                        const btn = document.getElementById('designationBtn');
+                        btn.innerText = "Update";
+                        btn.classList.remove("btn-primary");
+                        btn.classList.add("btn-success");
+                    }
+                </script>
+
+                <script>
+                    function Upstatuas(validID) {
+                        $.ajax({
+                            url: `/admin/typestatus/${validID}`,
+                            method: 'GET',
+                            success: function (res) {
+                                console.log(res);
+                            },
+                            error: function (err) {
+                                console.error(err);
+                            }
+                        });
+                    }
+                </script>
+</body>
+
+</html>
