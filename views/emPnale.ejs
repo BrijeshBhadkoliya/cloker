@@ -3,7 +3,14 @@
 
 <head>
   <%- include('partials/head.ejs') %>
-
+    <link rel="stylesheet" type="text/css" href="/css/vendors/daterange-picker.css">
+    <style>
+      td.off {
+        pointer-events: none;
+        background-color: #cccccc;
+        cursor: not-allowed;
+      }
+    </style>
 </head>
 
 <body> <%- include('partials/sidebar.ejs') %>`
@@ -187,7 +194,66 @@
 
         <!-- Container-fluid Ends-->
       </div>
+
+      <div class="container-fluid dashboard-default general-widget">
+        <div class="row">
+          <% if(leftdaysobj.leftdays !==0){ %>
+            <div class="col-lg-3 col-md-6 box-col-33">
+              <div class="card total-investment">
+                <div class="card-header pb-0">
+                  <div class="d-flex justify-content-between">
+                    <div class="flex-grow-1">
+                      <div class="d-flex justify-content-between">
+                        <p class="square-after f-w-600 header-text-primary">Notice Period<i class="fa fa-circle"></i>
+                        </p>
+                        <p class=" f-w-600 header-text-primary">
+                          <%=leftdaysobj.enddays%>
+                        </p>
+                      </div>
+                      <h4>
+                        <%=leftdaysobj.leftdays%> days left
+                      </h4>
+                    </div>
+                  </div>
+                </div>
+                <div class="card-body pt-0">
+                </div>
+              </div>
+            </div>
+            <%}%>
+              <div class="col-lg-3 col-md-6 box-col-33">
+                <div class="card total-investment">
+                  <div class="card-header pb-0">
+                    <div class="d-flex justify-content-between">
+                      <div class="flex-grow-1">
+                        <div class="d-flex justify-content-between">
+                          <p class="square-after f-w-600 header-text-primary">Payroll time<i class="fa fa-circle"></i>
+                          </p>
+                          <p class=" f-w-600 header-text-primary">
+                            <%=payrollobj.payDate%>
+                          </p>
+                        </div>
+                        <h4>
+                          <%=payrollobj.dayDifference%> days left
+                        </h4>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="card-body pt-0">
+                  </div>
+                </div>
+              </div>
+        </div>
+
+        <!-- Container-fluid Ends-->
+      </div>
+
+      <input type="hidden" id="datelistnoleave">
+
+
+
     </div>
+
 
 
     <!-- Day Gap Modal  -->
@@ -217,26 +283,32 @@
                   </div>
                 </div>
 
-                <div class="row">
+                <div class="row date-range-picker">
                   <!-- Start Date -->
-                  <div class="col-md-6 mb-3">
-                    <label for="leaveDate" class="form-label" id="startdate-label">Date</label>
-                    <input type="date" class="form-control" id="leaveDate" name="satrtdate" required />
+                  <div class="col-md-6 mb-3" id="onedate">
+                    <div class="theme-form">
+                      <label for="leaveDate" class="form-label" id="startdate-label">Date</label>
+                      <input type="date" class="form-control bg-white" id="leaveDate" data-status="1" name="satrtdate" required
+                        readonly />
+                    </div>
                   </div>
 
+
+
                   <!-- "More than one day?" link -->
-                  <div class="col-md-6 mb-3 font-400 d-flex align-items-end" id="linketext">
-                    <a class="text-decoration-none fw-semibold" style="cursor: pointer"
-                      onclick="$('#enddate').removeClass('d-none'); $('#linketext').addClass('d-none'); $('#startdate-label').text('Start Date');">
+                  <div class="col-md-6 mb-3 font-400 d-flex align-items-end" id="linketext" style="height: 70px;">
+                    <a class="text-decoration-none fw-semibold" style="cursor: pointer;"
+                      onclick="$('#enddate').removeClass('d-none'); $('#linketext').addClass('d-none'); $('#onedate').addClass('d-none'); $('#leaveDate').val(''); $('#startdate-label').text('Start Date'); $('#leaveDate').remove();$('#leavelastDate').removeAttr('disabled');">
                       MORE THAN ONE DAY?
                     </a>
                   </div>
 
                   <!-- End Date (initially hidden) -->
                   <div class="col-md-6 mb-3 d-none" id="enddate">
-                    <label for="leavelastDate" class="form-label">End Date</label>
-                    <input type="date" class="form-control" id="leavelastDate" name="enddate"
-                      onchange="checkIfCurrentDate(this)" />
+                    <label for="leavelastDate" class="form-label">Set Date</label>
+                     <div id="leavesatenddate"> 
+                      <input class='form-control' type='text' name='daterange' id='leavelastDate' disabled  data-status='0' onchange='chengers()'required>
+                    </div>
                     <div class="invalid-feedback d-none" id="enddate-error">
                       End date cannot be today's date.
                     </div>
@@ -439,10 +511,15 @@
     <%- include('partials/footer.ejs') %> <%- include('partials/script.ejs') %>
         <!-- login js-->
 
-
+        <script src="/js/datepicker/daterange-picker/moment.min.js"></script>
+        <script src="/js/datepicker/daterange-picker/daterangepicker.js"></script>
+        <script src="/js/datepicker/daterange-picker/daterange-picker.custom.js"></script>
 
         <!-- imag model path text  -->
 
+
+
+        
         <script>
 
           $('#exampleModalCenter').on('hidden.bs.modal', function () {
@@ -450,6 +527,7 @@
             $('#break').addClass('d-none');
             $('#clockin').removeClass('d-none');
             $('#fromhom').removeClass('d-none');
+            $('.daterangepicker').addClass('d-none')
           });
 
           function checkIfCurrentDate(input) {
@@ -681,7 +759,6 @@
 
               let id = $("#emplyeeId").val();
 
-
               $.ajax({
                 url: `/employee/attendence/${id}`,
                 method: "POST",
@@ -723,9 +800,6 @@
                     };
                     displayTime("", workTime);
 
-
-
-
                     if (res.MissingDates.length > 0) {
 
                       stopWorkTimer();
@@ -733,7 +807,13 @@
 
                       $("#exampleModalCenter").removeClass("d-none");
                       $("#exampleModalCenter").modal("show");
+                      $('.daterangepicker').removeClass('d-none')
+                      $("#datelistnoleave").val(res.firstDates).trigger('input');
 
+                      let satrtDate = `${res.firstDates[0].split('-')[1]}/${res.firstDates[0].split('-')[0]}/${res.firstDates[0].split('-')[2]}`
+                      let endDate = `${res.firstDates[res.firstDates.length-1].split('-')[1]}/${res.firstDates[res.firstDates.length-1].split('-')[0]}/${res.firstDates[res.firstDates.length-1].split('-')[2]}`
+
+                      $("#leavelastDate").val(`${satrtDate}-${endDate}`)
                       function formatDateToISO(dateStr) {
                         const parts = dateStr.split("-");
                         if (parts.length === 3) {
@@ -742,12 +822,10 @@
                         return dateStr;
                       }
 
-                      // Set start and end date
+
                       $("#leaveDate").val(formatDateToISO(res.MissingDates[0]));
+
                     }
-
-
-
 
                   } else {
                     stopWorkTimer();
@@ -757,8 +835,6 @@
                     $("#clockout").addClass("d-none");
                     $("#break").addClass("d-none");
                   }
-
-
 
                 }
 
@@ -856,7 +932,7 @@
                     $('#TimeWorking').text(res.WorkingTime)
                   }
 
-                
+
                 },
                 error: function (err) {
                   console.error("Clockout error:", err);
@@ -870,6 +946,7 @@
               $('#clockout').removeClass('d-none');
               $('#break').removeClass('d-none');
               $('#clockin').addClass('d-none');
+
               startWorkTimer()
             });
 
@@ -912,21 +989,140 @@
         </script>
 
 
+        <script>
+
+          $('#datelistnoleave').on('input change', function () {
 
 
-        <!-- <script>
-      window.addEventListener("visibilitychange", () => {
-    if (!document.hidden) {
-        alert(111)
-    } else {
-        alert(222)
-        // localStorage.setItem("startTime", startTime);
-    }
-});
 
-    </script> -->
 
-        <!-- latest jquery-->
+            const leaveDatesString = document.getElementById('datelistnoleave').value;
+
+            const leaveDates = leaveDatesString.split(',');
+
+            function formatDateForMatch(day, monthIndex, year) {
+              day = day.toString().padStart(2, '0');
+              monthIndex = (monthIndex + 1).toString().padStart(2, '0');
+              return `${day}-${monthIndex}-${year}`;
+            }
+
+            function markLeaveDays() {
+              const months = document.querySelectorAll('.calendar-table');
+              if (months.length === 0) return;
+
+              months.forEach((monthTable) => {
+                const monthText = monthTable.querySelector('thead .month')?.innerText.trim();
+                if (!monthText) return;
+
+                const [monthName, yearStr] = monthText.split(' ');
+                const monthIndex = new Date(`${monthName} 1, 2000`).getMonth();
+                const year = parseInt(yearStr);
+
+                monthTable.querySelectorAll('td.available').forEach((td) => {
+                  const dayText = td.innerText.trim();
+
+
+                  if (!/^\d+$/.test(dayText)) return;
+
+                  const day = parseInt(dayText);
+
+
+                  const dateFromTd = new Date(year, monthIndex, day);
+
+                  if (dateFromTd.getMonth() !== monthIndex) return;
+
+                  const fullDate = formatDateForMatch(day, monthIndex, year);
+
+                  if (!leaveDates.includes(fullDate)) {
+                    td.classList.add('off2');
+                    td.style.pointerEvents = 'none';
+                    td.style.opacity = '0.5';
+                    td.style.cursor = 'not-allowed';
+                  } else {
+                    td.classList.remove('off2');
+                    td.style.pointerEvents = '';
+                    td.style.opacity = '';
+                    td.style.cursor = '';
+                  }
+                  document.querySelectorAll('td.off').forEach(function (td) {
+                    td.style.visibility = 'hidden';
+                  });
+                  $(document).on('click', '.applyBtn', function () {
+                    $('.daterangepicker').addClass('d-none');
+                  });
+                });
+              });
+            }
+
+            const observer = new MutationObserver(() => {
+              markLeaveDays();
+            });
+
+            observer.observe(document.body, {
+              childList: true,
+              subtree: true
+            });
+
+            markLeaveDays();
+
+
+            function chengers() {
+              function isEndDateAfterLastDate(formattedEnd, lastLeaveDate) {
+                function parseDate(dateStr) {
+                  const [day, month, year] = dateStr.split("-");
+                  return new Date(`${year}-${month}-${day}`);
+                }
+
+                const endDate = parseDate(formattedEnd);
+                const lastDate = parseDate(lastLeaveDate);
+
+                return endDate > lastDate;
+              }
+
+              let endInputEl = document.getElementById('leavelastDate');
+              let endDateValue = endInputEl.value;
+
+
+              let dates = endDateValue.split('-').map(d => d.trim());
+              if (dates.length !== 2) {
+
+                return;
+              }
+
+
+              let endDateStrRaw = dates[1];
+
+              let endParts = endDateStrRaw.split('/');
+              if (endParts.length !== 3) {
+                return;
+              }
+
+              let formattedEnd = `${endParts[1]}-${endParts[0]}-${endParts[2]}`;
+
+              if (formattedEnd) {
+                let lastLeaveDate = leaveDates[leaveDates.length - 1];
+                let firstleaveDate = leaveDates[0];
+
+
+                if (isEndDateAfterLastDate(formattedEnd, lastLeaveDate)) {
+                  let lastsetDates = lastLeaveDate.split("-");
+                  let firstsetleaveDate = firstleaveDate.split("-");
+                  let formatterEndDate = `${lastsetDates[1]}/${lastsetDates[0]}/${lastsetDates[2]}`;
+                  let startDateStr = `${firstsetleaveDate[1]}/${firstsetleaveDate[0]}/${firstsetleaveDate[2]}`
+
+                  endInputEl.value = `${startDateStr} - ${formatterEndDate}`;
+                }
+              }
+            }
+          });
+
+          $(document).on('click', '#leavelastDate', function () {
+            $('.daterangepicker').removeClass('d-none');
+          });
+        </script>
+
+
+
 
 
 

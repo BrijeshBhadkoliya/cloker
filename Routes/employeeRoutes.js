@@ -46,8 +46,10 @@ router.post("/attendence/:id", async (req, res) => {
 
     // ************** Missing ClockOut Condition *************
 
-    console.log("OldData[0]", OldData[OldData.length - 1]);
+    // console.log("OldData[0]", OldData[OldData.length - 1]);
+
     let MissOut = false;
+
     if (OldData[OldData.length - 1].clockOut_time === "") {
       MissOut = true;
       return res.send({
@@ -99,7 +101,7 @@ router.post("/attendence/:id", async (req, res) => {
             );
           } catch (err) {
             console.log("Error fetching weekend data", err);
-            return val; // fallback, treat as normal date
+            return val;
           }
 
           if (weekendDay.length > 0) {
@@ -116,7 +118,6 @@ router.post("/attendence/:id", async (req, res) => {
       );
       let processedDates = [];
       finalLeaveDates.forEach(async (val, i) => {
-
         if (val !== "weekend") {
           console.log("Weekend date:", leaveDates[i]);
           let CurrantEntry = moment().format("DD-MM-YYYY");
@@ -138,7 +139,6 @@ router.post("/attendence/:id", async (req, res) => {
               .status(200)
               .json({ error_msg: "Today is weekend, you did not clock in" });
           }
-
         } else if (val === "weekend") {
           console.log("Weekend date:", leaveDates[i]);
           let CurrantEntry = moment().format("DD-MM-YYYY");
@@ -189,23 +189,114 @@ router.post("/attendence/:id", async (req, res) => {
           : UpdatedData[0].all_time;
     }
 
-    console.log(UpdatedData);
+    console.log("UpdatedData", UpdatedData[UpdatedData.length - 1]);
 
-    const date2 = moment(
+    // weekEnd Inssert Data
+
+    let lastweeekend = moment(
       UpdatedData[UpdatedData.length - 1]?.date,
       "DD-MM-YYYY"
     );
+    let currantdate = moment(date, "DD-MM-YYYY");
+    let DatesArr = [];
+    let NextDateDay = lastweeekend.clone().add(1, "days");
+
+    while (NextDateDay.isSameOrBefore(currantdate)) {
+      DatesArr.push(NextDateDay.format("DD-MM-YYYY"));
+      NextDateDay.add(1, "days");
+    }
+    console.log("lastweeekend", lastweeekend);
+    console.log("currantdate", currantdate);
+    console.log("NextDateDay", NextDateDay);
+    console.log("DatesArr", DatesArr);
+
+    const missingDatesWeekend = await Promise.all(
+      DatesArr.map(async (val) => {
+        const datedayfind = val.split("-").reverse().join("-");
+        const dateObj = new Date(datedayfind);
+        const dayName = dateObj.toLocaleDateString("en-US", {
+          weekday: "long",
+        });
+        // console.log(dayName, "Date", dateObj);
+
+        let weekendDay = [];
+
+        try {
+          weekendDay = await DataFind(
+            `SELECT * FROM tbl_weekend WHERE days='${dayName}'`
+          );
+        } catch (err) {
+          return res
+            .status(200)
+            .json({ error: "Error fetching weekendDay" }, err);
+        }
+
+        if (weekendDay.length > 0) {
+          let weekEnds = weekendDay[0].weeks.split(",").map(Number);
+          const dayCount = Math.ceil(dateObj.getUTCDate() / 7);
+          // console.log(dayCount);
+
+          if (weekEnds.includes(dayCount)) {
+            // console.log("Weekend day, skipping:", val);
+            return "weekend";
+          }
+        }
+        return val;
+      })
+    );
+
+    console.log("missingDatesWeekend", missingDatesWeekend);
+
+    let weekendsInsertedDatas = false;
+    let processedDatesAfterweek = [];
+
+    missingDatesWeekend.forEach(async (val, i) => {
+      if (val === "weekend" && !weekendsInsertedDatas) {
+        console.log("Weekend date:", DatesArr[i]);
+        let CurrantEntry = moment().format("DD-MM-YYYY");
+        if (CurrantEntry !== DatesArr[i]) {
+          const result = await DataInsert(
+            `tbl_employee_attndence`,
+            `emplyeeId, date, all_time, clockIn_time, clockOut_time, break_time, productive_time, extra_time, total_time, clockIn_ip, clockOut_ip, day_status, attendens_status, leave_resone_id`,
+            `'${req.params.id}', '${
+              DatesArr[i]
+            }', '[]', '-', '-', '-', '-', '-', '-', '-', '-', 'WK', '-', '${"-"}'`,
+            req.hostname,
+            req.protocol
+          );
+
+          if (result == -1) {
+            req.flash("errors", process.env.dataerror);
+            return res.redirect("/valid_license");
+          }
+        } else {
+          return res
+            .status(200)
+            .json({ error_msg: "Today is weekend, you did not clock in" });
+        }
+      } else if (val !== "weekend") {
+        weekendsInsertedDatas = true;
+      }
+
+      let CurrantEntry = moment().format("DD-MM-YYYY");
+      if (val !== CurrantEntry) {
+        processedDatesAfterweek.push(val);
+      }
+    });
+    console.log("processedDatesAfterweek", processedDatesAfterweek);
+
+    const date2 = moment(processedDatesAfterweek[0], "DD-MM-YYYY");
     const date1 = moment(date, "DD-MM-YYYY");
     const diffDays = date1.diff(date2, "days");
 
     if (diffDays > 1) {
       let dateArray = [];
-      let tempDate = date2.clone().add(1, "days");
 
-      while (tempDate.isSameOrBefore(date1)) {
-        dateArray.push(tempDate.format("DD-MM-YYYY"));
-        tempDate.add(1, "days");
+      while (date2.isSameOrBefore(date1)) {
+        dateArray.push(date2.format("DD-MM-YYYY"));
+        date2.add(1, "days");
       }
+
       const sqlDateList = dateArray.map((d) => `'${d}'`).join(",");
       const leaveVerify = await DataFind(
         `SELECT * FROM tbl_leave_resons WHERE emp_Id = '${req.params.id}' AND start_date IN(${sqlDateList})`
@@ -223,14 +314,16 @@ router.post("/attendence/:id", async (req, res) => {
           );
         }
       });
-      console.log("leaveDates",leaveDates);
-
-      dateArray = dateArray.filter((date) => !leaveDates.includes(date));
+      console.log("leaveDates", leaveDates);
 
       console.log("dateArrayfilter", dateArray);
 
+      const leaveremove = dateArray.filter(
+        (date) => !leaveDates.includes(date)
+      );
+
       const missingDates = await Promise.all(
-        dateArray.map(async (val) => {
+        leaveremove.map(async (val) => {
           const datedayfind = val.split("-").reverse().join("-");
           const dateObj = new Date(datedayfind);
           const dayName = dateObj.toLocaleDateString("en-US", {
@@ -265,7 +358,7 @@ router.post("/attendence/:id", async (req, res) => {
       );
 
       // const filteredMissingDates = missingDates.filter(Boolean);
-      console.log("filteredMissingDates", missingDates);
+      // console.log("filteredMissingDates", leaveMarkedDates);
       let weekendsInserted = false;
       let processedDates = [];
 
@@ -303,12 +396,39 @@ router.post("/attendence/:id", async (req, res) => {
         }
       });
 
-      console.log("processedDates", processedDates);
+      // console.log("processedDates", processedDates);
+
+      // console.log("leaveDates", leaveDates);
+      // console.log("DataArrays", dateArray);
+
+      let firstDates = [];
+      let started = false;
+
+      for (let val of dateArray) {
+        if (!started) {
+          if (leaveDates.includes(val)) {
+            continue;
+          } else {
+            started = true;
+            firstDates.push(val);
+          }
+        } else {
+          if (leaveDates.includes(val)) {
+            break;
+          }
+          if (val !== moment().format("DD-MM-YYYY")) {
+            firstDates.push(val);
+          }
+        }
+      }
+
+      console.log("firstDates", firstDates);
 
       return res.status(200).json({
         Break: "00:00:00",
         WorkingTime: "00:00:00",
         MissingDates: processedDates,
+        firstDates,
       });
     } else if (currantData.length > 0 && currantData[0].clockOut_time === "") {
       const BarakCheak =
@@ -450,7 +570,7 @@ router.post("/attendence/:id", async (req, res) => {
           `tbl_employee_attndence`,
           `all_time='${JSON.stringify(
             all_time
-          )}',clockOut_time='',clockOut_ip='', extra_time='', total_time=''`,
+          )}',clockOut_time='',clockOut_ip='', extra_time='', total_time='', attendens_status='P'`,
           `emplyeeId = '${req.params.id}' AND date='${date}'`,
           req.hostname,
           req.protocol
@@ -471,7 +591,7 @@ router.post("/attendence/:id", async (req, res) => {
     } else {
       // No entry today
       const clockIn_time = moment().format("hh:mm:ss A");
- 
+
       const ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress;
 
       const all_time = [
@@ -531,7 +651,6 @@ router.post("/attendence/:id", async (req, res) => {
           .json({ error_msg: "Today is weekend, you did not clock in" });
         // res.redirect("/employee/dashboard");
       }
-
     }
   } catch (err) {
     console.error("Unexpected error:", err);
@@ -898,10 +1017,6 @@ router.get("/attendlist", async (req, res) => {
   });
 });
 
-
-
-
-
 router.post("/rersonRoutes/:id", UploadRosone, async (req, res) => {
   console.log(req.body);
   console.log(req.params.id);
@@ -918,21 +1033,36 @@ router.post("/rersonRoutes/:id", UploadRosone, async (req, res) => {
 
     let currentDate = new Date(startYear, startMonth - 1, startDay);
     const endDate = new Date(endYear, endMonth - 1, endDay);
-
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
     while (currentDate <= endDate) {
       const yyyy = currentDate.getFullYear();
       const mm = String(currentDate.getMonth() + 1).padStart(2, "0");
       const dd = String(currentDate.getDate()).padStart(2, "0");
-
-      result.push(`${dd}-${mm}-${yyyy}`);
+      if (currentDate.getTime() !== today.getTime()) {
+        result.push(`${dd}-${mm}-${yyyy}`);
+      }
       currentDate.setDate(currentDate.getDate() + 1);
     }
 
     return result;
   }
 
-  let startleave = req.body.satrtdate.split("-").reverse().join("-");
-  let endleave = req.body.enddate.split("-").reverse().join("-");
+  function dateformat(date) {
+    let formateer = date.split("/");
+    return `${formateer[1]}-${formateer[0]}-${formateer[2]}`;
+  }
+
+  let startleave = req.body.satrtdate
+    ? req.body.satrtdate.split("-").reverse().join("-")
+    : dateformat(req.body.daterange.split("-")[0]);
+  // let endleave = req.body.enddate.split("-").reverse().join("-");
+  let endleave = req.body.daterange
+    ? dateformat(req.body.daterange.split("-")[1])
+    : "";
+
+  console.log("startleave", startleave);
+  console.log("endleave", endleave);
 
   const missingDates = await Promise.all(
     getDateRange(startleave, endleave).map(async (val) => {
@@ -986,46 +1116,10 @@ router.post("/rersonRoutes/:id", UploadRosone, async (req, res) => {
     return res.redirect("/valid_license");
   }
 
-     missingDates.map(async (val, i) => {
-    const leavedate = val; 
-  
-    if (leavedate !== "weekend"){
-      let leaverequt = await DataFind(`SELECT * FROM tbl_leave_resons WHERE start_date = '${val}' AND emp_Id='${req.params.id}'`)
+  missingDates.map(async (val, i) => {
+    const leavedate = val;
 
-     let leaveDates = []
-    if(leaverequt.length>0){
-      const date2 = moment(leaverequt[0].start_date, "DD-MM-YYYY");
-      const date1 = moment(leaverequt[0].end_date, "DD-MM-YYYY");
-      const diffDays = date1.diff(date2, "days");
-      for (let i = 0; i <= diffDays; i++) {
-        leaveDates.push(
-          moment(date2, "DD-MM-YYYY")
-            .add(i, "days")
-            .format("DD-MM-YYYY")
-        );
-      }
-    }
-  
-    leaveDates.map(async(val)=>{
-      const result = await DataInsert(
-        `tbl_employee_attndence`,
-        `emplyeeId, date, all_time, clockIn_time, clockOut_time, break_time, productive_time, extra_time, total_time, clockIn_ip, clockOut_ip, day_status, attendens_status, leave_resone_id, leave_status`,
-        `'${
-          req.params.id
-        }', '${val}', '[]', '-', '-', '-', '-', '-', '-', '-', '-', 'FD', 'A', '${
-          leaverequt[0].id
-        }','${leaverequt[0].leave_status}'`,
-        req.hostname,
-        req.protocol
-      );
-
-      if (result == -1) {
-        req.flash("errors", process.env.dataerror);
-        return res.redirect("/valid_license");
-      }
-
-    })
-
+    if (leavedate !== "weekend") {
       const result = await DataInsert(
         `tbl_employee_attndence`,
         `emplyeeId, date, all_time, clockIn_time, clockOut_time, break_time, productive_time, extra_time, total_time, clockIn_ip, clockOut_ip, day_status, attendens_status, leave_resone_id, leave_status`,
@@ -1042,9 +1136,7 @@ router.post("/rersonRoutes/:id", UploadRosone, async (req, res) => {
         req.flash("errors", process.env.dataerror);
         return res.redirect("/valid_license");
       }
-
-    }else{
-
+    } else {
       let CurrantEntry = moment().format("DD-MM-YYYY");
       if (CurrantEntry !== dateArray[i]) {
         const result = await DataInsert(
@@ -1066,14 +1158,10 @@ router.post("/rersonRoutes/:id", UploadRosone, async (req, res) => {
           .status(200)
           .json({ error_msg: "Today is weekend, you did not clock in" });
       }
-
     }
   });
   res.redirect("/employee/dashboard");
 });
-
-
-
 
 router.post("/leaverequst/:id", UploadRosone, async (req, res) => {
   console.log(req.body);
@@ -1111,41 +1199,32 @@ router.post("/leaverequst/:id", UploadRosone, async (req, res) => {
   let total_days = dateArray.length;
   console.log("total_days", total_days);
 
-  const resons = await DataInsert(
-    `tbl_leave_resons`,
-    `start_date,end_date,leave_resone,leave_attachment,leave_type,leave_status,emp_Id,innsert_date,total_days`,
-    `'${startleave}','${endleave === "" ? startleave : endleave}','${
-      req.body.reason
-    }','${JSON.stringify(
-      (req.files?.attachment === undefined ? [] : req.files?.attachment).map(
-        (val) => val.filename
-      )
-    )}', '${req.body.leavetype}','${"Pending"}','${
-      req.params.id
-    }','${new Date().toISOString()}','${total_days}'`,
-    req.hostname,
-    req.protocol
+  const verify = await DataFind(
+    `SELECT * FROM tbl_leave_resons WHERE emp_Id = '${req.params.id}' AND start_date='${startleave}' `
   );
+  if (verify.length === 0) {
+    const resons = await DataInsert(
+      `tbl_leave_resons`,
+      `start_date,end_date,leave_resone,leave_attachment,leave_type,leave_status,emp_Id,innsert_date,total_days`,
+      `'${startleave}','${endleave === "" ? startleave : endleave}','${
+        req.body.reason
+      }','${JSON.stringify(
+        (req.files?.attachment === undefined ? [] : req.files?.attachment).map(
+          (val) => val.filename
+        )
+      )}', '${req.body.leavetype}','${"Pending"}','${
+        req.params.id
+      }','${new Date().toISOString()}','${total_days}'`,
+      req.hostname,
+      req.protocol
+    );
 
-  if (resons == -1) {
-    req.flash("errors", process.env.dataerror);
-    return res.redirect("/valid_license");
+    if (resons == -1) {
+      req.flash("errors", process.env.dataerror);
+      return res.redirect("/valid_license");
+    }
   }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-  res.redirect("/employee/dashboard");
+  res.redirect("/employee/leaverequst");
 });
 
 router.get("/entry/:id", async (req, res) => {
@@ -1528,20 +1607,20 @@ router.post("/erlyclockOut/:id", async (req, res) => {
       currantData[0].all_time[currantData[0].all_time.length - 1];
     if (lastEntry.status === 1) {
       let difrence = getTimeDifference(lastEntry.intime, currantTime);
-      // console.log(difrence);
+      console.log(difrence);
       productiveTime = sumTime(productiveTime, difrence);
-      // console.log("productiveTime", productiveTime);
+      console.log("productiveTime", productiveTime);
     } else if (lastEntry.status === 2) {
       let difrence = getTimeDifference(lastEntry.intime, currantTime);
       console.log(difrence);
       breakTime = sumTime(breakTime, difrence);
-      // console.log("breakTime", breakTime);
+      console.log("breakTime", breakTime);
     }
 
     //  set Total Time
 
     let total_time = sumTime(productiveTime, breakTime);
-    // console.log(total_time);
+    console.log(total_time);
 
     // set Extra Time
     const settingData = await DataFind("SELECT * FROM tbl_setting LIMIT 1");
@@ -1569,7 +1648,7 @@ router.post("/erlyclockOut/:id", async (req, res) => {
      total_time='${total_time}',
      extra_time='${
        ProductiveTimesecons > MinimumTime ? extra_time : "00:00:00"
-     }'`,
+     }',attendens_status='EC'`,
       `emplyeeId = '${req.params.id}' AND date='${date}'`,
       req.hostname,
       req.protocol

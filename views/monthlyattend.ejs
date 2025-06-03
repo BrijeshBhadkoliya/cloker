@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="en">
+
+
+
+<head>
+    <%- include('partials/head.ejs') %>
+        <link rel="stylesheet" type="text/css" href="/css/vendors/daterange-picker.css">>
+
+</head>
+
+<body>
+    <%- include('partials/sidebar.ejs') %>`
+        <div class="page-body">
+            <div class="container-fluid">
+                <div class="page-title">
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <h3>Employee List</h3>
+                        </div>
+                        <div class="col-sm-6">
+                            <ol class="breadcrumb">
+                                <li class="breadcrumb-item"><a href="/admin/dashboard"><i data-feather="home"
+                                            class="me-2"></i>Dashboard</a></li>
+                                <li class="breadcrumb-item active"><a href="/admin/attendance"><i
+                                            data-feather="user-check" class="me-2"></i>Attendance List</a></li>
+                            </ol>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="container-fluid ">
+                <div class="row">
+
+                    <div class="col-sm-12">
+                        <div class="card">
+                            <div class="card-header pb-0">
+                                <div class="mt-3">
+
+                                    <div class="d-flex justify-content-between align-items-center gap-3">
+                                        <div>
+                                            <div class="theme-form">
+                                                <div>
+                                                    <input class="form-control text-primary border-primary" type="text"
+                                                        onchange="Datapic()" oninput="Datapic()" name="birthdate"
+                                                        id="datePic">
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <button class="btn btn-outline-dark rounded"
+                                            style="font-size: 16px; padding: 0px !important; height: 35px; width:35px ;">
+                                            <i class="fa-regular fa-arrow-down-to-line"></i>
+                                        </button>
+
+                                    </div>
+
+                                </div>
+                            </div>
+
+                            <div class="card-body">
+                                <div class="table-responsive theme-scrollbar">
+                                    <table class="display table table-bordered text-center align-middle" id="basic-1">
+                                        <thead id="datesFormate">
+                                            <tr>
+                                                <th>Employee Data</th>
+                                                <% dateFormate.forEach(date=> { %>
+                                                    <th
+                                                        style="width: 30px; font-size: 12px; font-weight: 500; padding: 9px;">
+                                                        <%= date %>
+                                                    </th>
+                                                    <% }) %>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="attendenceMonth">
+                                            <% attendlist.forEach(val=> { %>
+                                                <tr>
+                                                    <td class="d-flex align-items-center gap-2">
+                                                        <img src="/uploads/<%= val.profileimage %>" alt=""
+                                                            class="rounded-circle" width="35" height="35">
+                                                        <div>
+                                                            <div class="fw-semibold">
+                                                                <%= val.userName %>
+                                                            </div>
+                                                            <small class="text-muted">
+                                                                <%= val.userCode %>
+                                                            </small>
+                                                        </div>
+                                                    </td>
+
+                                                    <% allDates.forEach(date=> { %>
+                                                        <% let record=val.attendance.find(r=> r.date === date); %>
+                                                            <td>
+                                                                <% if (record) { %>
+                                                                    <% if (record.attendens_status==='P' ||
+                                                                        record.attendens_status==='C' || record.attendens_status==='EC' ) { %>
+
+                                                                        <div class="d-flex align-items-center justify-content-center px-2 py-1 rounded text-success fw-semibold position-relative"
+                                                                            style="width: 28px; height: 28px; background-color: rgba(25, 135, 84, 0.1); font-size: 12px; font-weight: 600;"
+                                                                            data-bs-toggle="tooltip"
+                                                                             title="<%= val.attendens_status === 'C' ? 'Missing Clock Out' :val.attendens_status === 'EC' ?'Erlyclock Out': 'Present' %>">
+                                                                            <span>P</span>
+                                                                            <% if (record.attendens_status==='C' ) { %>
+                                                                                <div class="position-absolute top-0 start-100 translate-middle badge text-primary"
+                                                                                    style="font-size: 10px;">
+                                                                                    <i
+                                                                                        class="fa-solid fa-alarm-exclamation"></i>
+                                                                                </div>
+                                                                                <% }else if(record.attendens_status==='EC'){ %>
+                                                                                    <div class="position-absolute top-0 start-100 translate-middle badge text-danger"
+                                                                                    style="font-size: 10px;">
+                                                                                    <i class="fa-solid fa-alarm-snooze"></i>
+                                                                                </div>
+                                                                               <% }  %>
+                                                                        </div>
+
+                                                                        <% } else if (record.day_status==='WK' ) { %>
+
+                                                                  <div class="d-flex align-items-center justify-content-center px-2 py-1 rounded text-info fw-semibold" style="width: 40px; height: 28px; background-color: rgba(0, 122, 255, 0.1); color: rgb(0, 122, 255) !important; font-weight: 600;" data-bs-toggle="tooltip" data-bs-placement="Top" title="" data-bs-original-title="Weekend">WK</div>
+
+                                                                            <% } else if
+                                                                                (record.leave_status==='Pending' ) { %>
+
+                                                                                <div class="d-flex align-items-center justify-content-center px-2 py-1 rounded text-danger fw-semibold"
+                                                                                    style="width: 28px; height: 28px; font-size: 12px; background-color: rgba(220, 53, 69, 0.1);"
+                                                                                    data-bs-toggle="tooltip"
+                                                                                    title="Leave Pending">
+                                                                                    A
+                                                                                </div>
+
+                                                                                <% } else if
+                                                                                    (record.leave_status==='Appove' ) {
+                                                                                    %>
+
+                                                                                    <div class="d-flex align-items-center justify-content-center px-2 py-1 rounded text-danger fw-semibold"
+                                                                                        style="width: 28px; height: 28px; font-size: 12px; background-color: rgba(220, 53, 69, 0.1);"
+                                                                                        data-bs-toggle="tooltip"
+                                                                                        title="Leave Approved">
+                                                                                        A
+                                                                                        <div class="position-absolute top-0 start-100 translate-middle badge text-success"
+                                                                                            style="font-size: 10px;">
+                                                                                            <i
+                                                                                                class="fa-solid fa-thumbs-up"></i>
+                                                                                        </div>
+                                                                                    </div>
+
+                                                                                    <% } else if
+                                                                                        (record.leave_status==='Reject'
+                                                                                        ) { %>
+
+                                                                                        <div class="d-flex align-items-center justify-content-center px-2 py-1 rounded text-danger fw-semibold"
+                                                                                            style="width: 28px; height: 28px; font-size: 12px; background-color: rgba(220, 53, 69, 0.1);"
+                                                                                            data-bs-toggle="tooltip"
+                                                                                            title="Leave Rejected">
+                                                                                            A
+                                                                                            <div class="position-absolute top-0 start-100 translate-middle badge text-danger"
+                                                                                                style="font-size: 10px;">
+                                                                                                <i
+                                                                                                    class="fa-solid fa-ban"></i>
+                                                                                            </div>
+                                                                                        </div>
+
+                                                                                        <% } else { %>
+
+                                                                                            <div class="d-flex align-items-center justify-content-center px-2 py-1 rounded text-danger fw-semibold"
+                                                                                                style="width: 28px; height: 28px; font-size: 12px; background-color: rgba(220, 53, 69, 0.1);"
+                                                                                                data-bs-toggle="tooltip"
+                                                                                                title="Absent">
+                                                                                                A
+                                                                                            </div>
+                                                                                            <% } %>
+
+                                                                                                <% } else { %>
+
+                                                                                                    <div
+                                                                                                        style="width: 28px; height: 28px;">
+                                                                                                    </div>
+                                                                                                    <% } %>
+                                                            </td>
+                                                            <% }) %>
+
+                                                </tr>
+                                                <% }) %>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- HTML (DOM) sourced data  Starts-->
+
+                    <!-- Container-fluid Ends-->
+                </div>
+            </div>
+        </div>
+
+
+        <%- include('partials/footer.ejs') %>
+            <%- include('partials/script.ejs') %>
+
+
+                <script src="/js/datepicker/daterange-picker/moment.min.js"></script>
+                <script src="/js/datepicker/daterange-picker/daterangepicker.js"></script>
+                <script src="/js/datepicker/daterange-picker/daterange-picker.custom.js"></script>
+                <script src="/js/tooltip-init.js"></script>
+
+
+
+
+                <script>
+                    const today = new Date();
+                    const formatDate = (date) => {
+                        const day = String(date.getDate()).padStart(2, '0');
+                        const month = String(date.getMonth() + 1).padStart(2, '0');
+                        const year = date.getFullYear();
+                        return `${month}/${day}/${year}`;
+                    };
+
+                    document.querySelector('input[name="birthdate"]').value =
+                        `${formatDate(today)}`;
+
+
+                    function Datapic() {
+
+                        function convertDateFormat(dateStr) {
+                            const [month, day, year] = dateStr.split('/');
+                            return `${day}-${month}-${year}`;
+                        }
+
+
+                        let datePic = document.getElementById('datePic').value
+                        let findDate = convertDateFormat(datePic)
+
+
+                        $.ajax({
+                            url: '/admin/monthlyattend',
+                            method: 'POST',
+                            data: { date: findDate },
+                            success: function (res) {
+                                console.log(res);
+
+
+                                if ($.fn.DataTable.isDataTable('#basic-1')) {
+                                    $('#basic-1').DataTable().destroy();
+                                }
+
+                                const thead = document.getElementById("datesFormate");
+                                thead.innerHTML = "";
+
+
+                                let headerRow = `<tr>
+                                     <th>Employee Data</th>`;
+
+                                res.dateFormate.forEach((date) => {
+                                    headerRow += `
+                                     <th style="width: 30px; font-size: 12px; font-weight: 500; padding: 9px;">
+                                         ${date}
+                                     </th>`;
+                                });
+
+                                headerRow += `</tr>`;
+                                thead.innerHTML = headerRow;
+
+
+
+                                const tbody = document.getElementById("attendenceMonth");
+                                tbody.innerHTML = "";  
+
+                                res.attendlist.forEach((employee) => {
+                                    let row = `<tr>
+        <td class="d-flex align-items-center gap-2">
+            <img src="/uploads/${employee.profileimage}" alt=""
+                class="rounded-circle" width="35" height="35">
+            <div>
+                <div class="fw-semibold">${employee.userName}</div>
+                <small class="text-muted">${employee.userCode || ''}</small>
+            </div>
+        </td>`;
+
+                                     
+                                    res.allDates.forEach((date) => {
+                                        const record = employee.attendance.find(r => r.date === date);
+                                        if (record) {
+                                            if (record.attendens_status === 'P' || record.attendens_status === 'C' ||record.attendens_status === 'EC') {
+                                                row += `
+                    <td>
+                        <div class="position-relative d-flex align-items-center justify-content-center px-2 py-1 rounded text-success fw-semibold"
+                            style="width: 28px; height: 28px; background-color: rgba(25, 135, 84, 0.1); font-size: 12px; font-weight: 600;"
+                            data-bs-toggle="tooltip"
+                            title="${record.attendens_status === 'C' ? 'Missing Clock Out' :record.attendens_status === 'EC' ? 'Erlyclock Out' : 'Present'}">
+                            <span>P</span>
+                            ${record.attendens_status === 'C' ? `
+                            <div class="position-absolute top-0 start-100 translate-middle badge text-primary"
+                                style="font-size: 10px;">
+                                <i class="fa-solid fa-alarm-exclamation"></i>
+                            </div>` : record.attendens_status === 'EC' ? `
+                            <div class="position-absolute top-0 start-100 translate-middle badge text-danger"
+                                style="font-size: 10px;">
+                                    <i class="fa-solid fa-alarm-snooze"></i>
+
+                            </div>` :``}
+                        </div>
+                    </td>`;
+                                            } else if (record.day_status === 'WK') {
+                                                row += `
+                    <td>
+                         <div class="d-flex align-items-center justify-content-center px-2 py-1 rounded text-info fw-semibold" style="width: 40px; height: 28px; background-color: rgba(0, 122, 255, 0.1); color: rgb(0, 122, 255) !important; font-weight: 600;" data-bs-toggle="tooltip" data-bs-placement="Top" title="" data-bs-original-title="Weekend">WK</div>
+                    </td>`;
+                                            } else if (record.leave_status === 'Pending') {
+                                                row += `
+                    <td>
+                        <div class="d-flex align-items-center justify-content-center px-2 py-1 rounded text-danger fw-semibold"
+                            style="width: 28px; height: 28px; font-size: 12px; background-color: rgba(220, 53, 69, 0.1);"
+                            data-bs-toggle="tooltip"
+                            title="Leave Pending">
+                            A
+                        </div>
+                    </td>`;
+                                            } else if (record.leave_status === 'Appove') {
+                                                row += `
+                    <td>
+                        <div class="d-flex align-items-center justify-content-center px-2 py-1 rounded text-danger fw-semibold"
+                            style="width: 28px; height: 28px; font-size: 12px; background-color: rgba(220, 53, 69, 0.1);"
+                            data-bs-toggle="tooltip"
+                            title="Leave Approved">
+                            A
+                            <div class="position-absolute top-0 start-100 translate-middle badge text-success"
+                                style="font-size: 10px;">
+                                <i class="fa-solid fa-thumbs-up"></i>
+                            </div>
+                        </div>
+                    </td>`;
+                                            } else if (record.leave_status === 'Reject') {
+                                                row += `
+                    <td>
+                        <div class="d-flex align-items-center justify-content-center px-2 py-1 rounded text-danger fw-semibold"
+                            style="width: 28px; height: 28px; font-size: 12px; background-color: rgba(220, 53, 69, 0.1);"
+                            data-bs-toggle="tooltip"
+                            title="Leave Rejected">
+                            A
+                            <div class="position-absolute top-0 start-100 translate-middle badge text-danger"
+                                style="font-size: 10px;">
+                                <i class="fa-solid fa-ban"></i>
+                            </div>
+                        </div>
+                    </td>`;
+                                            } else {
+                                                row += `
+                    <td>
+                        <div class="d-flex align-items-center justify-content-center px-2 py-1 rounded text-danger fw-semibold"
+                            style="width: 28px; height: 28px; font-size: 12px; background-color: rgba(220, 53, 69, 0.1);"
+                            data-bs-toggle="tooltip"
+                            title="Absent">
+                            A
+                        </div>
+                    </td>`;
+                                            }
+                                        } else {
+                                            row += `<td><div style="width: 28px; height: 28px;"></div></td>`;
+                                        }
+                                    });
+
+                                    row += `</tr>`;
+                                    tbody.innerHTML += row;
+                                });
+
+                                $('[data-bs-toggle="tooltip"]').tooltip();
+
+                                $('#basic-1').DataTable({
+                                    pageLength: 10,
+                                    destroy: true,
+                                    retrieve: true
+                                });
+
+
+                            }
+
+                        })
+
+                    }
+                </script>
+
+</body>
+
+
+
+
+</html>

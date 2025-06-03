@@ -5,7 +5,7 @@ const moment = require("../middleware/momentZone");
 const jwt = require("jsonwebtoken");
 
 const { isAuth, isAdmin } = require("../middleware/jwtAuth");
-const { DataFind, DataInsert } = require("../config/databasrqurey");
+const { DataFind, DataInsert, DataUpdate } = require("../config/databasrqurey");
 
 router.get("/admin/dashboard", isAuth, isAdmin, async (req, res) => {
   const data = req.user;
@@ -83,8 +83,8 @@ router.get("/admin/dashboard", isAuth, isAdmin, async (req, res) => {
 
 router.get("/employee/dashboard", isAuth, async (req, res) => {
   const { employee, role } = req.user;
-      //  console.log("employee",employee);
-        
+  //  console.log("employee",employee);
+
   const employeedetais = await DataFind(
     `SELECT * FROM employee WHERE id=${employee.id}`
   );
@@ -105,9 +105,72 @@ router.get("/employee/dashboard", isAuth, async (req, res) => {
 
   // console.log("BrithDayArr", BrithDayArr);
 
+  // notice_period find
+
   let leaveType = await DataFind(
     `SELECT * FROM tbl_type_setting WHERE type_name="leaveType" AND status="active"`
   );
+
+  let noticetime = await DataFind(
+    `SELECT *, DATEDIFF(CURDATE(), STR_TO_DATE(start_date, '%d-%m-%Y')) AS days_passed FROM tbl_notice_period WHERE emp_Id = '${employee.id}' AND status= 'active'`
+  );
+
+  let leftdays = 0;
+  let startMoment = ''
+  let endNoticePeriod = ''
+
+  if (noticetime.length > 0) {
+    leftdays = setting[0].notice_period - noticetime[0].days_passed;
+
+
+  console.log(noticetime);
+
+   startMoment = moment(noticetime[0].start_date, "DD-MM-YYYY"); // <-- string to moment
+
+  endNoticePeriod = startMoment
+    .clone() // clone so original moment is not mutated
+    .add(setting[0].notice_period, "days")
+    .format("DD-MM-YYYY");
+  }
+  let leftdaysobj = {
+    leftdays: leftdays,
+    startdays: startMoment,
+    enddays: endNoticePeriod,
+  };
+console.log("leftdaysobj",leftdaysobj);
+
+  if (leftdaysobj.leftdays <= 0 ) {
+    const updated = await DataUpdate(
+      `tbl_notice_period`,
+      `status='deactive'`,
+      `emp_Id = '${employee.id}'`,
+      req.hostname,
+      req.protocol
+    );
+
+    if (updated === -1) throw new Error("Update failed");
+  }
+
+  let payroll = await DataFind(`SELECT payroll_date FROM tbl_setting`);
+  let payrollDay = parseInt(payroll[0].payroll_date);
+
+  let today = moment();
+
+  let payrollDate = moment().date(payrollDay);
+
+  if (payrollDate.isBefore(today, "day")) {
+    payrollDate = payrollDate.add(1, "months");
+  }
+
+  let finalPayrollDate = payrollDate.format("DD-MM-YYYY");
+  let dayDifference = payrollDate.diff(today, "days");
+
+  let payrollobj = {
+    payDate: finalPayrollDate,
+    dayDifference,
+  };
+
+  console.log("payrollobj:", payrollobj);
 
   if (employeeData.length > 0) {
     // *****************functions *******************************
@@ -207,6 +270,8 @@ router.get("/employee/dashboard", isAuth, async (req, res) => {
       employeedetais,
       BrithDayArr,
       leaveType,
+      leftdaysobj:leftdaysobj,
+      payrollobj,
     });
   } else {
     res.render("emPnale", {
@@ -219,6 +284,8 @@ router.get("/employee/dashboard", isAuth, async (req, res) => {
       employeedetais,
       BrithDayArr,
       leaveType,
+      leftdaysobj:leftdaysobj,
+      payrollobj,
     });
   }
 });

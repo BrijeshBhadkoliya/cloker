@@ -10,7 +10,7 @@
 
 </head>
 
-<body>  <%- include('partials/sidebar.ejs') %>`
+<body> <%- include('partials/sidebar.ejs') %>`
     <div class="page-body">
       <div class="container-fluid">
         <div class="page-title">
@@ -95,7 +95,18 @@
                                 <li class="delete ms-1"><a href="/admin/deleteem/<%=val.id%>" data-bs-original-title=""
                                     title=""><i data-feather="trash" style="height: 16px; width: 16px;"
                                       class="text-danger"></i></a></li>
-                                      <li class="idProf ms-2 text-info"><a href="/admin/UpIdpro/<%=val.id%>"><i class="fa-light fa-address-card"></i></a></li>
+                                <li class="idProf ms-2 text-info"><a href="/admin/UpIdpro/<%=val.id%>"><i
+                                      class="fa-light fa-address-card"></i></a></li>
+                                <% const ismatch = noticePeriod.find(n=> n.emp_Id == val.id);
+                                  const showIcon = !ismatch || ismatch.status === 'active';
+                                  %>
+                                  <% if (showIcon) { %>
+                                    <li class="idProf ms-2">
+                                      <a href="/admin/adnoticperi/<%= val.id %>">
+                                        <i class="fas fa-calendar-check text-info"></i>
+                                      </a>
+                                    </li>
+                                    <% } %>
                               </ul>
                             </td>
                             <!-- <td> 
@@ -115,7 +126,6 @@
             </div>
           </div>
         </div>
-
       </div>
     </div>
     </div>

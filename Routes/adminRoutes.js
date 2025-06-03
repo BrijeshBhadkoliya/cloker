@@ -16,6 +16,7 @@ const {
 } = require("../config/databasrqurey");
 const { log } = require("console");
 const uploadFolderPath = path.join(__dirname, "../public/uploads");
+const moment = require("../middleware/momentZone");
 
 router.get("/add", async (req, res) => {
   let setting = await DataFind(`SELECT * FROM tbl_setting LIMIT 1`);
@@ -117,11 +118,14 @@ router.get("/list", async (req, res) => {
   let setting = await DataFind(`SELECT * FROM tbl_setting LIMIT 1`);
 
   const employeeList = await DataFind(`SELECT * FROM employee`);
+  const noticePeriod = await DataFind(`SELECT * FROM tbl_notice_period`);
+
   const data = req.user;
   res.render("employeeList", {
     data: data.admin,
     employee: employeeList,
     role: data.role,
+    noticePeriod,
     setting,
   });
 });
@@ -847,5 +851,170 @@ router.post("/hostmessage/", async (req, res) => {
   }
   return res.redirect("/admin/leavereson");
 });
+
+router.get("/adnoticperi/:id", async (req, res) => {
+  let date = moment().format("DD-MM-YYYY");
+
+  const result = await DataInsert(
+    `tbl_notice_period`,
+    `status,start_date,emp_Id`,
+    `'active','${date}','${req.params.id}'`,
+    req.hostname,
+    req.protocol
+  );
+
+  if (result == -1) {
+    req.flash("errors", process.env.dataerror);
+    return res.redirect("/valid_license");
+  }
+  res.redirect("/admin/list/");
+});
+
+router.get("/monthlyttend/", async (req, res) => {
+  const { admin, role } = req.user;
+  let setting = await DataFind(`SELECT * FROM tbl_setting LIMIT 1`);
+  let employee = await DataFind(`SELECT * FROM employee`);
+
+  let startOfMonth = moment().startOf("month");
+  let endOfMonth = moment().endOf("month");
+
+  let allDates = [];
+
+  let currentDate = startOfMonth.clone();
+
+  while (currentDate.isSameOrBefore(endOfMonth)) {
+    allDates.push(currentDate.format("DD-MM-YYYY"));
+    currentDate.add(1, "day");
+  }
+  console.log(allDates);
+  let dateFormate = [];
+
+  allDates.map((val, i) => {
+    dateFormate.push(moment(val, "DD-MM-YYYY").format("MMM, DD ddd"));
+  });
+
+  console.log(dateFormate);
+
+  let attendlist = await Promise.all(
+    employee.map(async (val) => {
+      let employeeData = await DataFind(`
+      SELECT 
+        att.attendens_status, 
+        att.date, 
+        att.leave_status,
+        att.day_status,
+        emp.userName, 
+        emp.profileimage,
+        att.clockIn_time,
+        att.clockOut_time,
+        att.productive_time
+        FROM tbl_employee_attndence AS att
+        JOIN employee AS emp ON att.emplyeeId = emp.id
+        WHERE att.emplyeeId = '${val.id}'
+        AND MONTH(STR_TO_DATE(att.date, '%d-%m-%Y')) = MONTH(CURDATE())
+        AND YEAR(STR_TO_DATE(att.date, '%d-%m-%Y')) = YEAR(CURDATE())
+    `);
+
+      return {
+        id: val.id,
+        userName: val.userName,
+        profileimage: val.profileimage,
+        attendance: employeeData,
+      };
+    })
+  );
+
+  console.log(attendlist[0].attendance);
+  console.log(attendlist);
+
+  res.render("monthlyattend", {
+    setting,
+    admin,
+    role,
+    attendlist,
+    dateFormate,
+    allDates,
+  });
+});
+
+
+router.post("/monthlyattend/", async (req, res) => {
+  try {
+  
+    const inputDate = req.body.date;  
+ 
+
+    if (!inputDate) {
+      return res.status(400).json({ error: "Date is required in DD-MM-YYYY format" });
+    }
+
+    const inputMoment = moment(inputDate, "DD-MM-YYYY");
+
+    if (!inputMoment.isValid()) {
+      return res.status(400).json({ error: "Invalid date format" });
+    }
+
+    
+    const startOfMonth = inputMoment.clone().startOf("month");
+    const endOfMonth = inputMoment.clone().endOf("month");
+
+ 
+    let allDates = [];
+    let dateIterator = startOfMonth.clone();
+
+    while (dateIterator.isSameOrBefore(endOfMonth)) {
+      allDates.push(dateIterator.format("DD-MM-YYYY"));
+      dateIterator.add(1, "day");
+    }
+
+  
+    let dateFormate = allDates.map((val) =>
+      moment(val, "DD-MM-YYYY").format("MMM, DD ddd")
+    );
+
+ 
+  
+    const employee = await DataFind(`SELECT * FROM employee`);
+
+   
+    const attendlist = await Promise.all(
+      employee.map(async (val) => {
+        const employeeData = await DataFind(`
+          SELECT 
+            att.attendens_status, 
+            att.date, 
+            att.leave_status,
+            att.day_status,
+            emp.userName, 
+            emp.profileimage,
+            att.clockIn_time,
+            att.clockOut_time,
+            att.productive_time
+            FROM tbl_employee_attndence AS att
+            JOIN employee AS emp ON att.emplyeeId = emp.id
+            WHERE att.emplyeeId = '${val.id}'
+            AND MONTH(STR_TO_DATE(att.date, '%d-%m-%Y')) = ${inputMoment.month() + 1}
+            AND YEAR(STR_TO_DATE(att.date, '%d-%m-%Y')) = ${inputMoment.year()}
+        `);
+
+        return {
+          id: val.id,
+          userName: val.userName,
+          profileimage: val.profileimage,
+          attendance: employeeData,
+        };
+      })
+    );
+
+ 
+    res.status(200).json({attendlist,dateFormate,allDates});
+
+  } catch (error) {
+    console.error("Error in POST /monthlyattend/:", error);
+    return res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
+
 
 module.exports = router;

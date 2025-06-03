@@ -154,12 +154,12 @@
                                                                     </div>
                                                                     <!-- <i class="bg-light-success font-success" data-feather="alert-triangle"></i> -->
                                                                     <% }else if(val.attendens_status==='P' ||
-                                                                        val.attendens_status==='C' ) { %>
+                                                                        val.attendens_status==='C' || val.attendens_status === 'EC') { %>
                                                                         <div class="d-flex align-items-center justify-content-center px-2 py-1 rounded text-success fw-semibold position-relative"
                                                                             style="width: 28px; height: 28px; background-color: rgba(25, 135, 84, 0.1); font-size: 12px; font-weight: 600;"
                                                                             data-bs-toggle="tooltip"
                                                                             data-bs-placement="top"
-                                                                            title="<%= val.attendens_status === 'C' ? 'Missing Clock Out' : 'Present' %>">
+                                                                            title="<%= val.attendens_status === 'C' ? 'Missing Clock Out' : val.attendens_status === 'EC' ? 'Erlyclock Out' : 'Present' %>">
 
                                                                             <span>P</span>
 
@@ -169,7 +169,12 @@
                                                                                     <i
                                                                                         class="fa-duotone fa-solid fa-alarm-exclamation"></i>
                                                                                 </div>
-                                                                                <% } %>
+                                                                                <% }else if(val.attendens_status==='EC'){ %>
+                                                                                    <div class="position-absolute top-0 start-100 translate-middle badge text-danger"
+                                                                                    style="font-size: 10px;">
+                                                                                    <i class="fa-solid fa-alarm-snooze"></i>
+                                                                                </div>
+                                                                               <% } %>
 
                                                                         </div>
                                                                         <% } else if(val.day_status !=='WK' ) { %>
@@ -212,7 +217,7 @@
                                                                                             <%}%>
                                                         </td>
                                                         <% function SecondTime(t) { if (val.attendens_status==='P' ||
-                                                            val.attendens_status==='C' && t !=='-' ) { if (!t || typeof
+                                                            val.attendens_status==='C' || val.attendens_status==='EC' && t !=='-' ) { if (!t || typeof
                                                             t !=='string' ) { return ' ' ; } const [h, m]=t.split(':');
                                                             const ampm=t.includes('AM') ? 'AM' : 'PM' ; return
                                                             `${h.padStart(2, '0' )}:${m.padStart(2, '0' )} ${ampm}`;
@@ -224,7 +229,7 @@
                                                                 <%=SecondTime(val.clockOut_time)%>
                                                             </td>
                                                             <% function formatTime(t) { if (val.attendens_status==='P'
-                                                                || val.attendens_status==='C' && t !=='-' ) { if (!t ||
+                                                                || val.attendens_status==='C' || val.attendens_status==='EC' && t !=='-' ) { if (!t ||
                                                                 typeof t !=='string' ) { return ' ' ; } const
                                                                 parts=t.split(':').map(part=>
                                                                 part.padStart(2,
@@ -341,7 +346,7 @@
                                 res.forEach((val, i) => {
 
                                     function formatTime(t) {
-                                        if (val.attendens_status === 'P' || val.attendens_status === 'C' && t !== '-') {
+                                        if (val.attendens_status === 'P' || val.attendens_status === 'C' || val.attendens_status==='EC' && t !== '-') {
                                             if (!t || typeof t !== 'string') {
                                                 return ' ';
                                             }
@@ -354,7 +359,7 @@
                                     }
 
                                     function SecondTime(t) {
-                                        if (val.attendens_status === 'P' || val.attendens_status === 'C' && t !== '-') {
+                                        if (val.attendens_status === 'P' || val.attendens_status === 'C' || val.attendens_status==='EC' && t !== '-') {
                                             if (!t || typeof t !== 'string') {
                                                 return ' ';
                                             }
@@ -395,21 +400,27 @@
                      title="On Going!" >
                      <i class="fa-solid fa-triangle-exclamation"></i>
                     </div>
-        ` : val.attendens_status === 'P' || val.attendens_status === 'C' ? `
+        ` : val.attendens_status === 'P' || val.attendens_status === 'C' || val.attendens_status === 'EC' ? `
               <div
     class="d-flex align-items-center justify-content-center px-2 py-1 rounded text-success fw-semibold position-relative"
     style="width: 28px; height: 28px; background-color: rgba(25, 135, 84, 0.1); font-size: 12px; font-weight: 600;"
     data-bs-toggle="tooltip"
     data-bs-placement="top"
-    title="${val.attendens_status === 'C' ? 'Missing Clock Out' : 'Present'}">
+    title="${val.attendens_status === 'C' ? 'Missing Clock Out' : val.attendens_status === 'EC' ? 'Erlyclock Out' : 'Present'}">
     
     P
 
     ${val.attendens_status === 'C' ? `
-      <div class="position-absolute top-0 start-100 translate-middle badge text-primary"
-           style="font-size: 10px;">
-       <i class="fa-duotone fa-solid fa-alarm-exclamation"></i>
-      </div>` : ''}
+  <div class="position-absolute top-0 start-100 translate-middle badge text-primary"
+       style="font-size: 10px;">
+    <i class="fa-solid fa-alarm-exclamation"></i>
+  </div>` : 
+val.attendens_status === 'EC' ? `
+  <div class="position-absolute top-0 start-100 translate-middle badge text-danger"
+       style="font-size: 10px;">
+    <i class="fa-solid fa-alarm-snooze"></i>
+  </div>` : ''
+}
   </div>
         `: val.day_status !== 'WK' ? `${val.leave_status === "Pending" ? `  <div
                  class="d-flex align-items-center justify-content-center px-2 py-1 rounded text-danger fw-semibold"
