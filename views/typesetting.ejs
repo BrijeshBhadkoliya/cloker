@@ -12,17 +12,19 @@
 
 <body> <%- include('partials/sidebar.ejs') %>`
         <div class="page-body">
+
+
             <div class="container-fluid">
                 <div class="page-title">
-                    <div class="row">
-                        <div class="col-sm-6">
+                    <div class="row align-items-center">
+                        <div class="col-12 col-md-6 text-center text-md-start mb-2 mb-md-0">
                             <h3>Type Setting</h3>
                         </div>
-                        <div class="col-sm-6">
-                            <ol class="breadcrumb">
+                        <div class="col-12 col-md-6 text-center text-md-end">
+                            <ol class="breadcrumb justify-content-center justify-content-md-end mb-0">
                                 <li class="breadcrumb-item"><a
-                                        href="<%=role===2?'/employee/dashboard':'/admin/dashboard'%>"><i
-                                            data-feather="home" class="me-2"></i>Dashboard</a></li>
+                                        href="<%=role===2?'/employee/   ':'/admin/dashboard'%>"><i data-feather="home"
+                                            class="me-2"></i>Dashboard</a></li>
                                 <li class="breadcrumb-item active"><a href="/admin/weekend"><i data-feather="user-check"
                                             class="me-2"></i>Weekend</a></li>
                             </ol>
@@ -30,10 +32,10 @@
                     </div>
                 </div>
             </div>
-            <div class="container-fluid">
-                <div class="row">
+          
 
-
+            <div class="container-fluid py-3">
+                <div class="row gy-4">
                     <div class="col-xl-6 col-lg-6 col-sm-12">
                         <div class="card browser-table">
 
@@ -75,15 +77,15 @@
                                                         <td>
                                                             <%=val.type_values%>
                                                         </td>
-                                                        <td class="tbrow">
-                                                            <label class="switch">
-                                                                <input type="checkbox" id="stastusUp"
-                                                                    value="<%= val.id %>" data-bs-original-title=""
-                                                                    title="" <%=val.status==='active' ? 'checked' : ''
-                                                                    %>
-                                                                onclick="Upstatuas(<%= val.id %>)">
-                                                                    <span class="switch-state"></span>
-                                                            </label>
+                                                        <td>
+                                                            <div
+                                                                class="form-check form-switch d-flex justify-content-start">
+                                                                <input type="checkbox"
+                                                                    class="form-check-input status-toggle"
+                                                                    value="<%= val.id %>" <%=val.status==='active'
+                                                                    ? 'checked' : '' %>
+                                                                onclick="Upstatuas(<%= val.id %>)" />
+                                                            </div>
                                                         </td>
                                                         <td>
                                                             <ul class="action">
@@ -110,13 +112,6 @@
                             </div>
                         </div>
                     </div>
-
-
-
-
-
-
-
 
                     <div class="col-xl-6 col-lg-6 col-sm-12">
                         <div class="card browser-table">
@@ -159,15 +154,15 @@
                                                             <%=val.type_values%>
                                                         </td>
 
-                                                        <td class="tbrow">
-                                                            <label class="switch">
-                                                                <input type="checkbox" id="stastusUp"
-                                                                    value="<%= val.id %>" data-bs-original-title=""
-                                                                    title="" <%=val.status==='active' ? 'checked' : ''
-                                                                    %>
-                                                                onclick="Upstatuas(<%= val.id %>)">
-                                                                    <span class="switch-state"></span>
-                                                            </label>
+                                                        <td>
+                                                            <div
+                                                                class="form-check form-switch d-flex justify-content-start">
+                                                                <input type="checkbox"
+                                                                    class="form-check-input status-toggle"
+                                                                    value="<%= val.id %>" <%=val.status==='active'
+                                                                    ? 'checked' : '' %>
+                                                                onclick="Upstatuas(<%= val.id %>)" />
+                                                            </div>
                                                         </td>
                                                         <td>
                                                             <ul class="action">
@@ -238,18 +233,18 @@
                                                         <td>
                                                             <%=val.type_values%>
                                                         </td>
-                                                     
-                                                        <td class="tbrow">
-                                                            <label class="switch">
-                                                                <input type="checkbox" id="stastusUp"
-                                                                    value="<%= val.id %>" data-bs-original-title=""
-                                                                    title="" <%=val.status==='active' ? 'checked' : ''
-                                                                    %>
-                                                                onclick="Upstatuas(<%= val.id %>)">
-                                                                    <span class="switch-state"></span>
-                                                            </label>
+
+                                                        <td>
+                                                            <div
+                                                                class="form-check form-switch d-flex justify-content-start">
+                                                                <input type="checkbox"
+                                                                    class="form-check-input status-toggle"
+                                                                    value="<%= val.id %>" <%=val.status==='active'
+                                                                    ? 'checked' : '' %>
+                                                                onclick="Upstatuas(<%= val.id %>)" />
+                                                            </div>
                                                         </td>
-                                                       
+
                                                         <td>
                                                             <ul class="action">
                                                                 <li class="edit"> <a
@@ -278,8 +273,6 @@
 
                 </div>
             </div>
-
-        </div>
         </div>
 
 

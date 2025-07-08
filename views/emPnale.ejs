@@ -13,17 +13,19 @@
     </style>
 </head>
 
-<body> <%- include('partials/sidebar.ejs') %>`
+<body>
+  <%- include('partials/sidebar.ejs') %>
+
     <div class="page-body">
 
       <div class="container-fluid">
         <div class="page-title" `>
-          <div class="row">
-            <div class="col-sm-6">
+          <div class="row align-items-center">
+            <div class="col-12 col-md-6 text-center text-md-start mb-2 mb-md-0">
               <h3>Employee List</h3>
             </div>
-            <div class="col-sm-6">
-              <ol class="breadcrumb">
+            <div class="col-12 col-md-6 text-center text-md-end">
+              <ol class="breadcrumb justify-content-center justify-content-md-end mb-0">
                 <li class="breadcrumb-item"><a href="/employee/dashboard"><i data-feather="home"
                       class="me-2"></i>Dashboard</a></li>
 
@@ -37,14 +39,110 @@
       <div class="container-fluid dashboard-default general-widget">
         <div class="row justify-content-between">
 
-          <div class="col-xxl-6 col-xl-5 col-lg-6 dash-45 box-col-40 ">
-            <div class="card profile-greeting" style="padding: 51px !important;">
-              <div class="card-body">
-                <div class="d-sm-flex d-block justify-content-end">
+          <div class="col-12 col-md-12 col-lg-5 col-xl-4 order-lg-3">
+            <div class="d-flex justify-content-center">
+
+              <div class="card border-0 overflow-hidden" style="width:100%;">
+                <div class="p-4">
+
+                  <!-- Profile Image -->
+                  <div class="card-body d-flex justify-content-center mb-3">
+                    <img class="rounded-circle border border-3 border-primary" src="/uploads/<%= data?.profileimage %>"
+                      height="110" width="110" alt="Profile" loading="lazy" />
+                  </div>
+
+                  <!-- Hidden Employee ID -->
+                  <input type="hidden" value="<%= data?.id %>" id="emplyeeId" />
+
+                  <!-- Username -->
+                  <div class="text-center profile-details mb-4">
+                    <a href="#" class="text-decoration-none text-dark">
+                      <h4 class="fw-semibold mb-0">
+                        <%= data?.userName %>
+                      </h4>
+                    </a>
+                  </div>
+
+                  <!-- "My Timing" label -->
+                  <div class="d-flex align-items-center ps-2 mb-5" style="margin-left: -33px;">
+                    <div class="border-end border-5 border-primary rounded" style="height: 20px;"></div>
+                    <span class="ms-2 fw-semibold">My Timing</span>
+                  </div>
+
+                  <!-- Timing Section -->
+                  <div class="d-flex justify-content-center mb-4">
+                    <div class="d-flex flex-wrap justify-content-center align-items-center gap-4">
+
+                      <!-- Current Time -->
+                      <div class="text-center">
+                        <h6 class="text-success mb-1 fw-bold">Current Time</h6>
+                        <h5 class="fs-5" id="curanttime">
+                          <span id="hou">00</span>:<span id="min">00</span>:<span id="sec">00</span>
+                        </h5>
+                      </div>
+
+                      <!-- Vertical Divider -->
+                      <div class="vr rounded" style="height: 50px; width: 2px; background-color: rgb(228, 226, 226);">
+                      </div>
+
+                      <!-- Break Time -->
+                      <div class="text-center">
+                        <h6 class="text-danger mb-1 fw-bold">Break Time</h6>
+                        <h5 class="fs-5" id="breactime">
+                          <span id="hou2">00</span>:<span id="min2">00</span>:<span id="sec2">00</span>
+                        </h5>
+                      </div>
+
+                    </div>
+                  </div>
+
+                  <!-- Action Buttons -->
+                  <div class="social-btngroup d-flex justify-content-center">
+
+
+                    <button class="btn btn-outline-danger rounded me-2 col-6 d-none" id="break" type="button"
+                      data-bs-original-title="" title="">
+                      BREAK
+                    </button>
+
+                    <button class="btn btn-square btn-success rounded col-12" type="button" data-bs-original-title=""
+                      title="" id="clockin">
+                      CLOCK IN
+                    </button>
+                    <button class="btn btn-square btn-danger rounded col-6 d-none" type="button"
+                      data-bs-original-title="" title="" id="clockout">
+                      CLOCK OUT
+                    </button>
+                  </div>
+
+
                 </div>
+
+                <!-- Hidden Data -->
+                <div id="emp-data" data-break="<%= Break || '00:00:00' %>" data-work="<%= Working || '00:00:00' %>"
+                  data-status="<%= status || '' %>" style="display: none">
+                </div>
+
+              </div>
+
+            </div>
+
+
+            <input type="hidden" id="datelistnoleave">
+
+          </div>
+
+          <div class="col-12 col-md-12 col-lg-8 col-xl-4 mb-1">
+            <div class="card profile-greeting p-4 p-md-5">
+              <div class="card-body text-center text-md-start">
+                <!-- Top Right Content (optional space) -->
+                <div class="d-flex justify-content-end d-none d-sm-flex"></div>
+
+                <!-- User Greeting Section -->
                 <div class="greeting-user">
-                  <div class="profile-vector">
-                    <ul class="dots-images">
+                  <div class="profile-vector position-relative">
+                    <!-- Dot Decorations -->
+                    <ul class="dots-images position-absolute top-0 start-0 w-100 h-100 d-xl-none">
                       <li class="dot-small bg-info dot-1"></li>
                       <li class="dot-medium bg-primary dot-2"></li>
                       <li class="dot-medium bg-info dot-3"></li>
@@ -54,211 +152,174 @@
                       <li class="dot-small bg-primary dot-7"></li>
                       <li class="semi-medium bg-primary dot-8"></li>
                       <li class="dot-big bg-info dot-9"></li>
-                    </ul><img class="img-fluid rounded-circle" style="width: 160px; height: 150px;"
-                      src="/uploads/<%= data?.profileimage%>" alt="">
+                    </ul>
+
+                    <!-- Profile Image -->
+                    <img class="img-fluid rounded-circle mx-auto d-block"
+                      style="width: 160px; height: 150px; object-fit: cover;" src="/uploads/<%= data?.profileimage %>"
+                      alt="" loading="lazy">
+
+                    <!-- Ribbons -->
                     <ul class="vector-image">
-                      <li> <img src="../images/dashboard/default/ribbon1.png" alt=""></li>
-                      <li> <img src="../images/dashboard/default/ribbon3.png" alt=""></li>
-                      <li> <img src="../images/dashboard/default/ribbon4.png" alt=""></li>
-                      <li> <img src="../images/dashboard/default/ribbon5.png" alt=""></li>
-                      <li> <img src="../images/dashboard/default/ribbon6.png" alt=""></li>
-                      <li> <img src="../images/dashboard/default/ribbon7.png" alt=""></li>
+                      <li><img src="../images/dashboard/default/ribbon1.png" alt="" loading="lazy"></li>
+                      <li><img src="../images/dashboard/default/ribbon3.png" alt="" loading="lazy"></li>
+                      <li><img src="../images/dashboard/default/ribbon4.png" class="d-none" alt="" loading="lazy"></li>
+                      <li><img src="../images/dashboard/default/ribbon5.png" class="d-none" alt="" loading="lazy"></li>
+                      <li><img src="../images/dashboard/default/ribbon6.png" alt="" loading="lazy"></li>
+                      <li><img src="../images/dashboard/default/ribbon7.png" alt="" loading="lazy"></li>
                     </ul>
                   </div>
-                  <h3 style="font-size: 22px;"><a href="#"><span>Welcome Back</span>
-                      <%=employeedetais[0].firstName +" "+employeedetais[0].lastName%>  </a><span class=" right-circle">
-                        <i class="fa fa-check-circle font-primary f-14 middle"></i></span></h5>
+
+                  <!-- Welcome Message -->
+                  <h3 class="mt-3" style="font-size: 22px;">
+                    <a href="#" class="text-decoration-none text-dark">
+                      <span>Welcome Back </span>
+                      <%= employeedetais[0].firstName %>
+                    </a>
+                    <span class="right-circle ms-2">
+                      <i class="fa fa-check-circle font-primary f-14 middle"></i>
+                    </span>
+                  </h3>
                 </div>
               </div>
             </div>
           </div>
 
-          <div class="col-lg-3 col-md-6 box-col-40 xl-40">
-            <div class="card appointment-detail">
-              <div class="card-header pb-0 ">
-                <div class="d-flex justify-content-between">
-                  <div class="flex-grow-1">
-                    <p class="square-after f-w-600 header-text-primary">Upcoming Birthday (<%= BrithDayArr.length %>) 🎂
-                        <i class="fa fa-circle"></i></p>
+          <div class="col-12 col-md-12 col-lg-4 col-xl-4 mb-1">
+            <div class="row">
+
+              <% if(leftdaysobj.leftdays !==0){ %>
+                <div class="col-12 col-sm-12 col-lg-12">
+                  <div class="d-flex justify-content-center">
+                    <div class="card total-investment mb-2" style="width: 100%; height: 100px;">
+                      <div class="card-header pb-0 pt-3">
+                        <div class="d-flex justify-content-between">
+                          <div class="flex-grow-1">
+                            <div class="d-flex justify-content-between">
+                              <p class="square-after f-w-600 header-text-primary">Notice Period <%=leftdaysobj.enddays%>
+                                  <i class="fa fa-circle"></i>
+                              </p>
+
+                            </div>
+                            <h5 class="text-nowrap">
+                              <%=leftdaysobj.leftdays%> days left
+                            </h5>
+                          </div>
+                        </div>
+                      </div>
+
+                    </div>
                   </div>
                 </div>
-              </div>
-              <div class="card-body">
-                <div class="table-responsive theme-scrollbar">
-                  <table class="table">
-                    <tbody>
-                      <% if (BrithDayArr.length> 0) { %>
-                        <% BrithDayArr.forEach((val)=> { %>
-                          <tr>
-                            <td>
-                              <div class="d-flex"><img class="img-fluid align-top circle"
-                                  src="/uploads/<%= val.profileimage %>" alt="">
-                                <div class="flex-grow-1"><a href=""><span>
-                                      <%= val.firstName + ' ' + val.lastName %>
-                                    </span></a>
-                                  <p class="mb-0">Age: <%= val.age %>
-                                  </p>
-                                </div>
+                <%}%>
+                  <div class="col-12 col-sm-12 col-lg-12">
+                    <div class="d-flex justify-content-center">
+                      <div class="card total-investment mb-2" style="width: 100%; height: 100px;">
+                        <div class="card-header pb-0 pt-3">
+                          <div class="d-flex justify-content-between">
+                            <div class="flex-grow-1">
+                              <div class="d-flex justify-content-between">
+                                <p class="square-after f-w-600 header-text-primary">Payroll Date <%=payrollobj.payDate%>
+                                    <i class="fa fa-circle"></i>
+                                </p>
 
                               </div>
+                              <h5 class="text-nowrap">
+                                <%=payrollobj.dayDifference%> days left
+                              </h5>
+                            </div>
+                          </div>
+                        </div>
+
+                      </div>
+                    </div>
+                  </div>
+
+
+
+            </div>
+
+            <div class="d-flex justify-content-center">
+              <div class="card appointment-detail" style="width: 100%;">
+                <div class="card-header pb-0 ">
+                  <div class="d-flex justify-content-between">
+                    <div class="flex-grow-1">
+                      <p class="square-after f-w-600 header-text-primary">Upcoming Birthday (<%= BrithDayArr.length %>)
+                          🎂
+                          <i class="fa fa-circle"></i></p>
+                    </div>
+                  </div>
+                </div>
+                <div class="card-body" style="padding-top: 15px !important ;">
+                  <div class="table-responsive theme-scrollbar">
+                    <table class="table">
+                      <tbody>
+                        <% if (BrithDayArr.length> 0) { %>
+                          <% BrithDayArr.forEach((val)=> { %>
+                            <tr>
+                              <td>
+                                <div class="d-flex"><img src="/uploads/<%= val.profileimage %>" alt=""
+                                    class="img-fluid rounded-circle d-inline-block align-top me-2"
+                                    style="width: 45px; height: 45px; object-fit: cover;" loading="lazy">
+
+                                  <div class="flex-grow-1 text-nowrap ms-2"><a href=""><span>
+                                        <%= val.firstName %>
+                                      </span></a>
+                                    <p class="mb-0">Age: <%= val.age %>
+                                    </p>
+                                  </div>
+
+                                </div>
+                              </td>
+                              <td class="text-end text-nowrap">
+                                 <% if(val.today){ %>
+                                  Today
+                                  <% }else { %>
+                                <%= new Date(val.birthDate).toLocaleString('en-US', { day: '2-digit' , month: 'short' ,
+                                  timeZone: 'Asia/Kolkata' }).split(" ").reverse().join(" ") %>
+                                  <% } %>
                             </td>
-                            <td class="text-end">
-                              <%= new Date(val.birthDate).toLocaleDateString('en-US', { day: '2-digit' , month: 'short'
-                                }).split(" ").reverse().join(" ") %>
-                            </td>
+                                 
                           </tr>
                           <% }) %>
                             <% } else { %>
                               <tr class=" text-center">
-                            <td>
-                              <img src="/images/no-birthday.svg" class="mb-3" alt="">
-                              <p>No birthday for this month.</p>
-                            </td>
-                          </tr>
-                          <% } %>
-                    </tbody>
-                  </table>
-                </div>
+                              <td>
+                                <img src="/images/no-birthday.svg" class="mb-3" alt="">
+                                <p>No birthday for this month.</p>
+                              </td>
+                            </tr>
+                            <% } %>
+                      </tbody>
+                    </table>
+                  </div>
 
+                </div>
               </div>
             </div>
+
           </div>
 
 
 
-          <div class="col-lg-3 col-md-6 box-col-33">
-            <div class="card custom-card">
-              <div class="card-profile">
-                <img class="rounded-circle" src="/uploads/<%= data?.profileimage%>" height="110" width="110px" alt="" />
-              </div>
-              <input type="hidden" value="<%=data?.id%>" id="emplyeeId" />
-              <div class="text-center profile-details mb-5">
-                <a href="#" data-bs-original-title="" title="">
-                  <h4>
-                    <%=data?.userName%>
-                  </h4>
-                </a>
-              </div>
-              <div class="d-flex" style="margin-left: -32px">
-                <div class="border-end border-primary border-5 rounded mb-3" style="height: 20px"></div>
-                <!-- <h6 class="ms-1">My Timing</h6> -->
-                <div class="name f-w-600 ms-1">My Timing</div>
-              </div>
-              <div class="d-flex justify-content-center mb-2">
-                <div class="d-flex justify-content-center align-items-center" style="height: 100px; width: 300px">
-                  <div class="text-center">
-                    <h4 class="text-success" style="font-size: 16px">
-                      Current Time
-                    </h4>
-                    <h5 style="font-size: 18px" id="curanttime">
-                      <span id="hou">00</span>:<span id="min">00</span>:<span id="sec">00</span>
-                    </h5>
-                  </div>
-
-                  <div class="border border-primary ms-4 me-4" style="height: 50px"></div>
-
-                  <div class="text-center">
-                    <h4 class="text-danger" style="font-size: 16px">
-                      Break Time
-                    </h4>
-                    <h5 style="font-size: 18px" id="breactime">
-                      <span id="hou2">00</span>:<span id="min2">00</span>:<span id="sec2">00</span>
-                    </h5>
-                  </div>
-                </div>
-              </div>
-
-              <div class="social-btngroup d-flex justify-content-center">
 
 
-                <button class="btn btn-outline-danger rounded me-2 col-6 d-none" id="break" type="button"
-                  data-bs-original-title="" title="">
-                  BREAK
-                </button>
 
-                <button class="btn btn-square btn-success rounded col-12" type="button" data-bs-original-title=""
-                  title="" id="clockin">
-                  CLOCK IN
-                </button>
-                <button class="btn btn-square btn-danger rounded col-6 d-none" type="button" data-bs-original-title=""
-                  title="" id="clockout">
-                  CLOCK OUT
-                </button>
-              </div>
-            </div>
-
-            <div id="emp-data" data-break="<%= Break || '00:00:00' %>" data-work="<%= Working || '00:00:00' %>"
-              data-status="<%= status || '' %>" style="display: none"></div>
-          </div>
         </div>
 
         <!-- Container-fluid Ends-->
       </div>
-
-      <div class="container-fluid dashboard-default general-widget">
-        <div class="row">
-          <% if(leftdaysobj.leftdays !==0){ %>
-            <div class="col-lg-3 col-md-6 box-col-33">
-              <div class="card total-investment">
-                <div class="card-header pb-0">
-                  <div class="d-flex justify-content-between">
-                    <div class="flex-grow-1">
-                      <div class="d-flex justify-content-between">
-                        <p class="square-after f-w-600 header-text-primary">Notice Period<i class="fa fa-circle"></i>
-                        </p>
-                        <p class=" f-w-600 header-text-primary">
-                          <%=leftdaysobj.enddays%>
-                        </p>
-                      </div>
-                      <h4>
-                        <%=leftdaysobj.leftdays%> days left
-                      </h4>
-                    </div>
-                  </div>
-                </div>
-                <div class="card-body pt-0">
-                </div>
-              </div>
-            </div>
-            <%}%>
-              <div class="col-lg-3 col-md-6 box-col-33">
-                <div class="card total-investment">
-                  <div class="card-header pb-0">
-                    <div class="d-flex justify-content-between">
-                      <div class="flex-grow-1">
-                        <div class="d-flex justify-content-between">
-                          <p class="square-after f-w-600 header-text-primary">Payroll time<i class="fa fa-circle"></i>
-                          </p>
-                          <p class=" f-w-600 header-text-primary">
-                            <%=payrollobj.payDate%>
-                          </p>
-                        </div>
-                        <h4>
-                          <%=payrollobj.dayDifference%> days left
-                        </h4>
-                      </div>
-                    </div>
-                  </div>
-                  <div class="card-body pt-0">
-                  </div>
-                </div>
-              </div>
-        </div>
-
-        <!-- Container-fluid Ends-->
-      </div>
-
-      <input type="hidden" id="datelistnoleave">
-
 
 
     </div>
 
 
 
+
+
     <!-- Day Gap Modal  -->
-    <div class="modal fade show d-none" id="exampleModalCenter" tabindex="-1" aria-labelledby="exampleModalCenter"
-      style="padding-right: 15px; display: block" aria-modal="true" role="dialog">
+    <div class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog" aria-hidden="true"
+      aria-labelledby="exampleModalCenter" aria-modal="true" role="dialog">
       <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
         <div class="modal-content" style="background-color: transparent; border: none">
           <div class="card m-0 border-0 shadow-sm">
@@ -288,8 +349,8 @@
                   <div class="col-md-6 mb-3" id="onedate">
                     <div class="theme-form">
                       <label for="leaveDate" class="form-label" id="startdate-label">Date</label>
-                      <input type="date" class="form-control bg-white" id="leaveDate" data-status="1" name="satrtdate" required
-                        readonly />
+                      <input type="date" class="form-control bg-white" id="leaveDate" data-status="1" name="satrtdate"
+                        required readonly />
                     </div>
                   </div>
 
@@ -306,8 +367,9 @@
                   <!-- End Date (initially hidden) -->
                   <div class="col-md-6 mb-3 d-none" id="enddate">
                     <label for="leavelastDate" class="form-label">Set Date</label>
-                     <div id="leavesatenddate"> 
-                      <input class='form-control' type='text' name='daterange' id='leavelastDate' disabled  data-status='0' onchange='chengers()'required>
+                    <div id="leavesatenddate">
+                      <input class='form-control' type='text' name='daterange' id='leavelastDate' disabled
+                        data-status='0' required>
                     </div>
                     <div class="invalid-feedback d-none" id="enddate-error">
                       End date cannot be today's date.
@@ -366,10 +428,9 @@
       </div>
     </div>
 
-
     <!-- MissingClockOut  -->
-    <div class="modal fade show d-none" id="clockOutMissing" tabindex="-1" aria-labelledby="clockOutMissingLabel"
-      style="padding-right: 15px; display: block" aria-modal="true" role="dialog">
+    <div class="modal fade" id="clockOutMissing" tabindex="-1" role="dialog" aria-hidden="true"
+      aria-labelledby="clockOutMissingLabel" aria-modal="true" role="dialog">
       <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
         <div class="modal-content" style="background-color: transparent; border: none">
           <div class="card m-0 border-0 shadow-sm">
@@ -395,9 +456,11 @@
                   </div>
                   <div class="col-md-6 mb-3">
                     <label for="clockOut" class="form-label">Clock Out</label>
-                    <input type="time" class="form-control" id="clockOut" name="clockOutTime" />
-                    <small id="timeError" class="text-danger d-none">Clock Out time cannot be earlier than Clock In
-                      time.</small>
+                    <input type="time" class="form-control" id="clockOut" name="clockOutTime" required />
+                    <small id="timeError" class="text-danger d-none">
+                      Clock Out time is too early. Choose a valid time.
+                    </small>
+
                   </div>
                 </div>
                 <input type="hidden" name="lastdaydate" id="lastdaydate">
@@ -423,10 +486,9 @@
       </div>
     </div>
 
-
     <!-- Eraly ClockOut  -->
-    <div class="modal fade show d-none" id="EarlyClockOut" tabindex="-1" aria-labelledby="earlyClockOutLabel"
-      aria-hidden="true">
+    <div class="modal fade" id="EarlyClockOut" tabindex="-1" role="dialog" aria-hidden="true"
+      aria-labelledby="earlyClockOutLabel" aria-hidden="true">
       <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
 
@@ -438,7 +500,8 @@
 
           <div class="text-black py-2 px-3 mb-0 border-bottom" style="background-color: #f4f4f4 ;" role="alert"
             id="earlyOutAlert">
-            <strong>Notice:</strong> Your working hours are less than <strong id="TimeWorking"></strong>. Please provide
+            <strong>Notice:</strong> Your working hours are less than <strong id="TimeWorking"></strong>. Please
+            provide
             a reason
             for early clock-out.
           </div>
@@ -450,7 +513,7 @@
               <div class="mb-3">
                 <label for="earlyReason" class="form-label">Reason</label>
                 <textarea class="form-control" id="earlyReason" name="erlyreson" rows="4"
-                  placeholder="Enter your reason here..."></textarea>
+                  placeholder="Enter your reason here..." required></textarea>
               </div>
             </div>
 
@@ -465,10 +528,9 @@
       </div>
     </div>
 
-
     <!-- Breack Over  -->
-    <div class="modal fade show d-none" id="breackOver" tabindex="-1" aria-labelledby="breackOverLabel"
-      aria-hidden="true">
+    <div class="modal fade" id="breackOver" tabindex="-1" role="dialog" aria-hidden="true"
+      aria-labelledby="breackOverLabel" aria-hidden="true">
       <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
 
@@ -480,7 +542,8 @@
 
           <div class="text-black py-2 px-3 mb-0 border-bottom" style="background-color: #f4f4f4 ;" role="alert"
             id="earlyOutAlert">
-            <strong>Notice:</strong> Your break hours have exceeded <strong id="BreackTime"></strong>. Please provide a
+            <strong>Notice:</strong> Your break hours have exceeded <strong id="BreackTime"></strong>. Please
+            provide a
             reason
           </div>
 
@@ -506,9 +569,62 @@
       </div>
     </div>
 
+    <!-- No Breack Out  -->
+    <div class="modal fade" id="NoBreackOut" tabindex="-1" role="dialog" aria-hidden="true"
+      aria-labelledby="breackOverLabel" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
 
 
-    <%- include('partials/footer.ejs') %> <%- include('partials/script.ejs') %>
+          <div class="modal-header text-black">
+            <h5 class="modal-title" id="earlyClockOutLabel">Missing Breakout in <span id="breackInDate2"
+                style="font-weight: 800;"></span></h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+
+          <form action="/employee/breackOutMiss/<%= data.id %>" method="post">
+            <div class="modal-body">
+              <div class="row">
+                <div class="col-md-6 mb-3">
+                  <label for="clockIn" class="form-label">BreakIn Time</label>
+                  <input type="text" class="form-control bg-white" id="breackIntime" name="breackIntime" required
+                    readonly />
+                </div>
+                <input type="hidden" class="form-control bg-white" id="breackInDate" name="breackInDate" required
+                  readonly />
+                <div class="col-md-6 mb-3">
+                  <label for="clockOut" class="form-label">BreakOut Out</label>
+                  <input type="time" class="form-control" id="breakOutTime" name="breakOutTime" />
+                  <small id="breaktimeError" class="text-danger d-none">
+                    BreakOut time is too early. Choose a valid time.
+                  </small>
+
+                </div>
+              </div>
+              <div class="row">
+                <!-- Reason -->
+                <div class="col-12 mb-3">
+                  <label for="leaveReason" class="form-label">Reason For Missing Breakout</label>
+                  <textarea class="form-control" id="breakoutreason" name="breakoutreason" rows="3"
+                    placeholder="Type reason here..." required></textarea>
+                </div>
+              </div>
+            </div>
+
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+              <button type="submit" class="btn btn-primary">Submit</button>
+            </div>
+          </form>
+
+        </div>
+      </div>
+    </div>
+    <!-- Right Sidebar -->
+
+    <%- include('partials/footer.ejs') %>
+      <%- include('partials/script.ejs') %>
+
         <!-- login js-->
 
         <script src="/js/datepicker/daterange-picker/moment.min.js"></script>
@@ -517,9 +633,66 @@
 
         <!-- imag model path text  -->
 
+        <script>
+          document.getElementById("breakOutTime").addEventListener("change", function () {
+            const breakOutVal = this.value;
+            const breakInVal = document.getElementById("breackIntime").value;
+
+            const breaktimeError = document.getElementById("breaktimeError");
 
 
-        
+
+            breaktimeError.classList.add("d-none");
+
+
+            if (!breakOutVal || !breakInVal) return;
+
+
+            const [inTime, modifier] = breakInVal.split(" ");
+            let [inHours, inMinutes] = inTime.split(":").map(Number);
+            if (modifier === "PM" && inHours < 12) inHours += 12;
+            if (modifier === "AM" && inHours === 12) inHours = 0;
+
+
+            const today = new Date();
+            const breakInDate = new Date(today.getFullYear(), today.getMonth(), today.getDate(), inHours, inMinutes);
+            const [outHours, outMinutes] = breakOutVal.split(":").map(Number);
+            const breakOutDate = new Date(today.getFullYear(), today.getMonth(), today.getDate(), outHours, outMinutes);
+
+            const minValidTime = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 9, 0);
+
+
+            if (breakOutDate < breakInDate) {
+              breaktimeError.classList.remove("d-none");
+              this.value = "";
+              return;
+            }
+          });
+        </script>
+
+        <script>
+          document.getElementById("clockOut").addEventListener("change", function () {
+            const clockOutVal = this.value;
+            const clockInVal = document.getElementById("clockInTime").value;
+
+
+            const [time, modifier] = clockInVal.split(" ");
+            let [hours, minutes] = time.split(":");
+            hours = parseInt(hours, 10);
+
+            if (modifier === "PM" && hours < 12) hours += 12;
+            if (modifier === "AM" && hours === 12) hours = 0;
+
+            const clockIn24 = `${String(hours).padStart(2, '0')}:${minutes}`;
+
+            if (clockOutVal < clockIn24) {
+              document.getElementById("timeError").classList.remove("d-none");
+              this.value = "";
+            } else {
+              document.getElementById("timeError").classList.add("d-none");
+            }
+          });
+        </script>
         <script>
 
           $('#exampleModalCenter').on('hidden.bs.modal', function () {
@@ -552,9 +725,6 @@
             $('#fromhom').removeClass('d-none');
           });
 
-
-
-
           function checkIfCurrentDate(input) {
             const selectedDate = input.value;
             const today = new Date().toISOString().split("T")[0];
@@ -570,12 +740,7 @@
             }
           }
 
-
-
-
         </script>
-
-
 
         <script>
           document.getElementById("attachment").addEventListener("change", function () {
@@ -590,7 +755,6 @@
             }
           });
         </script>
-
 
         <script>
           $(document).ready(function () {
@@ -703,54 +867,53 @@
             let visibilityTimeout;
 
             window.addEventListener("visibilitychange", () => {
-              clearTimeout(visibilityTimeout);
+              if (!document.hidden) {
+                clearTimeout(visibilityTimeout);
 
-              if ($('#EarlyClockOut').hasClass('show')) {
-                return;
+                visibilityTimeout = setTimeout(() => {
+                  if (!document.hidden) {
+                    let id = $("#emplyeeId").val();
+
+                    $.ajax({
+                      url: `/employee/hiddenChange/${id}`,
+                      method: "GET",
+                      success: function (res) {
+
+                        const breaker = res.Break || "00:00:00";
+                        const work = res.Working || "00:00:00";
+                        const status = res.status;
+
+                        let changework = work.replace(/"/g, "").split(":").map(Number);
+                        let changebreak = breaker.replace(/"/g, "").split(":").map(Number);
+
+                        workTime = { h: changework[0], m: changework[1], s: changework[2] };
+                        breakTime = { h: changebreak[0], m: changebreak[1], s: changebreak[2] };
+
+                        displayTime("", workTime);
+                        displayTime("2", breakTime);
+
+                        if (status === "true") {
+
+                          $("#clockin").addClass("d-none");
+                          $("#fromhom").addClass("d-none");
+                          $("#clockout").removeClass("d-none");
+                          $("#break").removeClass("d-none");
+                        } else if (status === "false") {
+
+                          $("#clockout").addClass("d-none");
+                          $("#break").addClass("d-none");
+                          $("#clockin").removeClass("d-none");
+                          $("#fromhom").removeClass("d-none");
+                        }
+                      },
+                      error: function (err) {
+                        console.error("AJAX error:", err);
+                      }
+                    });
+                  }
+                }, 300);
               }
 
-              visibilityTimeout = setTimeout(() => {
-                if (!document.hidden) {
-                  let id = $("#emplyeeId").val();
-
-                  $.ajax({
-                    url: `/employee/hiddenChange/${id}`,
-                    method: "GET",
-                    success: function (res) {
-
-                      const breaker = res.Break || "00:00:00";
-                      const work = res.Working || "00:00:00";
-                      const status = res.status;
-
-                      let changework = work.replace(/"/g, "").split(":").map(Number);
-                      let changebreak = breaker.replace(/"/g, "").split(":").map(Number);
-
-                      workTime = { h: changework[0], m: changework[1], s: changework[2] };
-                      breakTime = { h: changebreak[0], m: changebreak[1], s: changebreak[2] };
-
-                      displayTime("", workTime);
-                      displayTime("2", breakTime);
-
-                      if (status === "true") {
-
-                        $("#clockin").addClass("d-none");
-                        $("#fromhom").addClass("d-none");
-                        $("#clockout").removeClass("d-none");
-                        $("#break").removeClass("d-none");
-                      } else if (status === "false") {
-
-                        $("#clockout").addClass("d-none");
-                        $("#break").addClass("d-none");
-                        $("#clockin").removeClass("d-none");
-                        $("#fromhom").removeClass("d-none");
-                      }
-                    },
-                    error: function (err) {
-                      console.error("AJAX error:", err);
-                    }
-                  });
-                }
-              }, 300);
             });
 
             $("#clockin").click(function () {
@@ -773,13 +936,33 @@
                     $("#clockOutMissing").removeClass("d-none");
                     $("#clockOutMissing").modal("show")
                     $("#lastdaydate").val(res.OldData.date)
+
                     $("#dateOut").html(`Record for the <strong>${res.OldData.date}</strong> is missing <strong>Clock Out</strong> in the system. Please apply request.`)
 
-                    let Pmtime = res.OldData.clockIn_time.split(" ")
-                    let removesecond = Pmtime[0].split(":")[0] + ":" + Pmtime[0].split(":")[1] + " " + Pmtime[1]
+                    let allTimeRaw = res.OldData.all_time;
+
+                    let allTimeArray = [];
+                    try {
+                      allTimeArray = typeof allTimeRaw === "string" ? JSON.parse(allTimeRaw) : allTimeRaw;
+                    } catch (err) {
+                      console.error("Failed to parse all_time:", err);
+
+                    }
+
+                    let Pmtime = allTimeArray[allTimeArray.length - 1].intime
+                    console.log(Pmtime);
+                    
+                    let timeFormatted = new Date(Pmtime).toLocaleTimeString('en-IN', {
+                      hour: '2-digit',
+                      minute: '2-digit',
+                      hour12: true,
+                      timeZone: 'Asia/Kolkata'
+                    });
+
+
+                    let removesecond = timeFormatted.replace(/AM|PM/i, match => match.toUpperCase());
                     $("#clockInTime").val(removesecond)
                   }
-
 
                   if (!res.error_msg) {
                     let Break = res.Break.split(":");
@@ -800,18 +983,55 @@
                     };
                     displayTime("", workTime);
 
-                    if (res.MissingDates.length > 0) {
 
+
+
+                    if (res.BreakOutEntry && Object.keys(res.BreakOutEntry).length > 0) {
+                      $("#NoBreackOut").removeClass("d-none");
+                      $("#NoBreackOut").modal("show");
+                      $('#clockout').removeClass('d-none');
+                      $('#break').removeClass('d-none');
+                      $('#clockin').addClass('d-none');
+
+                      stopWorkTimer();
+                      stopBreakTimer();
+
+                      // alert("res.BreakOutEntry.intime", res.BreakOutEntry.intime)
+                      const rawTime = new Date(res.BreakOutEntry.intime);
+                      const formatted = rawTime.toLocaleTimeString('en-US', {
+                        hour: '2-digit',
+                        minute: '2-digit',
+                        hour12: true,
+                        minute: '2-digit'
+                      });
+
+                      console.log("Formatted Time:", formatted);
+
+                      $('#breackIntime').val(formatted);
+                      $('#breackInDate').val(res.BreakOutEntry.intime.split("T")[0].split("-").reverse().join("-"));
+                      $("#breackInDate2").text(res.BreakOutEntry.intime.split("T")[0].split("-").reverse().join("-"))
+                    }
+
+
+
+
+                    if (res.MissingDates.length > 0) {
                       stopWorkTimer();
                       stopBreakTimer();
 
                       $("#exampleModalCenter").removeClass("d-none");
                       $("#exampleModalCenter").modal("show");
                       $('.daterangepicker').removeClass('d-none')
+                      $(".cancelBtn").click(function () {
+                        $('.daterangepicker').addClass('d-none')
+
+                      })
                       $("#datelistnoleave").val(res.firstDates).trigger('input');
 
+
+
                       let satrtDate = `${res.firstDates[0].split('-')[1]}/${res.firstDates[0].split('-')[0]}/${res.firstDates[0].split('-')[2]}`
-                      let endDate = `${res.firstDates[res.firstDates.length-1].split('-')[1]}/${res.firstDates[res.firstDates.length-1].split('-')[0]}/${res.firstDates[res.firstDates.length-1].split('-')[2]}`
+                      let endDate = `${res.firstDates[res.firstDates.length - 1].split('-')[1]}/${res.firstDates[res.firstDates.length - 1].split('-')[0]}/${res.firstDates[res.firstDates.length - 1].split('-')[2]}`
 
                       $("#leavelastDate").val(`${satrtDate}-${endDate}`)
                       function formatDateToISO(dateStr) {
@@ -826,7 +1046,6 @@
                       $("#leaveDate").val(formatDateToISO(res.MissingDates[0]));
 
                     }
-
                   } else {
                     stopWorkTimer();
                     toastr.error(res.error_msg);
@@ -862,10 +1081,11 @@
                 success: function (res) {
 
                   if (res.BreackOver === true) {
-
                     $('#breackOver').removeClass("d-none");
                     $('#breackOver').modal("show")
                     $('#BreackTime').text(res.BreackTime)
+                    stopWorkTimer();
+                    stopBreakTimer();
                   }
 
                   let Break = res.Break.split(":");
@@ -885,10 +1105,6 @@
                     s: Number(Working[2]),
                   };
                   displayTime("", workTime);
-
-
-
-
 
                 },
               });
@@ -951,6 +1167,24 @@
             });
 
 
+            $('#breackOver').on('hidden.bs.modal', function () {
+              $('#clockout').removeClass('d-none');
+              $('#break').removeClass('d-none');
+              $('#clockin').addClass('d-none');
+
+              startWorkTimer();
+              stopBreakTimer();
+            });
+
+
+            $('#NoBreackOut').on('hidden.bs.modal', function () {
+              $('#clockout').addClass('d-none');
+              $('#break').addClass('d-none');
+              $('#clockin').removeClass('d-none');
+
+              stopWorkTimer();
+              stopBreakTimer();
+            });
 
 
           });
@@ -960,41 +1194,12 @@
 
 
 
+
         </script>
-
-
-
-        <script>
-          document.getElementById("clockOut").addEventListener("change", function () {
-            const clockOutVal = this.value;
-            const clockInVal = document.getElementById("clockInTime").value;
-
-
-            const [time, modifier] = clockInVal.split(" ");
-            let [hours, minutes] = time.split(":");
-            hours = parseInt(hours, 10);
-
-            if (modifier === "PM" && hours < 12) hours += 12;
-            if (modifier === "AM" && hours === 12) hours = 0;
-
-            const clockIn24 = `${String(hours).padStart(2, '0')}:${minutes}`;
-
-            if (clockOutVal < clockIn24) {
-              document.getElementById("timeError").classList.remove("d-none");
-              this.value = "";
-            } else {
-              document.getElementById("timeError").classList.add("d-none");
-            }
-          });
-        </script>
-
 
         <script>
 
           $('#datelistnoleave').on('input change', function () {
-
-
-
 
             const leaveDatesString = document.getElementById('datelistnoleave').value;
 
@@ -1065,8 +1270,17 @@
 
             markLeaveDays();
 
-
+            $(document).ready(function () {
+              $('#leavelastDate').on('change', function () {
+                chengers();
+              });
+            });
             function chengers() {
+              if (typeof leaveDates === "undefined" || !Array.isArray(leaveDates) || leaveDates.length === 0) {
+                console.warn("leaveDates is not defined or empty.");
+                return;
+              }
+
               function isEndDateAfterLastDate(formattedEnd, lastLeaveDate) {
                 function parseDate(dateStr) {
                   const [day, month, year] = dateStr.split("-");
@@ -1082,43 +1296,38 @@
               let endInputEl = document.getElementById('leavelastDate');
               let endDateValue = endInputEl.value;
 
-
               let dates = endDateValue.split('-').map(d => d.trim());
-              if (dates.length !== 2) {
-
-                return;
-              }
-
+              if (dates.length !== 2) return;
 
               let endDateStrRaw = dates[1];
-
               let endParts = endDateStrRaw.split('/');
-              if (endParts.length !== 3) {
-                return;
-              }
+              if (endParts.length !== 3) return;
 
               let formattedEnd = `${endParts[1]}-${endParts[0]}-${endParts[2]}`;
 
               if (formattedEnd) {
                 let lastLeaveDate = leaveDates[leaveDates.length - 1];
-                let firstleaveDate = leaveDates[0];
-
+                let firstLeaveDate = leaveDates[0];
 
                 if (isEndDateAfterLastDate(formattedEnd, lastLeaveDate)) {
                   let lastsetDates = lastLeaveDate.split("-");
-                  let firstsetleaveDate = firstleaveDate.split("-");
+                  let firstsetleaveDate = firstLeaveDate.split("-");
+
                   let formatterEndDate = `${lastsetDates[1]}/${lastsetDates[0]}/${lastsetDates[2]}`;
-                  let startDateStr = `${firstsetleaveDate[1]}/${firstsetleaveDate[0]}/${firstsetleaveDate[2]}`
+                  let startDateStr = `${firstsetleaveDate[1]}/${firstsetleaveDate[0]}/${firstsetleaveDate[2]}`;
 
                   endInputEl.value = `${startDateStr} - ${formatterEndDate}`;
                 }
               }
             }
+
           });
 
           $(document).on('click', '#leavelastDate', function () {
             $('.daterangepicker').removeClass('d-none');
+            // $('#leavelastDate')
           });
+
         </script>
 
 

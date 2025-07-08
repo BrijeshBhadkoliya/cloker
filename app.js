@@ -11,27 +11,17 @@ app.use(cors());
 const helmet = require('helmet')
 const flash = require('connect-flash')
 const {connection} = require('./config/db')
-// Serve static files (fonts, images, etc.)
+
 app.use(express.static(path.join(__dirname, "public")));
 app.use(express.static(path.join(__dirname,'../public/uploads'))) 
-// Body parser middleware
-// app.use(session({
-//   secret:'message',
-//   resave:false,
-//   saveUninitialized:true, 
-//   cookie:{
-//     maxAge:60000
-//   }
-// }))
 
  app.use(
     helmet({
-        noCache: true, // For older versions, now deprecated
-        contentSecurityPolicy: false, // Disable CSP if not configured
+        noCache: true,
+        contentSecurityPolicy: false,
     })
 );
 
-// Middleware to set no-cache headers explicitly
 app.use((req, res, next) => {
     res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
     res.setHeader("Pragma", "no-cache");
@@ -40,17 +30,20 @@ app.use((req, res, next) => {
     next();
 });
 
-connection.connect((err)=>{
-  if (err) throw err;
-  console.log("Db Connected !!!!");
-})
+// connection.connect((err)=>{
+//  if(err){
+//   console.log(err);
+//  }
+//   console.log("Db Connected !!!!");
+// })
 
 app.use(session({
   secret: 'message',
   resave: false,
   saveUninitialized: true,
-  cookie: {maxAge: 1000 * 60 }
+  cookie: {maxAge: 1000 * 60 } 
 }))
+
 app.use(flash());
 app.use(function (req, res, next) {
   res.locals.success_msg = req.flash("success_msg");

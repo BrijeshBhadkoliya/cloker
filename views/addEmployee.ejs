@@ -9,14 +9,16 @@
 
 <body> <%- include('partials/sidebar.ejs') %>`
     <div class="page-body">
+
+
       <div class="container-fluid">
         <div class="page-title">
-          <div class="row">
-            <div class="col-sm-6">
+          <div class="row align-items-center">
+            <div class="col-12 col-md-6 text-center text-md-start mb-2 mb-md-0">
               <h3>Add Employee</h3>
             </div>
-            <div class="col-sm-6">
-              <ol class="breadcrumb">
+            <div class="col-12 col-md-6 text-center text-md-end">
+              <ol class="breadcrumb justify-content-center justify-content-md-end mb-0">
                 <li class="breadcrumb-item"><a href="/admin"><i data-feather="home" class="me-2"></i>Dashboard</a></li>
                 <li class="breadcrumb-item active">Add Employee</li>
               </ol>
@@ -24,92 +26,75 @@
           </div>
         </div>
       </div>
+
+   
+
       <!-- Container-fluid starts-->
       <div class="container-fluid dashboard-default">
         <div class="row">
-          <div class="col-sm-12">
-            <div class="card" style=" padding: 20px;">
-              <div class="card-header  relative" style="height: 100px; padding: 20px;">
-
-                <div class="border rounded-circle"
+          <div class="col-12">
+            <div class="card p-3">
+              <div class="card-header relative d-flex flex-column flex-md-row align-items-center"
+                style="padding: 20px;">
+                <div class="mx-auto mx-md-0 border rounded-circle mb-3 mb-md-0"
                   style="padding: 5px; height: 120px; width: 120px; display: flex; justify-content: center; align-items: center;">
                   <img src="/default/blank-avatar-photo-place-holder-600nw-1095249842.png" id="profilepri"
-                    alt="Profile Preview" class="rounded-circle"
-                    style="object-fit: cover; width: 100%; height: 100%; border-radius: 50%;">
+                    alt="Profile Preview" class="rounded-circle img-fluid"
+                    style="object-fit: cover; width: 100%; height: 100%;">
                 </div>
-
               </div>
-              <div class="card-body">
-                <div class="card relative">
 
-                </div>
+              <div class="card-body">
                 <form class="needs-validation" action="/admin/add_data" method="post" enctype="multipart/form-data">
                   <div class="row g-3 mb-3">
-
-
-                    <div class="col-md-4" style="height: 47px;">
-
-
-
+                    <div class="col-12 col-sm-6 col-md-4">
                       <label class="form-label" for="validationCustom01">Profile Image</label>
-                      <input class="form-control p-0 " style="padding: 12px 15px !important;" name="profileImag"
+                      <input class="form-control p-0" style="padding: 12px 15px !important;" name="profileImag"
                         onchange="document.getElementById('profilepri').src = window.URL.createObjectURL(this.files[0])"
-                        id="validationCustom01" type="file" placeholder="Mark" data-bs-original-title="" title=""
+                        id="validationCustom01" type="file" required>
+                      <div class="valid-feedback">Looks good!</div>
+                    </div>
+                    <div class="col-12 col-sm-6 col-md-4">
+                      <label class="form-label" for="validationCustom02">First name</label>
+                      <input class="form-control" id="validationCustom02" type="text" placeholder="Mark"
+                        name="firstName" required>
+                      <div class="valid-feedback">Looks good!</div>
+                    </div>
+                    <div class="col-12 col-sm-6 col-md-4">
+                      <label class="form-label" for="validationCustom03">Last name</label>
+                      <input class="form-control" id="validationCustom03" type="text" placeholder="Otto" name="lastName"
                         required>
                       <div class="valid-feedback">Looks good!</div>
                     </div>
-                    <div class="col-md-4">
-                      <label class="form-label" for="validationCustom02">First name</label>
-                      <input class="form-control" id="validationCustom02" type="text" placeholder="Mark"
-                        name="firstName" data-bs-original-title="" title="" required>
-                      <div class="valid-feedback">Looks good!</div>
-                    </div>
-                    <div class="col-md-4">
-                      <label class="form-label" for="validationCustom03">Last name</label>
-                      <input class="form-control" id="validationCustom03" type="text" placeholder="Otto" name="lastName"
-                        data-bs-original-title="" title="" required>
-                      <div class="valid-feedback">Looks good!</div>
-                    </div>
-
                   </div>
-                  <div class="row g-3">
 
-                    <div class="col-md-4 mb-3">
+                  <div class="row g-3 mb-3">
+                    <div class="col-12 col-sm-6 col-md-4">
                       <label class="form-label" for="validationCustomUsername">Username</label>
-                      <div class="input-group left-radius">
-                        <input class="form-control" id="validationCustomUsername" type="text" name="userName"
-                          placeholder="Username" aria-describedby="inputGroupPrepend" data-bs-original-title="" title=""
-                          required>
-                        <div class="invalid-feedback">Please Choose a Username.</div>
-                      </div>
+                      <input class="form-control" id="validationCustomUsername" type="text" name="userName"
+                        placeholder="Username" required>
+                      <div class="invalid-feedback">Please Choose a Username.</div>
                     </div>
-
-                    <div class="col-md-4 mb-3">
-                      <label class="form-label" for="validationCustomUsername">Email address</label>
-                      <div class="input-group left-radius"><span class="input-group-text"
-                          id="inputGroupPrepend">@</span>
-                        <input class="form-control" id="validationCustomUsername" type="email" name="email"
-                          placeholder="name@example.com" aria-describedby="inputGroupPrepend" data-bs-original-title=""
-                          title="" required>
-                        <div class="invalid-feedback">Please provide a valid email.</div>
+                    <div class="col-12 col-sm-6 col-md-4">
+                      <label class="form-label" for="validationCustomUsernameEmail">Email address</label>
+                      <div class="input-group">
+                        <span class="input-group-text">@</span>
+                        <input class="form-control" id="validationCustomUsernameEmail" type="email" name="email"
+                          placeholder="name@example.com" required>
                       </div>
+                      <div class="invalid-feedback">Please provide a valid email.</div>
                     </div>
-
-                    <div class="col-md-4">
-                      <label class="form-label" for="validationCustom03">Contact No.</label>
-                      <input class="form-control" id="validationCustom03" type="number" placeholder="12345678"
-                        name="phoneNum" data-bs-original-title="" title="" required>
+                    <div class="col-12 col-sm-6 col-md-4">
+                      <label class="form-label" for="validationCustom03Phone">Contact No.</label>
+                      <input class="form-control" id="validationCustom03Phone" type="number" placeholder="12345678"
+                        name="phoneNum" required>
                       <div class="invalid-feedback">Please provide a valid phone number.</div>
                     </div>
-
-
-
                   </div>
-                  <div class="row g-3">
 
-                    <div class="col-md-4 position-relative">
-                      <label class="form-label" for="validationCustom03">Password</label>
-
+                  <div class="row g-3 mb-3">
+                    <div class="col-12 col-sm-6 col-md-4">
+                      <label class="form-label" for="passwordInput">Password</label>
                       <div class="input-group">
                         <input class="form-control" id="passwordInput" type="password" placeholder="Password"
                           name="password" required>
@@ -117,99 +102,79 @@
                           <i class="fa-regular fa-eye-slash" id="togglePassword" style="cursor: pointer;"></i>
                         </span>
                       </div>
-
-                      <div class="invalid-feedback">
-                        Please provide a strong password.
-                      </div>
+                      <div class="invalid-feedback">Please provide a strong password.</div>
                     </div>
-
-
-                    <div class="col-md-4 mb-3">
+                    <div class="col-12 col-sm-6 col-md-4">
                       <label class="form-label" for="validationCustom04">Birthday:</label>
-                      <input class="form-control" id="validationCustom04" name="birthDate" type="date"
-                        data-bs-original-title="" title="" required>
-                      <div class="invalid-feedback">Please add birthdate </div>
+                      <input class="form-control" id="validationCustom04" name="birthDate" type="date" required>
+                      <div class="invalid-feedback">Please add birthdate</div>
                     </div>
-
-                    <div class="col-md-4 mb-3">
-                      <label class="form-label" for="validationCustom04">Joining Date:</label>
-                      <input class="form-control" id="validationCustom04" name="joindate" type="date"
-                        data-bs-original-title="" title="" required>
-                      <div class="invalid-feedback">Please add your joining date </div>
+                    <div class="col-12 col-sm-6 col-md-4">
+                      <label class="form-label" for="joindate">Joining Date:</label>
+                      <input class="form-control" id="joindate" name="joindate" type="date" required>
+                      <div class="invalid-feedback">Please add your joining date</div>
                     </div>
-
-
-
-
-
                   </div>
 
-
-                  <div class="row g-3">
-                   
-                      <div class="col-md-4 " style="height: 47px;">
-                        <label class="form-label">ID Image</label>
-                        <input class="form-control p-0 " style="padding: 12px 15px !important;" name="idImag"
-                          id="validationCustom01" type="file" placeholder="Mark" multiple data-bs-original-title=""
-                          title="">
-                        <div class="valid-feedback">Looks good!</div>
-                      </div>
-
-                     <div class="col-md-4 mb-3">
+                  <div class="row g-3 mb-3">
+                    <div class="col-12 col-sm-6 col-md-4">
+                      <label class="form-label">ID Image</label>
+                      <input class="form-control p-0" style="padding: 12px 15px !important;" name="idImag" type="file"
+                        multiple>
+                      <div class="valid-feedback">Looks good!</div>
+                    </div>
+                    <div class="col-12 col-sm-6 col-md-4">
                       <label class="form-label">Job Designation</label>
                       <select name="designation" id="designation" class="form-control">
                         <option value="" selected>Select Designation</option>
-                         <%durationtypes.map((val)=>{%>
-                        <option value="<%=val.type_values%>" ><%=val.type_values%></option>
-                        
-                        <%})%>
+                        <% durationtypes.map((val)=> { %>
+                          <option value="<%= val.type_values %>">
+                            <%= val.type_values %>
+                          </option>
+                          <% }) %>
                       </select>
                     </div>
-
-                    <div class="col-md-4 mb-3">
+                    <div class="col-12 col-sm-6 col-md-4">
                       <label class="form-label">Employment Type</label>
                       <select name="duration" id="duration" class="form-control">
                         <option value="" selected>Select Employment Type</option>
-                            <%designationtypes.map((val)=>{%>
-                        <option value="<%=val.type_values%>" ><%=val.type_values%></option>
-                        
-                        <%})%>
+                        <% designationtypes.map((val)=> { %>
+                          <option value="<%= val.type_values %>">
+                            <%= val.type_values %>
+                          </option>
+                          <% }) %>
                       </select>
                     </div>
-                  
-                    <div class="card-body animate-chk">
-                      <div class="row">
-                        <div class="col d-flex" style="align-items: center;">
-                          <label for="edo-ani" style="margin-right: 15px;">
-                            <input class="radio_animated" id="edo-ani" type="radio" name="status" value="active" checked
-                              required style="margin-right: 5px;">
-                            Active
-                          </label>
-                          <label for="edo-ani1">
-                            <input class="radio_animated" id="edo-ani1" type="radio" name="status" value="deactive"
-                              required style="margin-right: 5px;">
-                            Deactive
-                          </label>
-                        </div>
+                  </div>
 
+                  <div class="row mb-3">
+                    <div class="col-12">
+                      <label class="form-label me-3">Status</label>
+                      <div class="d-flex flex-wrap gap-3 align-items-center">
+                        <label>
+                          <input class="radio_animated me-1" type="radio" name="status" value="active" checked required>
+                          Active
+                        </label>
+                        <label>
+                          <input class="radio_animated me-1" type="radio" name="status" value="deactive" required>
+                          Deactive
+                        </label>
                       </div>
                     </div>
                   </div>
-                  <button class="btn btn-primary" type="submit" data-bs-original-title="" title="">Submit form</button>
+
+                  <button class="btn btn-primary" type="submit">Submit form</button>
                 </form>
               </div>
             </div>
           </div>
-
-
         </div>
-
       </div>
+
     </div>
-    </div>
-    </div>
+
     <!-- Container-fluid Ends-->
-    </div>
+
 
     <%- include('partials/footer.ejs') %>
 

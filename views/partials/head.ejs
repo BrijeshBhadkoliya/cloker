@@ -4,27 +4,22 @@
 <meta name="description" content="">
 <meta name="keywords" content="">
 <meta name="author" content="">
-<link rel="icon" href="/uploads/<%=setting[0].dark_img%>" type="image/x-icon">
-<link rel="shortcut icon" href="/uploads/<%=setting[0].dark_img%>" type="image/x-icon">
-<title>CSCODETECH</title>
-<link rel="preconnect" href="https://fonts.googleapis.com/">
-<link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin>
-<link
-    href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&amp;display=swap"
-    rel="stylesheet">
+<link rel="icon" href="/uploads/<%=setting[0].dark_img%>" type="image/x-icon" >
+ 
+<title>
+    <%= setting[0].site_titel %>
+</title>
+ 
+
+<link  href="/css/css2.css"  rel="stylesheet"  type="text/css">
+
 <link rel="stylesheet" type="text/css" href="/css/vendors/fontawsome-new.css">
-<!-- ico-font-->
-<link rel="stylesheet" type="text/css" href="/css/vendors/icofont.css">
-<!-- Themify icon-->
-<link rel="stylesheet" type="text/css" href="/css/vendors/themify.css">
-<link rel="stylesheet" href="/css/vendors/themify-up">
-<!-- Flag icon-->
-<link rel="stylesheet" type="text/css" href="/css/vendors/flag-icon.css">
+ 
 <!-- Feather icon-->
 <link rel="stylesheet" type="text/css" href="/css/vendors/feather-icon.css">
 <link rel="stylesheet" type="text/css" href="/css/vendors/scrollbar.css">
-<link rel="stylesheet" type="text/css" href="/css/vendors/animate.css">
-<link rel="stylesheet" type="text/css" href="/css/vendors/prism.css">
+<!-- <link rel="stylesheet" type="text/css" href="/css/vendors/animate.css"> -->
+ 
 <!-- Bootstrap css-->
 <link rel="stylesheet" type="text/css" href="/css/vendors/bootstrap.css">
 <link rel="stylesheet" type="text/css" href="/css/vendors/datatables.css">
@@ -40,7 +35,7 @@
 <script src="/js/tostify/jquery-1.9.1.min.js" hidden></script>
 <script src="/js/tostify/js-toastr.js"></script>
 
-
+ 
 <style>
     .tooltip .tooltip-inner {
         background-color: #1e2538;
@@ -49,43 +44,46 @@
         border-radius: 5px;
     }
 
-    /* .tooltip.bs-tooltip-start .tooltip-arrow:before {
-                border-left-color: #1e2538;
-                border-top-color: transparent;
-        } */
-
+ 
     .tooltip.bs-tooltip-top .tooltip-arrow:before {
         border-left-color: transparent;
         border-top-color: #1e2538;
     }
 
+    .tooltip.bs-tooltip-end .tooltip-arrow:before {
+        border-left-color: transparent;
+        border-right-color: #1e2538;
+    }
+
     .dataTables_wrapper button {
-    font-weight: 400;
-    font-size: 12px;
-    color: #fff;
-    border-radius: 14px !important;
-}
-img.img-fluid.table-avtar.rounded-circle.ms-2
- {
-    width: 30px !important;
-    height: 30px !important;
-    display: inline-block;
-    object-fit: cover;
-}
-.greeting-user .img-fluid.rounded-circle {
-    width: 150px !important;
-    height: 150px !important;
-    display: inline-block;
-    object-fit: cover;
-}
-.custom-card .card-profile img {
-    height: 110px;
-    padding: 7px;
-    background-color: #f6f8fc;
-    z-index: 1;
-    position: relative;
-    object-fit: cover;
-    width: 110px;
-    display: inline-block;
-}
+        font-weight: 400;
+        font-size: 12px;
+        color: #fff;
+        border-radius: 14px !important;
+    }
+
+    img.img-fluid.table-avtar.rounded-circle.ms-2 {
+        width: 30px !important;
+        height: 30px !important;
+        display: inline-block;
+        object-fit: cover;
+    }
+
+    .greeting-user .img-fluid.rounded-circle {
+        width: 150px !important;
+        height: 150px !important;
+        display: inline-block;
+        object-fit: cover;
+    }
+
+    .custom-card .card-profile img {
+        height: 110px;
+        padding: 7px;
+        background-color: #f6f8fc;
+        z-index: 1;
+        position: relative;
+        object-fit: cover;
+        width: 110px;
+        display: inline-block;
+    }
 </style>

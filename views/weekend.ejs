@@ -12,14 +12,15 @@
 
 <body> <%- include('partials/sidebar.ejs') %>`
     <div class="page-body">
+
       <div class="container-fluid">
         <div class="page-title">
-          <div class="row">
-            <div class="col-sm-6">
+          <div class="row align-items-center">
+            <div class="col-12 col-md-6 text-center text-md-start mb-2 mb-md-0">
               <h3>Weekend Setup</h3>
             </div>
-            <div class="col-sm-6">
-              <ol class="breadcrumb">
+            <div class="col-12 col-md-6 text-center text-md-end">
+              <ol class="breadcrumb justify-content-center justify-content-md-end mb-0">
                 <li class="breadcrumb-item"><a href="<%=role===2?'/employee/dashboard':'/admin/dashboard'%>"><i
                       data-feather="home" class="me-2"></i>Dashboard</a></li>
                 <li class="breadcrumb-item active"><a href="/admin/weekend"><i data-feather="user-check"
@@ -30,19 +31,20 @@
         </div>
       </div>
 
-      <div class="container-fluid ">
+
+
+      <div class="container-fluid">
         <div class="row">
           <div class="col-sm-12">
             <div class="card">
-
               <div class="card-body">
                 <div class="table-responsive theme-scrollbar">
                   <form action="/admin/weekends/" method="post">
-                    <table class="table table-hover">
+                    <table class="table table-bordered table-hover text-center align-middle">
                       <thead>
                         <tr>
-                          <th class="text-center" rowspan="2" style="padding: 20px;">Day</th>
-                          <th class="text-center" colspan="6">Weeks</th>
+                          <th rowspan="2">Day</th>
+                          <th colspan="6">Weeks</th>
                         </tr>
                         <tr>
                           <th>1st</th>
@@ -64,25 +66,20 @@
                               <% for (let i=1; i <=5; i++) { %>
                                 <td>
                                   <input type="checkbox" name="<%= day %>[]" value="<%= i %>"
-                                    class="checkbox checkbox-<%= day.toLowerCase() %>"
-                                    id="<%= day.toLowerCase() %>_checkbox_<%= i %>" style="width: 15px; height: 15px;"
-                                    <%=weekendData.some(data=> data.days === day &&
-                                  data.weeks.split(',').includes(i.toString())) ? 'checked' : '' %>
+                                    class="checkbox-<%= day.toLowerCase() %>"
+                                    id="<%= day.toLowerCase() %>_checkbox_<%= i %>" <%=weekendData.some(data=> data.days
+                                  === day && data.weeks.split(',').includes(i.toString())) ? 'checked' : '' %>
                                   onchange="checkAllSelected('<%= day.toLowerCase() %>')"
                                     >
-                                    <label for="<%= day.toLowerCase() %>_checkbox_<%= i %>"></label>
                                 </td>
                                 <% } %>
                                   <td>
                                     <input type="checkbox" id="select_all_<%= day.toLowerCase() %>"
-                                      onclick="toggleSelectAll('<%= day.toLowerCase() %>')"
-                                      style="width: 15px; height: 15px;">
-                                    <label for="select_all_<%= day.toLowerCase() %>"></label>
+                                      onclick="toggleSelectAll('<%= day.toLowerCase() %>')">
                                   </td>
                             </tr>
                             <% }); %>
                       </tbody>
-
                     </table>
 
                     <div class="card-footer text-end">
@@ -94,11 +91,8 @@
             </div>
           </div>
         </div>
-        <!-- HTML (DOM) sourced data  Starts-->
-
-        <!-- Container-fluid Ends-->
       </div>
-    </div>
+
     </div>
 
 

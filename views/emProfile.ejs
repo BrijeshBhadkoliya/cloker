@@ -9,14 +9,15 @@
 
 <body>  <%- include('partials/sidebar.ejs') %>`
     <div class="page-body">
+
       <div class="container-fluid">
         <div class="page-title">
-          <div class="row">
-            <div class="col-sm-6">
+          <div class="row align-items-center">
+            <div class="col-12 col-md-6 text-center text-md-start mb-2 mb-md-0">
               <h3>Edit Profile</h3>
             </div>
-            <div class="col-sm-6">
-              <ol class="breadcrumb">
+            <div class="col-12 col-md-6 text-center text-md-end">
+              <ol class="breadcrumb justify-content-center justify-content-md-end mb-0">
                 <li class="breadcrumb-item"><a href="<%=role===2 ?'/employee/dashboard':'/admin/dashboard'%>"><i
                       data-feather="home" class="me-2"></i>Dashboard</a></li>
 
@@ -26,6 +27,9 @@
           </div>
         </div>
       </div>
+
+  
+
       <!-- Container-fluid starts-->
       <div class="container-fluid">
         <div class="edit-profile">

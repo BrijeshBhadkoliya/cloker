@@ -11,10 +11,7 @@ var BootstrapNotifyDemo = function () {
             if ($('#bootstrap-notify-icon').val() != '') {
                 content.icon = 'icon ' + $('#bootstrap-notify-icon').val();
             }
-            if ($('#bootstrap-notify-url').prop('checked')) {
-                content.url = 'http://pixelstrap.com';
-                content.target = '_blank';
-            }
+            
             var notify = $.notify(content, { 
                 type: $('#bootstrap-notify-state').val(),
                 allow_dismiss: $('#bootstrap-notify-dismiss').prop('checked'),

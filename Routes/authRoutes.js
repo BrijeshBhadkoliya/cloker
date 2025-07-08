@@ -19,13 +19,70 @@ router.get("/admin/dashboard", isAuth, isAdmin, async (req, res) => {
   // BrithDay Array
   const month = moment().format("MM");
 
-  const BrithDayArr =
-    await DataFind(`SELECT firstName, lastName, birthDate, profileimage,
-           TIMESTAMPDIFF(YEAR, birthDate, CURDATE()) AS age
-    FROM employee
-    WHERE birthDate LIKE CONCAT('____-${month}-%')`);
+const BrithDayArr =
+  await DataFind(`SELECT firstName, lastName, birthDate, profileimage,
+         TIMESTAMPDIFF(YEAR, birthDate, CURDATE()) AS age,
+          DAY(birthDate) = DAY(CURDATE()) As today FROM employee WHERE status='active' AND MONTH(birthDate) = ${month}  AND DAY(birthDate) >= DAY(CURDATE())`);
+
 
   console.log("BrithDayArr", BrithDayArr);
+
+  // Notice Period
+
+  // notice_period find
+
+ let noticetime = await DataFind(
+  `SELECT notice.*, emp.profileimage, emp.firstName, emp.lastName, 
+  DATEDIFF(CURDATE(), STR_TO_DATE(notice.start_date, '%d-%m-%Y')) AS days_passed 
+  FROM tbl_notice_period AS notice 
+  JOIN employee AS emp ON emp.id = notice.emp_Id AND emp.status='active' 
+  WHERE notice.status= 'active'`
+);
+
+// console.log("noticetime[1].days_passed",noticetime[1].days_passed);
+console.log(noticetime);
+
+  let leftdaysList = [];
+
+for (const notice of noticetime) {
+  const startMoment = moment(notice.start_date, "YYYY-MM-DD");  
+
+  const days_passed = moment().diff(startMoment, "days"); 
+
+  const leftdays = notice.days_duration - days_passed;
+
+  const endNoticePeriod = startMoment.clone()
+    .add(notice.days_duration, "days")
+    .format("DD-MM-YYYY");
+
+  if (leftdays <= 0) {
+    const updated = await DataUpdate(
+      `tbl_notice_period`,
+      `status='deactive'`,
+      `emp_Id = '${notice.emp_Id}'`,
+      req.hostname,
+      req.protocol
+    );
+    
+     if (updated === -1){
+      req.flash("errors", process.env.dataerror);
+      return res.redirect("/valid_license");
+    }
+    continue;  
+  }
+
+  leftdaysList.push({
+    empId: notice.emp_Id,
+    profileimage: notice.profileimage,
+    firstName: notice.firstName,
+    lastName: notice.lastName,
+    startdays: startMoment.format("DD-MM-YYYY"),
+    enddays: endNoticePeriod,
+    leftdays: leftdays
+  });
+}
+
+  // Notice Period End
 
   const currantDate = new Date()
     .toISOString()
@@ -33,6 +90,7 @@ router.get("/admin/dashboard", isAuth, isAdmin, async (req, res) => {
     .split("-")
     .reverse()
     .join("-");
+
   console.log(currantDate);
 
   const formattedDate = new Date().toLocaleDateString("en-GB", {
@@ -41,7 +99,7 @@ router.get("/admin/dashboard", isAuth, isAdmin, async (req, res) => {
   });
   console.log(formattedDate);
 
-  let employeeData = await DataFind("SELECT * FROM employee");
+  let employeeData = await DataFind("SELECT * FROM employee WHERE status='active'");
   // console.log("employeeData",employeeData);
   let todayAttend = await DataFind(
     `SELECT * FROM tbl_employee_attndence WHERE date='${currantDate}'`
@@ -67,7 +125,7 @@ router.get("/admin/dashboard", isAuth, isAdmin, async (req, res) => {
     };
   });
 
-  // console.log(mergedData);
+  // console.log("mergedData",mergedData);
 
   //  console.log(data);
 
@@ -78,6 +136,7 @@ router.get("/admin/dashboard", isAuth, isAdmin, async (req, res) => {
     newdata,
     mergedData,
     BrithDayArr,
+    leftdaysList,
   });
 });
 
@@ -97,11 +156,11 @@ router.get("/employee/dashboard", isAuth, async (req, res) => {
 
   const month = moment().format("MM");
 
-  const BrithDayArr =
-    await DataFind(`SELECT firstName, lastName, birthDate, profileimage,
-           TIMESTAMPDIFF(YEAR, birthDate, CURDATE()) AS age
-    FROM employee
-    WHERE birthDate LIKE CONCAT('____-${month}-%')`);
+const BrithDayArr =
+  await DataFind(`SELECT firstName, lastName, birthDate, profileimage,
+         TIMESTAMPDIFF(YEAR, birthDate, CURDATE()) AS age,
+          DAY(birthDate) = DAY(CURDATE()) As today
+  FROM employee WHERE status='active' AND MONTH(birthDate) = ${month}  AND DAY(birthDate) >= DAY(CURDATE())`);
 
   // console.log("BrithDayArr", BrithDayArr);
 
@@ -112,44 +171,64 @@ router.get("/employee/dashboard", isAuth, async (req, res) => {
   );
 
   let noticetime = await DataFind(
-    `SELECT *, DATEDIFF(CURDATE(), STR_TO_DATE(start_date, '%d-%m-%Y')) AS days_passed FROM tbl_notice_period WHERE emp_Id = '${employee.id}' AND status= 'active'`
-  );
+  `SELECT *, DATEDIFF(CURDATE(), STR_TO_DATE(start_date, '%d-%m-%Y')) AS days_passed 
+   FROM tbl_notice_period 
+   WHERE emp_Id = '${employee.id}' AND status= 'active'`
+);
 
-  let leftdays = 0;
-  let startMoment = ''
-  let endNoticePeriod = ''
+let leftdays = 0;
+let startMoment = "";
+let endNoticePeriod = "";
 
-  if (noticetime.length > 0) {
-    leftdays = setting[0].notice_period - noticetime[0].days_passed;
-
-
+if (noticetime.length > 0) {
   console.log(noticetime);
 
-   startMoment = moment(noticetime[0].start_date, "DD-MM-YYYY"); // <-- string to moment
+ 
+  startMoment = moment(noticetime[0].start_date, "");
+  
+  
+  const days_passed = moment().diff(startMoment, "days");
+  
+  leftdays = noticetime[0].days_duration - days_passed;
 
   endNoticePeriod = startMoment
-    .clone() // clone so original moment is not mutated
-    .add(setting[0].notice_period, "days")
+    .clone()
+    .add(noticetime[0].days_duration, "days")
     .format("DD-MM-YYYY");
-  }
-  let leftdaysobj = {
-    leftdays: leftdays,
-    startdays: startMoment,
-    enddays: endNoticePeriod,
-  };
-console.log("leftdaysobj",leftdaysobj);
+}
 
-  if (leftdaysobj.leftdays <= 0 ) {
-    const updated = await DataUpdate(
-      `tbl_notice_period`,
-      `status='deactive'`,
-      `emp_Id = '${employee.id}'`,
-      req.hostname,
-      req.protocol
-    );
+let leftdaysobj = {
+  leftdays: 0,
+  startdays: "",
+  enddays: "",
+};
+console.log(noticetime);
 
-    if (updated === -1) throw new Error("Update failed");
-  }
+if(noticetime.length > 0 &&   noticetime[0].days_duration >= leftdays){
+  leftdaysobj.leftdays = leftdays
+  leftdaysobj.startdays = startMoment ? startMoment.format("DD-MM-YYYY") : ""
+  leftdaysobj.enddays = endNoticePeriod
+}
+
+console.log("leftdaysobj", leftdaysobj);
+
+if (leftdaysobj.leftdays <= 0) {
+  const updated = await DataUpdate(
+    `tbl_notice_period`,
+    `status='deactive'`,
+    `emp_Id = '${employee.id}'`,
+    req.hostname,
+    req.protocol
+  );
+
+  // if (updated === -1) throw new Error("Update failed");
+   if (updated === -1){
+      req.flash("errors", process.env.dataerror);
+      return res.redirect("/valid_license");
+    }
+}
+
+  // Payroll Start
 
   let payroll = await DataFind(`SELECT payroll_date FROM tbl_setting`);
   let payrollDay = parseInt(payroll[0].payroll_date);
@@ -270,7 +349,7 @@ console.log("leftdaysobj",leftdaysobj);
       employeedetais,
       BrithDayArr,
       leaveType,
-      leftdaysobj:leftdaysobj,
+      leftdaysobj: leftdaysobj,
       payrollobj,
     });
   } else {
@@ -284,7 +363,7 @@ console.log("leftdaysobj",leftdaysobj);
       employeedetais,
       BrithDayArr,
       leaveType,
-      leftdaysobj:leftdaysobj,
+      leftdaysobj: leftdaysobj,
       payrollobj,
     });
   }

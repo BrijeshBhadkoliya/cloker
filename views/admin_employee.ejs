@@ -6,6 +6,31 @@
 <head>
     <%- include('partials/head.ejs') %>
         <link rel="stylesheet" type="text/css" href="/css/vendors/daterange-picker.css">
+        <style>
+            .dataTables_length {
+                visibility: hidden;
+
+            }
+        </style>
+        <style>
+            .date-picker-wrapper {
+                margin-bottom: -41px;
+                z-index: 5;
+                width: 200px;
+                position: relative;
+                margin-left: 0px;
+
+            }
+
+            @media (max-width: 668px) {
+                .date-picker-wrapper {
+                    margin-left: auto;
+                    margin-right: auto;
+                    margin-bottom: 15px;
+
+                }
+            }
+        </style>
 
 </head>
 
@@ -14,16 +39,16 @@
         <div class="page-body">
             <div class="container-fluid">
                 <div class="page-title">
-                    <div class="row">
-                        <div class="col-sm-6">
-                            <h3>Employee List</h3>
+                    <div class="row align-items-center">
+                        <div class="col-12 col-md-6 text-center text-md-start mb-2 mb-md-0">
+                            <h3>Daily Entry</h3>
                         </div>
-                        <div class="col-sm-6">
-                            <ol class="breadcrumb">
+                        <div class="col-12 col-md-6 text-center text-md-end">
+                            <ol class="breadcrumb justify-content-center justify-content-md-end mb-0">
                                 <li class="breadcrumb-item"><a href="/admin/dashboard"><i data-feather="home"
                                             class="me-2"></i>Dashboard</a></li>
                                 <li class="breadcrumb-item active"><a href="/admin/attendance"><i
-                                            data-feather="user-check" class="me-2"></i>Attendance List</a></li>
+                                            data-feather="user-check" class="me-2"></i>Daily Entry</a></li>
                             </ol>
                         </div>
                     </div>
@@ -31,59 +56,27 @@
             </div>
             <div class="container-fluid ">
                 <div class="row">
-                    <div class="col-sm-12">
-                        <div class="mt-3">
-                            <div class="card">
-                                <div class="card-body d-flex align-items-center justify-content-end flex-wrap gap-2">
 
-
-                                    <!-- <div class="dropdown">
-                                        <button class="btn btn-square btn-outline-primary dropdown-toggle" type="button"
-                                            data-bs-toggle="dropdown" aria-expanded="false">
-                                           <i class="fa-duotone fa-solid fa-user me-1"></i> Chandresh Bhil
-                                        </button>
-                                          
-                                    </div> -->
-
-
-                                    <div>
-                                        <div class="theme-form">
-                                            <div>
-                                                <input class="form-control text-primary border-primary" type="text"
-                                                    oninput="Datapic()" onchange="Datapic()" name="birthdate"
-                                                    id="datePic" value="4/24/2023">
-                                            </div>
-                                        </div>
-                                    </div>
-
-
-                                    <button class="btn btn-outline-dark rounded"
-                                        style="font-size: 16px; padding: 0px !important; height: 35px; width:35px ;">
-                                        <i class="fa-regular fa-arrow-down-to-line"></i>
-                                    </button>
-
-
-                                    <button class="btn btn-square btn-primary rounded-circle text-white"
-                                        style="font-size: 20px; padding: 0px !important; height: 35px; width:35px ;">
-                                        +
-                                    </button>
-
-                                </div>
-                            </div>
-                        </div>
-                    </div>
                     <!-- HTML (DOM) sourced data  Starts-->
                     <div class="col-sm-12">
                         <div class="card">
                             <div class="card-body">
                                 <div class="table-responsive theme-scrollbar">
-                                    <table class="display" style="font-size: 12px;" id="basic-1">
+                                    <div class="date-picker-wrapper">
+                                        <div class="theme-form">
+                                            <div>
+                                                <input class="form-control text-primary border-primary" type="text"
+                                                    onchange="Datapic()" oninput="Datapic()" name="birthdate"
+                                                    id="datePic" placeholder="Select Date">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <table class="display nowrap" style="font-size: 12px;" id="basic-1">
                                         <thead>
                                             <tr>
                                                 <th class="d-none">#</th>
                                                 <th>Date</th>
                                                 <th>Employee</th>
-
                                                 <th>Day</th>
                                                 <th>Attendance</th>
                                                 <th>Clock In</th>
@@ -113,7 +106,8 @@
                                                         <td>
                                                             <%=formattedDate%>
                                                         </td>
-                                                        <td>
+                                                        <td data-bs-toggle="tooltip" data-bs-placement="right"
+                                                            title="<%= val.em_name + ' '+ val.em_lname %>">
                                                             <a href="/admin/attendlist/<%=val.emplyeeId%>">
                                                                 <%=val.em_name%>
                                                             </a>
@@ -146,20 +140,21 @@
                                                                 <% if(val.clockOut_time==='' ) {%>
 
                                                                     <div class="d-flex align-items-center justify-content-center px-2 py-1 rounded text-primary fw-semibold"
-                                                                        style="width: 28px; height: 28px; background-color: rgba(25, 76, 135, 0.1); font-size: 12px; font-weight: 600;">
-                                                                        <i class="fa-solid fa-triangle-exclamation"
-                                                                            data-bs-toggle="tooltip"
-                                                                            data-bs-placement="Top"
-                                                                            title="On Going!"></i>
+                                                                        style="width: 28px; height: 28px; background-color: rgba(25, 76, 135, 0.1); font-size: 12px; font-weight: 600;"
+                                                                        data-bs-toggle="tooltip" data-bs-placement="Top"
+                                                                        title="On Going!">
+                                                                        <i class="fa-solid fa-triangle-exclamation"></i>
                                                                     </div>
                                                                     <!-- <i class="bg-light-success font-success" data-feather="alert-triangle"></i> -->
                                                                     <% }else if(val.attendens_status==='P' ||
-                                                                        val.attendens_status==='C' || val.attendens_status === 'EC') { %>
+                                                                        val.attendens_status==='C' ||
+                                                                        val.attendens_status==='EC' ||
+                                                                        val.attendens_status==='BO' ) { %>
                                                                         <div class="d-flex align-items-center justify-content-center px-2 py-1 rounded text-success fw-semibold position-relative"
                                                                             style="width: 28px; height: 28px; background-color: rgba(25, 135, 84, 0.1); font-size: 12px; font-weight: 600;"
                                                                             data-bs-toggle="tooltip"
                                                                             data-bs-placement="top"
-                                                                            title="<%= val.attendens_status === 'C' ? 'Missing Clock Out' : val.attendens_status === 'EC' ? 'Erlyclock Out' : 'Present' %>">
+                                                                            title="<%= val.attendens_status === 'C' ? 'Missing Clock Out' : val.attendens_status === 'EC' ? 'Erlyclock Out' : val.attendens_status === 'BO' ? 'BreakOut Missing' : 'Present' %>">
 
                                                                             <span>P</span>
 
@@ -169,12 +164,23 @@
                                                                                     <i
                                                                                         class="fa-duotone fa-solid fa-alarm-exclamation"></i>
                                                                                 </div>
-                                                                                <% }else if(val.attendens_status==='EC'){ %>
+                                                                                <% }else if(val.attendens_status==='EC'
+                                                                                    ){ %>
                                                                                     <div class="position-absolute top-0 start-100 translate-middle badge text-danger"
-                                                                                    style="font-size: 10px;">
-                                                                                    <i class="fa-solid fa-alarm-snooze"></i>
-                                                                                </div>
-                                                                               <% } %>
+                                                                                        style="font-size: 10px;">
+                                                                                        <i
+                                                                                            class="fa-solid fa-alarm-snooze"></i>
+                                                                                    </div>
+                                                                                    <% }else
+                                                                                        if(val.attendens_status==='BO'
+                                                                                        ){ %>
+                                                                                        <div class="position-absolute top-0 start-100 translate-middle badge text-danger"
+                                                                                            style="font-size: 11px;">
+                                                                                            <i class="fas fa-mug-hot"
+                                                                                                style="position: relative;"></i>
+
+                                                                                        </div>
+                                                                                        <% } %>
 
                                                                         </div>
                                                                         <% } else if(val.day_status !=='WK' ) { %>
@@ -184,7 +190,7 @@
                                                                                     data-bs-toggle="tooltip"
                                                                                     data-bs-placement="top"
                                                                                     title="Leave Pending">
-                                                                                  A
+                                                                                    A
                                                                                 </div>
                                                                                 <% } else { %>
                                                                                     <div class="d-flex align-items-center justify-content-center"
@@ -192,36 +198,50 @@
                                                                                         data-bs-toggle="tooltip"
                                                                                         data-bs-placement="top"
                                                                                         title="<%= val.leave_status === 'Appove' ? 'Leave Approved' : val.leave_status === 'Reject' ? 'Leave Rejected' : 'Absent' %>">
-                                                                                        <%if(val.leave_status==="Appove" ){
-                                                                                        %>
-                                                                                        <div class="position-absolute top-0 start-100 translate-middle badge text-success"
-                                                                                            style="font-size: 10px;">
-                                                                                            <i
-                                                                                                class="fa-solid fa-thumbs-up"></i>
-                                                                                        </div>
-                                                                                        <%}else
-                                                                                            if(val.leave_status==="Reject"
-                                                                                            ){%>
-                                                                                            ? `<div
-                                                                                                class="position-absolute top-0 start-100 translate-middle badge text-danger"
+                                                                                        <%if(val.leave_status==="Appove"
+                                                                                            ){ %>
+                                                                                            <div class="position-absolute top-0 start-100 translate-middle badge text-success"
                                                                                                 style="font-size: 10px;">
                                                                                                 <i
-                                                                                                    class="fa-solid fa-ban"></i>
-                                                                                            </div>`
-                                                                                            : ""
-                                                                                            <% } %>
+                                                                                                    class="fa-solid fa-thumbs-up"></i>
+                                                                                            </div>
+                                                                                            <%}else
+                                                                                                if(val.leave_status==="Reject"
+                                                                                                ){%>
+                                                                                                ? `<div
+                                                                                                    class="position-absolute top-0 start-100 translate-middle badge text-danger"
+                                                                                                    style="font-size: 10px;">
+                                                                                                    <i
+                                                                                                        class="fa-solid fa-ban"></i>
+                                                                                                </div>`
+                                                                                                : ""
+                                                                                                <% } %>
                                                                                     </div>
                                                                                     <% } %>
                                                                                         <% }else{ %>
                                                                                             <div>-</div>
                                                                                             <%}%>
                                                         </td>
-                                                        <% function SecondTime(t) { if (val.attendens_status==='P' ||
-                                                            val.attendens_status==='C' || val.attendens_status==='EC' && t !=='-' ) { if (!t || typeof
-                                                            t !=='string' ) { return ' ' ; } const [h, m]=t.split(':');
-                                                            const ampm=t.includes('AM') ? 'AM' : 'PM' ; return
-                                                            `${h.padStart(2, '0' )}:${m.padStart(2, '0' )} ${ampm}`;
-                                                            }else{ return '-' ; } } %>
+                                                        <% function SecondTime(t) { const validStatuses=['P', 'C' , 'EC'
+                                                            , 'BO' ]; if (!validStatuses.includes(val.attendens_status))
+                                                            return '-' ; if (!t || typeof t !=='string' ||
+                                                            t.trim()==='-' ) return '-' ; t=t.trim(); if
+                                                            (t.toLowerCase().includes('am') ||
+                                                            t.toLowerCase().includes('pm')) { const
+                                                            timeMatch=t.match(/^(\d{1,2}):(\d{2})(?::(\d{2}))?\s*(am|pm)$/i);
+                                                            if (timeMatch) { const hour=timeMatch[1].padStart(2, '0' );
+                                                            const minute=timeMatch[2].padStart(2, '0' ); const
+                                                            period=timeMatch[4].toUpperCase(); return `${hour}:${minute}
+                                                            ${period}`; } return t; } const timeParts=t.split(':'); if
+                                                            (timeParts.length < 2) return '-' ; let
+                                                            hour=parseInt(timeParts[0], 10); const minute=timeParts[1];
+                                                            const ampm=hour>= 12 ? 'PM' : 'AM';
+
+                                                            hour = hour % 12 || 12;
+
+                                                            return `${hour.toString().padStart(2,
+                                                            '0')}:${minute.padStart(2, '0')} ${ampm}`;
+                                                            } %>
                                                             <td>
                                                                 <%=SecondTime(val.clockIn_time)%>
                                                             </td>
@@ -229,7 +249,9 @@
                                                                 <%=SecondTime(val.clockOut_time)%>
                                                             </td>
                                                             <% function formatTime(t) { if (val.attendens_status==='P'
-                                                                || val.attendens_status==='C' || val.attendens_status==='EC' && t !=='-' ) { if (!t ||
+                                                                || val.attendens_status==='C' ||
+                                                                val.attendens_status==='EC' ||
+                                                                val.attendens_status==='BO' && t !=='-' ) { if (!t ||
                                                                 typeof t !=='string' ) { return ' ' ; } const
                                                                 parts=t.split(':').map(part=>
                                                                 part.padStart(2,
@@ -258,7 +280,9 @@
                                                                     </td>
                                                                     <td>
                                                                         <%if(val.attendens_status==='P' ||
-                                                                            val.attendens_status==='C' ){%>
+                                                                            val.attendens_status==='C' ||
+                                                                            val.attendens_status==='EC' ||
+                                                                            val.attendens_status==='BO' ){%>
                                                                             <ul class="action">
                                                                                 <li class="edit"><a
                                                                                         href="/employee/entry/<%=val.id%>"
@@ -346,7 +370,7 @@
                                 res.forEach((val, i) => {
 
                                     function formatTime(t) {
-                                        if (val.attendens_status === 'P' || val.attendens_status === 'C' || val.attendens_status==='EC' && t !== '-') {
+                                        if (val.attendens_status === 'P' || val.attendens_status === 'C' || val.attendens_status === 'EC' || val.attendens_status === 'BO' && t !== '-') {
                                             if (!t || typeof t !== 'string') {
                                                 return ' ';
                                             }
@@ -359,17 +383,49 @@
                                     }
 
                                     function SecondTime(t) {
-                                        if (val.attendens_status === 'P' || val.attendens_status === 'C' || val.attendens_status==='EC' && t !== '-') {
-                                            if (!t || typeof t !== 'string') {
-                                                return ' ';
+                                        const validStatuses = ['P', 'C', 'EC', 'BO'];
+
+                                        if (!validStatuses.includes(val.attendens_status)) return '-';
+                                        if (!t || typeof t !== 'string' || t.trim() === '-') return '-';
+
+                                        t = t.trim();
+
+                                        if (t.toLowerCase().includes('am') || t.toLowerCase().includes('pm')) {
+                                            const timeMatch = t.match(/^(\d{1,2}):(\d{2})(?::(\d{2}))?\s*(am|pm)$/i);
+                                            if (timeMatch) {
+                                                const hour = timeMatch[1].padStart(2, '0');
+                                                const minute = timeMatch[2].padStart(2, '0');
+                                                const period = timeMatch[4].toUpperCase();
+                                                return `${hour}:${minute} ${period}`;
                                             }
-                                            const [h, m] = t.split(':');
-                                            const ampm = t.includes('AM') ? 'AM' : 'PM';
-                                            return `${h.padStart(2, '0')}:${m.padStart(2, '0')} ${ampm}`;
-                                        } else {
-                                            return '';
+                                            return t;
                                         }
+
+
+                                        const timeParts = t.split(':');
+                                        if (timeParts.length < 2) return '-';
+
+                                        let hour = parseInt(timeParts[0], 10);
+                                        const minute = timeParts[1];
+                                        const ampm = hour >= 12 ? 'PM' : 'AM';
+
+                                        hour = hour % 12 || 12;
+
+                                        return `${hour.toString().padStart(2, '0')}:${minute.padStart(2, '0')} ${ampm}`;
                                     }
+
+                                    function timeToSeconds(timeStr) {
+                                        if (!timeStr || typeof timeStr !== 'string') return 0;
+                                        const [h, m, s] = timeStr.split(':').map(Number);
+                                        return (h || 0) * 3600 + (m || 0) * 60 + (s || 0);
+                                    }
+
+                                    const breakInSeconds = timeToSeconds(val.break_time);
+                                    const settingInSeconds = timeToSeconds(val.setting_break_time);
+                                    const isBreakOver = breakInSeconds > settingInSeconds;
+
+
+
 
                                     const [day, month, year] = val.date.split('-');
                                     const dateObj = new Date(`${year}-${month}-${day}`);
@@ -400,13 +456,13 @@
                      title="On Going!" >
                      <i class="fa-solid fa-triangle-exclamation"></i>
                     </div>
-        ` : val.attendens_status === 'P' || val.attendens_status === 'C' || val.attendens_status === 'EC' ? `
+        ` : val.attendens_status === 'P' || val.attendens_status === 'C' || val.attendens_status === 'EC' || val.attendens_status === 'BO' ? `
               <div
     class="d-flex align-items-center justify-content-center px-2 py-1 rounded text-success fw-semibold position-relative"
     style="width: 28px; height: 28px; background-color: rgba(25, 135, 84, 0.1); font-size: 12px; font-weight: 600;"
     data-bs-toggle="tooltip"
     data-bs-placement="top"
-    title="${val.attendens_status === 'C' ? 'Missing Clock Out' : val.attendens_status === 'EC' ? 'Erlyclock Out' : 'Present'}">
+    title="${val.attendens_status === 'C' ? 'Missing Clock Out' : val.attendens_status === 'EC' ? 'Erlyclock Out' : val.attendens_status === 'BO' ? 'BreakOut Missing' : 'Present'}">
     
     P
 
@@ -414,13 +470,18 @@
   <div class="position-absolute top-0 start-100 translate-middle badge text-primary"
        style="font-size: 10px;">
     <i class="fa-solid fa-alarm-exclamation"></i>
-  </div>` : 
-val.attendens_status === 'EC' ? `
+  </div>` :
+                                            val.attendens_status === 'EC' ? `
   <div class="position-absolute top-0 start-100 translate-middle badge text-danger"
        style="font-size: 10px;">
     <i class="fa-solid fa-alarm-snooze"></i>
-  </div>` : ''
-}
+  </div>` : val.attendens_status === 'BO' ? ` <div class="position-absolute top-0 start-100 translate-middle badge text-danger"
+                                                                                                style="font-size: 11px;">
+                                                                                                <i class="fas fa-mug-hot"
+                                                                                                    style="position: relative;"></i>
+                                                                                                
+                                                                                            </div>` : ''
+                                        }
   </div>
         `: val.day_status !== 'WK' ? `${val.leave_status === "Pending" ? `  <div
                  class="d-flex align-items-center justify-content-center px-2 py-1 rounded text-danger fw-semibold"
@@ -453,7 +514,7 @@ A
 </div>
         `}` : `<div>-</div>`;
 
-                                    const actionLink = val.attendens_status === 'P' || val.attendens_status === 'C' ? `
+                                    const actionLink = val.attendens_status === 'P' || val.attendens_status === 'C' || val.attendens_status === 'EC' || val.attendens_status === 'BO' ? `
             <ul class="action">
                 <li class="edit">
                     <a href="/employee/entry/${val.id}" title="">
@@ -472,14 +533,16 @@ A
                 <td class="d-none">${i + 1}</td>
                 <td>${formattedDate}</td>
                 <td>
-                    <a href="/admin/attendlist/${val.emplyeeId}" class="text-black">${val.em_name}</a>
+                 <a href="/admin/attendlist/${val.emplyeeId}"  data-bs-toggle="tooltip"
+                 data-bs-placement="right"
+                 title="${val.em_name} ${val.em_lname}"  class="text-black">${val.em_name}</a>
                 </td>
                 <td>${statusDiv}</td>
                 <td>${attendanceIcon}</td>
                 <td>${SecondTime(val.clockIn_time) || '-'}</td>
-                <td>${SecondTime(val.clockOut_time) || '-'}</td>
+                <td class="${val.attendens_status === 'C' || val.attendens_status === 'EC' || val.attendens_status === 'BO' ? 'text-danger' : ''}" >${SecondTime(val.clockOut_time)}</td>
                 <td>${formatTime(val.total_time) || '-'}</td>
-                <td>${formatTime(val.break_time) || '-'}</td>
+                <td class="${val.attendens_status === 'BO' || isBreakOver === true ? 'text-danger' : ''}">${formatTime(val.break_time)}</td>
                 <td>${formatTime(val.productive_time) || '-'}</td>
                 <td>${formatTime(val.extra_time) || '-'}</td>
                 <td>${val.clockIn_ip || '-'}</td>
@@ -487,7 +550,7 @@ A
                 <td>${actionLink}</td>
             </tr>
         `;
-                                });
+     });
 
 
                                 $('[data-bs-toggle="tooltip"]').tooltip();
@@ -495,7 +558,8 @@ A
                                 $('#basic-1').DataTable({
                                     pageLength: 10,
                                     destroy: true,
-                                    retrieve: true
+                                    retrieve: true,
+                                    paging: false
                                 });
 
 

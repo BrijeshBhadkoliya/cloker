@@ -9,15 +9,15 @@
 
 <body> <%- include('partials/sidebar.ejs') %>`
         <div class="page-body">
+
             <div class="container-fluid mb-3">
                 <div class="page-title">
-                    <div class="row">
-                        <div class="col-sm-6">
-                            <h3 class="d-flex">Employee Activity In <%= date %>
-                            </h3>
+                    <div class="row align-items-center">
+                        <div class="col-12 col-md-6 text-center text-md-start mb-2 mb-md-0">
+                            <h3><%=EmployeeName%> Activity  In <%= date %> </h3>
                         </div>
-                        <div class="col-sm-6">
-                            <ol class="breadcrumb">
+                        <div class="col-12 col-md-6 text-center text-md-end">
+                            <ol class="breadcrumb justify-content-center justify-content-md-end mb-0">
                                 <li class="breadcrumb-item"><a
                                         href="<%=role===2 ?'/employee/dashboard':'/admin/dashboard'%>"><i
                                             data-feather="home" class="me-2"></i>Dashboard</a></li>
@@ -30,12 +30,14 @@
                     </div>
                 </div>
             </div>
+
+
             <div class="container-fluid ">
                 <div class="row">
                     <div class="col-sm-12">
-
                         <div class="row">
-                            <div class="col-sm-6 col-lg-3">
+
+                            <div class="col-sm-6 col-lg-6 col-xl-6 col-xxl-3">
                                 <div class="card o-hidden">
                                     <div class="card-header pb-0">
                                         <div class="d-flex">
@@ -63,7 +65,8 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="col-sm-6 col-lg-3">
+ 
+                            <div class="col-sm-6 col-lg-6 col-xl-6 col-xxl-3">
                                 <div class="card o-hidden product-widget">
                                     <div class="card-header pb-0">
                                         <div class="d-flex">
@@ -92,8 +95,8 @@
                                     </div>
                                 </div>
                             </div>
-
-                            <div class="col-sm-6 col-lg-3">
+ 
+                            <div class="col-sm-6 col-lg-6 col-xl-6 col-xxl-3">
                                 <div class="card o-hidden message-widget">
                                     <div class="card-header pb-0">
                                         <div class="d-flex">
@@ -122,7 +125,8 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="col-sm-6 col-lg-3">
+ 
+                            <div class="col-sm-6 col-lg-6 col-xl-6 col-xxl-3">
                                 <div class="card o-hidden user-widget">
                                     <div class="card-header pb-0">
                                         <div class="d-flex">
@@ -151,6 +155,7 @@
                                     </div>
                                 </div>
                             </div>
+ 
                         </div>
                     </div>
                     <!-- HTML (DOM) sourced data  Starts-->
@@ -173,38 +178,38 @@
                                         </thead>
                                         <tbody>
                                             <% Allentrys.map((val,i)=>{ %>
-                                                <tr class="odd" style="font-size: 14px;">
+                                                <tr class="odd" style="font-size: 14px;" >
                                                     <td class="d-none">
                                                         <%=i%>
                                                     </td>
-                                                    <td>
+                                                    <td   class="<%= val.role && val.role === 'US' ? 'text-danger' : '' %> text-nowrap"  >
                                                         <span>
                                                             <%=val.intime !=='' ?val.status===1 ? "Work Time"
                                                                 : "Break Time" :"ClockOut"%>
                                                         </span>
                                                     </td>
-                                                    <td>
+                                                    <td class="<%= val.role && val.role === 'US' ? 'text-danger' : '' %> text-nowrap"> 
                                                         <%= isNaN(new Date(val.intime)) ? '-' : new Date(new
                                                             Date(val.intime).toLocaleString("en-US", {
                                                             timeZone: "Asia/Kolkata" })) .toLocaleTimeString("en-US", {
                                                             hour: "2-digit" , minute: "2-digit" , hour12: true }) %>
                                                     </td>
-                                                    <td class="sorting_1">
+                                                    <td class="<%= val.role && val.role === 'US' ? 'text-danger' : '' %> text-nowrap">
                                                         <%= isNaN(new Date(val.outtime)) ? '-' : new Date(new
                                                             Date(val.outtime).toLocaleString("en-US", {
                                                             timeZone: "Asia/Kolkata" })) .toLocaleTimeString("en-US", {
                                                             hour: "2-digit" , minute: "2-digit" , hour12: true }) %>
                                                     </td>
-                                                    <td>
+                                                    <td class="<%= val.role && val.role === 'US' ? 'text-danger' : '' %> text-nowrap" >
                                                         <%=totalTime[i]==="Invalid date format" ? '-' : totalTime[i] %>
                                                     </td>
-                                                    <td>
+                                                    <td class="text-nowrap">
                                                         <%=val.InTimeIP==='' ? '-' : val.InTimeIP%>
                                                     </td>
-                                                    <td>
+                                                    <td class="text-nowrap">
                                                         <%=val.OutTimeIP%>
                                                     </td>
-                                                    <td>
+                                                    <td class="text-nowrap">
                                                         <% if (val.comment && val.comment.trim() !=='' ) { %>
 
                                                             <% if (val.comment.length> 15) { %>

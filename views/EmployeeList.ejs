@@ -14,129 +14,312 @@
     <div class="page-body">
       <div class="container-fluid">
         <div class="page-title">
-          <div class="row">
-            <div class="col-sm-6">
+          <div class="row align-items-center">
+            <div class="col-12 col-md-6 text-center text-md-start mb-2 mb-md-0">
               <h3>Employee List</h3>
             </div>
-            <div class="col-sm-6">
-              <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a href="/admin"><i data-feather="home" class="me-2"></i>Dashboard</a></li>
+            <div class="col-12 col-md-6 text-center text-md-end">
+              <ol class="breadcrumb justify-content-center justify-content-md-end mb-0">
+                <li class="breadcrumb-item">
+                  <a href="/admin/dashboard "><i data-feather="home" class="me-2"></i>Dashboard</a>
+                </li>
                 <li class="breadcrumb-item active">Employee List</li>
               </ol>
             </div>
           </div>
         </div>
       </div>
+
+
       <!-- Container-fluid starts-->
-      <div class="container-fluid dashboard-default">
+      <div class="container-fluid">
         <div class="row">
-          <div class="col-sm-12">
-
-
+          <div class="col-12">
             <div class="card">
-              <div class="card-header pb-0">
 
-              </div>
               <div class="card-body">
                 <div class="table-responsive theme-scrollbar">
-                  <div id="basic-1_wrapper" class="dataTables_wrapper no-footer">
-                    <table class="display dataTable no-footer" id="basic-1" role="grid" aria-describedby="basic-1_info">
-                      <thead>
-                        <tr role="row">
-                          <th class="sorting_asc" tabindex="0" aria-controls="basic-1" aria-sort="ascending"
-                            aria-label="Name: activate to sort column descending">No.</th>
-                          <th class="sorting" tabindex="0" aria-controls="basic-1"
-                            aria-label="Position: activate to sort column ascending">Profile Image
-                          </th>
-                          <th class="sorting" tabindex="0" aria-controls="basic-1"
-                            aria-label="Office: activate to sort column ascending" style="height: 50px;">Employee Name
-                          </th>
-                          <th class="sorting" tabindex="0" aria-controls="basic-1"
-                            aria-label="Age: activate to sort column ascending" style="height: 50px;">Email</th>
-                          <th class="sorting" tabindex="0" aria-controls="basic-1"
-                            aria-label="Start date: activate to sort column ascending" style="height: 50px;">Contact No.
-                          </th>
-                          <th class="sorting" tabindex="0" aria-controls="basic-1"
-                            aria-label="Salary: activate to sort column ascending" style="height: 50px;">Status</th>
-                          <th class="sorting" tabindex="0" aria-controls="basic-1"
-                            aria-label="Action: activate to sort column ascending" style="height: 50px;">Action</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        <% employee?.map((val,i)=>{ %>
-                          <tr>
-                            <td class="tbrow">
-                              <%=i+=1%>
-                            </td>
-                            <td class="tbrow"><img src="/uploads/<%= val.profileimage%>" alt="" class="rounded-circle"
-                                style="height: 60px; width: 60px;"></td>
-                            <td class="tbrow">
-                              <%= val.firstName + ' ' + val.lastName %>
-                            </td>
-                            <td class="tbrow">
-                              <%= val.email %>
-                            </td>
-                            <td class="tbrow">
-                              <%= val.phoneNum %>
-                            </td>
-                            <td class="tbrow">
-                              <label class="switch">
-                                <input type="checkbox" id="stastusUp" value="<%= val.id %>" data-bs-original-title=""
-                                  title="" <%=val.status==='active' ? 'checked' : '' %>
-                                onclick="Upstatuas(<%= val.id %>)">
-                                  <span class="switch-state"></span>
-                              </label>
-                            </td>
-                            <td>
-                              <ul class="action">
-                                <li class="edit"> <a href="/admin/editem/<%=val.id%>" data-bs-original-title=""
-                                    title=""><i data-feather="edit" style="height: 16px; width: 16px;"
-                                      class="text-success"></i></a></li>
-                                <li class="delete ms-1"><a href="/admin/deleteem/<%=val.id%>" data-bs-original-title=""
-                                    title=""><i data-feather="trash" style="height: 16px; width: 16px;"
-                                      class="text-danger"></i></a></li>
-                                <li class="idProf ms-2 text-info"><a href="/admin/UpIdpro/<%=val.id%>"><i
-                                      class="fa-light fa-address-card"></i></a></li>
-                                <% const ismatch = noticePeriod.find(n=> n.emp_Id == val.id);
-                                  const showIcon = !ismatch || ismatch.status === 'active';
-                                  %>
-                                  <% if (showIcon) { %>
+
+                  <table class="display" id="basic-1">
+                    <thead>
+                      <tr role="row">
+                        <th>No.</th>
+                        <th>Profile Image</th>
+                        <th>Employee Name</th>
+                        <th>Email</th>
+                        <th>Contact No</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <% employee?.map((val,i)=>{ %>
+                        <tr>
+                          <td>
+                            <%=i+=1%>
+                          </td>
+                          <td><img src="/uploads/<%= val.profileimage%>" alt="" class="rounded-circle"
+                              style="height: 60px; width: 60px;" loading="lazy"></td>
+                          <td>
+                            <%= val.firstName + ' ' + val.lastName %>
+                          </td>
+                          <td>
+                            <%= val.email %>
+                          </td>
+                          <td>
+                            <%= val.phoneNum %>
+                          </td>
+                          <td>
+                            <div class="form-check form-switch">
+                              <input type="checkbox" id="stastusUp" value="<%= val.id %>" data-bs-original-title=""
+                                class="form-check-input" style="width: 3em !important; height: 25px !important;"
+                                title="" <%=val.status==='active' ? 'checked' : '' %>
+                              onclick="Upstatuas(<%= val.id %>)">
+                            </div>
+                          </td>
+                          <td>
+                            <ul class="action">
+
+                              <li>
+                                <div class="edit" data-bs-toggle="tooltip" data-bs-placement="top" title="Edit Details">
+                                  <a href="/admin/editem/<%=val.id%>"><i data-feather="edit"
+                                      style="height: 16px; width: 16px;" class="text-success"></i></a>
+                                </div>
+                              </li>
+
+                              <li>
+                                <div class="delete ms-1" data-bs-toggle="tooltip" data-bs-placement="top"
+                                  title="Remove Employee">
+                                  <a href="/admin/deleteem/<%=val.id%>"><i data-feather="trash"
+                                      style="height: 16px; width: 16px;" class="text-danger"></i></a>
+                                </div>
+                              </li>
+
+                              <li>
+
+
+                                <div class="idProf ms-2 text-info" data-bs-toggle="tooltip" data-bs-placement="top"
+                                  title="<%=val.userName%> ID proof">
+                                  <a href="/admin/UpIdpro/<%=val.id%>"><i class="fa-light fa-address-card"></i></a>
+                                </div>
+
+                              </li>
+
+                              <% const ismatch=noticePeriod.find(n=> n.emp_Id == val.id);
+                                const showIcon = !ismatch;
+                                %>
+                                <% if (showIcon) { %>
+                                  <li class="idProf ms-2">
+                                    <a data-bs-toggle="modal" data-bs-target="#resoneModal<%= val.id %>"
+                                      style="cursor: pointer;">
+                                      <div data-bs-toggle="tooltip" data-bs-placement="top" title="Add Notice Period">
+                                        <i class="fa-light fa-calendar-plus text-primary"></i>
+                                      </div>
+                                    </a>
+
+                                    <div class="modal fade" id="resoneModal<%= val.id %>" tabindex="-1"
+                                      aria-labelledby="resoneModalLabel<%= val.id %>" aria-hidden="true">
+                                      <div class="modal-dialog modal-dialog-centered">
+
+                                        <div class="modal-content" style="background-color: transparent; border: none">
+                                          <div class="card m-0 border-0 shadow-sm">
+                                            <div class="card-header bg-primary text-white">
+                                              <h5 class="mb-0">Notice Period</h5>
+                                            </div>
+                                            <div class="card-body">
+                                              <!-- Alert for missing date -->
+                                              <form action="/admin/adnoticperi/<%= val.id %>" method="post">
+                                                <!-- Radio buttons for Leave or Clock IN/OUT -->
+                                                <div class="row">
+                                                  <div class="col-md-6 mb-3">
+                                                    <label for="clockIn" class="form-label">Starting Date</label>
+                                                    <input type="date" class="form-control bg-white" id="clockInTime"
+                                                      name="start_date" required />
+                                                  </div>
+                                                  <div class="col-md-6 mb-3">
+                                                    <label for="clockOut" class="form-label">Days Duration</label>
+                                                    <input type="number" class="form-control" id="clockOut"
+                                                      name="total_days" placeholder="Total Day...."
+                                                      value="<%= val.notice_period %>" required />
+                                                  </div>
+                                                </div>
+                                                <input type="hidden" name="lastdaydate" id="lastdaydate">
+                                                <!-- Footer Buttons -->
+                                                <div class="text-end">
+                                                  <button type="button" class="btn btn-secondary me-2"
+                                                   
+                                                    data-bs-dismiss="modal">
+                                                    Cancel
+                                                  </button>
+                                                  <button type="submit" class="btn btn-primary">Save</button>
+                                                </div>
+                                              </form>
+                                            </div>
+                                          </div>
+                                        </div>
+
+                                      </div>
+                                    </div>
+
+                                  </li>
+                                  <% }else{ %>
                                     <li class="idProf ms-2">
-                                      <a href="/admin/adnoticperi/<%= val.id %>">
-                                        <i class="fas fa-calendar-check text-info"></i>
+                                      <a data-bs-toggle="modal" data-bs-target="#resoneModalUpdate<%= val.id %>"
+                                        style="cursor: pointer;" style="cursor: pointer;">
+                                        <div data-bs-toggle="tooltip" data-bs-placement="top"
+                                          title="<%= ismatch.status === 'active' ? 'Update Notice Period': 'Completed' %>">
+                                          <i
+                                            class="<%= ismatch.status === 'active' ? 'fa-light fa-calendar-lines-pen text-primary': 'fa-light fa-calendar-check text-primary' %>"></i>
+                                        </div>
                                       </a>
+
+                                      <div class="modal fade" id="resoneModalUpdate<%= val.id %>" tabindex="-1"
+                                        aria-labelledby="resoneModalLabel<%= val.id %>" aria-hidden="true">
+                                        <div class="modal-dialog modal-dialog-centered">
+
+                                          <div class="modal-content"
+                                            style="background-color: transparent; border: none">
+                                            <div class="card m-0 border-0 shadow-sm">
+                                              <div class="card-header bg-primary text-white">
+                                                <h5 class="mb-0">Notice Period</h5>
+                                              </div>
+                                              <div class="card-body">
+
+
+
+                                                <div class="text-center" id="optionNotice<%= val.id %>">
+                                                  <a href="/admin/cancelNotice/<%= val.id %>">
+                                                    <button type="button" class="btn btn-secondary me-2 text-white">
+                                                      Cancel
+                                                    </button>
+                                                  </a>
+                                                  <button type="submit" class="btn btn-primary"
+                                                    id="noticeUpdate<%= val.id %>">Update</button>
+                                                </div>
+
+                                                <!-- Alert for missing date -->
+                                                <div class="d-none" id="noticeUpdateform<%= val.id %>">
+                                                  <form action="/admin/Updatenoticperi/<%= val.id %>" method="post">
+                                                    <!-- Radio buttons for Leave or Clock IN/OUT -->
+                                                    <div class="row">
+                                                      <div class="col-md-6 mb-3">
+                                                        <label for="clockIn" class="form-label">Starting Date</label>
+                                                        <input type="date" class="form-control bg-white"
+                                                          id="clockInTime" name="start_date" required
+                                                          value="<%= ismatch.start_date %>" />
+                                                      </div>
+                                                      <div class="col-md-6 mb-3">
+                                                        <label for="clockOut" class="form-label">Days Duration</label>
+                                                        <input type="number" class="form-control" id="clockOut"
+                                                          name="total_days" placeholder="Total Day...."
+                                                          value="<%= ismatch.days_duration %>" required />
+                                                      </div>
+                                                    </div>
+                                                    <input type="hidden" name="lastdaydate" id="lastdaydate">
+                                                    <!-- Footer Buttons -->
+                                                    <div class="text-end">
+                                                      <button type="button" class="btn btn-secondary me-2" onclick="$('#optionNotice<%= val.id %>').removeClass('d-none');
+                                                            $('#noticeUpdateform<%= val.id %>').addClass('d-none')"
+                                                        data-bs-dismiss="modal">
+                                                        Cancel
+                                                      </button>
+                                                      <button type="submit" class="btn btn-primary">Save</button>
+                                                    </div>
+                                                  </form>
+
+                                                </div>
+                                              </div>
+                                            </div>
+                                          </div>
+
+                                        </div>
+                                      </div>
+
+
                                     </li>
-                                    <% } %>
-                              </ul>
-                            </td>
-                            <!-- <td> 
+
+                                    <%}%>
+                            </ul>
+                          </td>
+                          <!-- <td> 
                                 <ul class="action"> 
                                 <li class="edit"> <a ><i class="icon-pencil-alt"></i></a></li>
                                 <li class="delete"><a href="/settings/delete_banner/<%= data.id %>"><i class="icon-trash"></i></a></li>
                                 </ul>
                               </td> -->
-                          </tr>
-                          <% }) %>
-                      </tbody>
-                    </table>
+                        </tr>
+                        <% }) %>
+                    </tbody>
+                  </table>
 
-                  </div>
                 </div>
+
               </div>
             </div>
           </div>
         </div>
       </div>
     </div>
-    </div>
-    </div>
+
     <!-- Container-fluid Ends-->
-    </div>
+
+
+
+    <!-- Day Gap Modal  -->
+
+
+
+
 
     <%- include('partials/footer.ejs') %>
 
+
+
+
       <%- include('partials/script.ejs') %>
         <!-- login js-->
+
+
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        // When Update button is clicked
+        document.querySelectorAll('[id^="noticeUpdate"]').forEach(btn => {
+          btn.addEventListener("click", function () {
+            const id = this.id.replace("noticeUpdate", "");
+            document.getElementById(`optionNotice${id}`).classList.add("d-none");
+            document.getElementById(`noticeUpdateform${id}`).classList.remove("d-none");
+          });
+        });
+
+        // When modal is hidden (Reset form & UI)
+        document.querySelectorAll('[id^="resoneModalUpdate"]').forEach(modal => {
+          modal.addEventListener("hidden.bs.modal", function () {
+            const id = this.id.replace("resoneModalUpdate", "");
+            document.getElementById(`optionNotice${id}`).classList.remove("d-none");
+            document.getElementById(`noticeUpdateform${id}`).classList.add("d-none");
+          });
+        });
+      });
+    </script>
+    <script>
+      $(document).ready(function () {
+        $('[id^="noticeUpdate"]').click(function () {
+          const id = this.id.replace("noticeUpdate", "");
+          $(`#optionNotice${id}`).addClass('d-none');
+          $(`#noticeUpdateform${id}`).removeClass('d-none');
+        });
+
+        $('[id^="resoneModalUpdate"]').on('hidden.bs.modal', function () {
+          const id = this.id.replace("resoneModalUpdate", "");
+          $(`#optionNotice${id}`).removeClass('d-none');
+          $(`#noticeUpdateform${id}`).addClass('d-none');
+        });
+      });
+    </script>
+
+        <script src="/js/tooltip-init.js" ></script>
+
+
 
         <script>
           function Upstatuas(validID) {

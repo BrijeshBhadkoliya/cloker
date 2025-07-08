@@ -1,0 +1,33 @@
+ <!-- latest jquery-->
+ <!-- <script src="/js/jquery-3.6.0.min.js" defer></script> -->
+ <!-- Bootstrap js-->
+ <!-- <script src="/js/bootstrap/bootstrap.bundle.min.js" defer></script> -->
+ <!-- feather icon js-->
+ <!-- <script src="/js/icons/feather-icon/feather.min.js" defer></script> -->
+ <!-- <script src="/js/icons/feather-icon/feather-icon.js" defer></script> -->
+ <!-- scrollbar js-->
+ <!-- <script src="/js/scrollbar/simplebar.js" defer></script> -->
+ <!-- <script src="/js/scrollbar/custom.js" defer></script> -->
+ <!-- Sidebar jquery-->
+ <!-- <script src="/js/config.js" defer></script> -->
+ <!-- <script src="/js/sidebar-menu.js" defer></script> -->
+
+<!-- Datatble  -->
+<!-- <script src="/js/datatable/datatables/jquery.dataTables.min.js" defer></script> -->
+<!-- <script src="/js/datatable/datatables/datatable.custom.js" defer></script> -->
+
+
+ <!-- <script src="/js/prism/prism.min.js" defer></script> -->
+ <!-- <script src="/js/clipboard/clipboard.min.js" defer></script> -->
+ <!-- <script src="/js/custom-card/custom-card.js" defer></script> -->
+ <!-- <script src="/js/notify/bootstrap-notify.min.js" defer></script> -->
+ <!-- <script src="/js/dashboard/default.js"></script> -->
+ <!-- <script src="/js/notify/index.js"></script> -->
+ <!-- <script src="/js/typeahead/handlebars.js"></script> -->
+ <!-- <script src="/js/typeahead/typeahead.bundle.js"></script> -->
+ <!-- <script src="/js/typeahead/typeahead.custom.js"></script> -->
+ <!-- <script src="/js/typeahead-search/handlebars.js"></script> -->
+ <!-- <script src="/js/typeahead-search/typeahead-custom.js"></script> -->
+ <!-- Template js-->
+ <!-- <script src="/js/script.js" defer></script> -->
+ 

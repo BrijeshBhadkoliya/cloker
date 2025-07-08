@@ -117,7 +117,9 @@ router.post("/add_data", upload, async (req, res) => {
 router.get("/list", async (req, res) => {
   let setting = await DataFind(`SELECT * FROM tbl_setting LIMIT 1`);
 
-  const employeeList = await DataFind(`SELECT * FROM employee`);
+  const employeeList = await DataFind(
+    `SELECT emp.*,sett.notice_period FROM employee as emp JOIN tbl_setting AS sett`
+  );
   const noticePeriod = await DataFind(`SELECT * FROM tbl_notice_period`);
 
   const data = req.user;
@@ -202,6 +204,7 @@ router.post("/updateEm", upload, async (req, res) => {
   } = req.body;
 
   const user = await DataFind(`SELECT * FROM employee WHERE id = '${editid}'`);
+console.log("password",password);
 
   if (user[0].email !== email) {
     const validemail = await DataFind(
@@ -261,12 +264,17 @@ router.post("/updateEm", upload, async (req, res) => {
   } else {
     profileimg = oldData.profileimage;
   }
-
-  let hashpass = bcrypt.hashSync(password, 10);
+  let hashpass = user[0].password
+  console.log( user[0].password);
+  
+   if(password.trim().length > 0){
+   hashpass = bcrypt.hashSync(password, 10);
+   }
+   
   if (
     (await DataUpdate(
       `employee`,
-      `firstName = '${firstName}', lastName = '${lastName}', userName = '${userName}', email = '${email}', phoneNum = '${phoneNum}', password = '${hashpass}', birthDate = '${birthDate}', profileimage = '${profileimg}',  status = '${status}',joinDate='${joindate}',duration='${duration}',designation='${designation}'`,
+      `firstName = '${firstName}', lastName = '${lastName}', userName = '${userName}', email = '${email}', phoneNum = '${phoneNum}', password = '${hashpass}', birthDate = '${birthDate}',    profileimage = '${profileimg}', status = '${status}',joinDate='${joindate}',duration='${duration}',designation='${designation}'`,
       `id = '${editid}'`,
       req.hostname,
       req.protocol
@@ -372,7 +380,7 @@ router.post("/settingProfile/:id", uploadsetting, async (req, res) => {
      shift_end='${req.body.shiftEnd}',
      payroll_date='${req.body.payroll}',
      break_time='${req.body.breaktime}',
-     notice_period='${req.body.noticperiod}'`,
+     notice_period='${req.body.noticperiod}',half_days= '${req.body.HalfDyas}'`,
       `id = '${req.params.id}'`,
       req.hostname,
       req.protocol
@@ -396,13 +404,13 @@ router.get("/attendance", async (req, res) => {
     // console.log(date);
 
     const employeeList = await DataFind(
-      `SELECT ea.*, em.userName AS em_name 
+      `SELECT ea.*, em.firstName AS em_name , em.lastName AS em_lname , s.break_time AS setting_break_time
         FROM employee AS em
-        JOIN tbl_employee_attndence AS ea ON ea.emplyeeId = em.id AND ea.date = '${date}'
+        JOIN tbl_employee_attndence AS ea ON ea.emplyeeId = em.id AND ea.date = '${date}' LEFT JOIN  tbl_setting AS s ON 1=1
         WHERE em.status = 'active'`
     );
 
-    // console.log(employeeList);
+    console.log(employeeList);
     let setting = await DataFind(`SELECT * FROM tbl_setting LIMIT 1`);
 
     res.render("admin_employee", { role: 1, employeeList, setting });
@@ -413,11 +421,68 @@ router.get("/attendance", async (req, res) => {
 
 router.get("/attendlist/:id", async (req, res) => {
   const { employee, role } = req.user;
-  let setting = await DataFind(`SELECT * FROM tbl_setting LIMIT 1`);
 
-  const currantData = await DataFind(
-    `SELECT * FROM tbl_employee_attndence WHERE emplyeeId='${req.params.id}' ORDER BY id DESC`
+  let setting = await DataFind(`SELECT * FROM tbl_setting LIMIT 1`);
+  let employeeName = await DataFind(
+    `SELECT * FROM employee  WHERE id='${req.params.id}'`
   );
+
+  const currantData = await DataFind(`
+  SELECT 
+    a.*, 
+    s.break_time AS setting_break_time
+  FROM 
+    tbl_employee_attndence AS a
+  JOIN 
+    tbl_setting AS s ON 1=1
+  WHERE 
+    a.emplyeeId = '${req.params.id}'
+  ORDER BY 
+    a.id DESC
+`);
+
+  const Absent = await DataFind(`
+  SELECT COUNT(attendens_status) AS total_absent
+  FROM tbl_employee_attndence 
+  WHERE 
+    attendens_status = 'A' 
+    AND emplyeeId = '${req.params.id}'
+    AND MONTH(STR_TO_DATE(date, '%d-%m-%Y')) = MONTH(CURDATE())
+    AND YEAR(STR_TO_DATE(date, '%d-%m-%Y')) = YEAR(CURDATE())
+`);
+
+  // console.log("Absent", Absent[0].total_absent);
+
+  const Present = await DataFind(`
+   SELECT COUNT(attendens_status) AS total_precent
+   FROM tbl_employee_attndence WHERE (attendens_status = 'P' OR attendens_status = 'C' OR attendens_status = 'EC' OR attendens_status = 'BO') AND emplyeeId='${req.params.id}'AND MONTH(STR_TO_DATE(date, '%d-%m-%Y')) = MONTH(CURDATE())
+    AND YEAR(STR_TO_DATE(date, '%d-%m-%Y')) = YEAR(CURDATE())`);
+  // console.log("Present", Present[0].total_precent);
+
+  const WorkingTime = await DataFind(`
+   SELECT 
+  SEC_TO_TIME(SUM(TIME_TO_SEC(productive_time))) AS total_productive_time
+FROM 
+  tbl_employee_attndence 
+WHERE 
+  emplyeeId = '${req.params.id}' 
+  AND MONTH(STR_TO_DATE(date, '%d-%m-%Y')) = MONTH(CURDATE())
+  AND YEAR(STR_TO_DATE(date, '%d-%m-%Y')) = YEAR(CURDATE());`);
+
+  // console.log("WorkingTime", WorkingTime[0].total_productive_time);
+
+  const BreackTime = await DataFind(`
+   SELECT 
+  SEC_TO_TIME(SUM(TIME_TO_SEC(break_time))) AS total_break_time
+FROM 
+  tbl_employee_attndence 
+WHERE 
+  emplyeeId = '${req.params.id}' 
+  AND MONTH(STR_TO_DATE(date, '%d-%m-%Y')) = MONTH(CURDATE())
+  AND YEAR(STR_TO_DATE(date, '%d-%m-%Y')) = YEAR(CURDATE());`);
+
+  // console.log("BreackTime", BreackTime);
+
   const employeeId = req.params.id;
   res.render("attendlistadmin", {
     role,
@@ -425,6 +490,11 @@ router.get("/attendlist/:id", async (req, res) => {
     currantData,
     employeeId,
     setting,
+    employeeName: employeeName[0].firstName,
+    BreackTime,
+    WorkingTime,
+    Present,
+    Absent,
   });
 });
 
@@ -432,25 +502,88 @@ router.post("/attendDate", async (req, res) => {
   // console.log(req.body);
 
   const employeeList = await DataFind(
-    `SELECT ea.*, em.userName AS em_name 
+    `SELECT ea.*, em.firstName AS em_name , em.lastName AS em_lname , s.break_time AS setting_break_time
         FROM employee AS em
-        JOIN tbl_employee_attndence AS ea ON ea.emplyeeId = em.id AND ea.date = '${req.body.date}'
+        JOIN tbl_employee_attndence AS ea ON ea.emplyeeId = em.id AND ea.date = '${req.body.date}' LEFT JOIN  tbl_setting AS s 
+        ON 1=1
         WHERE em.status = 'active' ORDER BY em.id DESC`
   );
+
   // console.log("selectentry", employeeList);
   res.status(200).json(employeeList);
 });
 
 router.post("/workerList/:id", async (req, res) => {
   const employeeList = await DataFind(
-    `SELECT * FROM tbl_employee_attndence WHERE emplyeeId = '${
-      req.params.id
-    }' AND date IN (${req.body.data
+    `SELECT   a.*, 
+    s.break_time AS setting_break_time
+  FROM 
+    tbl_employee_attndence AS a
+  JOIN 
+     tbl_setting AS s  ON 1=1 WHERE emplyeeId = '${
+       req.params.id
+     }' AND date IN (${req.body.data
       .map((d) => `'${d}'`)
       .join(", ")}) ORDER BY id DESC`
   );
-  // console.log(employeeList);
-  res.status(200).json(employeeList);
+
+  const Absent = await DataFind(`
+  SELECT COUNT(attendens_status) AS total_absent
+  FROM tbl_employee_attndence 
+  WHERE 
+    attendens_status = 'A' 
+    AND emplyeeId = '${req.params.id}'
+    AND date IN (${req.body.data
+      .map((d) => `'${d}'`)
+      .join(", ")}) ORDER BY id DESC
+`);
+
+  // console.log("Absent", Absent[0].total_absent);
+
+  const Present = await DataFind(`
+   SELECT COUNT(attendens_status) AS total_precent
+   FROM tbl_employee_attndence WHERE (attendens_status = 'P' OR attendens_status = 'C' OR attendens_status = 'EC' OR attendens_status = 'BO') AND emplyeeId='${
+     req.params.id
+   }'AND date IN (${req.body.data
+    .map((d) => `'${d}'`)
+    .join(", ")}) ORDER BY id DESC`);
+
+  // console.log("Present", Present[0].total_precent);
+
+  const WorkingTime = await DataFind(`
+   SELECT 
+  SEC_TO_TIME(SUM(TIME_TO_SEC(productive_time))) AS total_productive_time
+FROM 
+  tbl_employee_attndence 
+WHERE 
+  emplyeeId = '${req.params.id}' 
+  AND date IN (${req.body.data
+    .map((d) => `'${d}'`)
+    .join(", ")}) ORDER BY id DESC`);
+
+  // console.log("WorkingTime", WorkingTime[0].total_productive_time);
+
+  const BreackTime = await DataFind(`
+   SELECT 
+  SEC_TO_TIME(SUM(TIME_TO_SEC(break_time))) AS total_break_time
+FROM 
+  tbl_employee_attndence 
+WHERE 
+  emplyeeId = '${req.params.id}' 
+  AND date IN (${req.body.data
+    .map((d) => `'${d}'`)
+    .join(", ")}) ORDER BY id DESC`);
+
+  console.log("BreackTime", BreackTime);
+  console.log("WorkingTime", WorkingTime);
+  console.log("Present", Present);
+  console.log("Absent", Absent);
+
+  // console.log("employeeList",employeeList);
+
+  res
+    .status(200)
+    .json({ employeeList, BreackTime, WorkingTime, Absent, Present });
 });
 
 router.get("/account", async (req, res) => {
@@ -564,8 +697,11 @@ router.post("/IdDelete/:id/:imageName", async (req, res) => {
     req.hostname,
     req.protocol
   );
-  if (updated === -1) throw new Error("Update failed");
-
+ 
+ if (updated === -1){
+      req.flash("errors", process.env.dataerror);
+      return res.redirect("/valid_license");
+    }
   res.redirect(`/admin/UpIdpro/${id}`);
 });
 
@@ -599,7 +735,11 @@ router.post("/IdUpdate/:id/:imageName", UpdateIDUpload, async (req, res) => {
       req.hostname,
       req.protocol
     );
-    if (updated === -1) throw new Error("Update failed");
+    
+     if (updated === -1){
+      req.flash("errors", process.env.dataerror);
+      return res.redirect("/valid_license");
+    }
   }
 
   res.redirect(`/admin/UpIdpro/${id}`);
@@ -628,8 +768,11 @@ router.post("/addIDimg/:id", upload, async (req, res) => {
     req.hostname,
     req.protocol
   );
-  if (updated === -1) throw new Error("Update failed");
-
+   
+ if (updated === -1){
+      req.flash("errors", process.env.dataerror);
+      return res.redirect("/valid_license");
+    }
   res.redirect(`/admin/UpIdpro/${id}`);
 });
 
@@ -772,15 +915,12 @@ router.get("/typestatus/:id", async (req, res) => {
 
 router.get("/leavereson/", async (req, res) => {
   const { admin, role } = req.user;
-  let setting = await DataFind(`SELECT * FROM tbl_setting LIMIT 1`);
+  let setting = await DataFind(`SELECT * FROM tbl_setting`);
+  console.log(setting);
 
   // let attendDate = await DataFind(`SELECT att.emplyeeId, lea.start_date, lea.end_date, lea.leave_attachment,lea.leave_type,lea.leave_resone,lea.leave_status,lea.emp_Id, lea.innsert_date , emp.firstName, emp.lastName ,emp.profileimage FROM tbl_employee_attndence AS att JOIN employee AS emp ON att.emplyeeId = emp.id JOIN tbl_leave_resons AS lea ON att.leave_resone_id = lea.id WHERE att.attendens_status='A' ANd att.leave_status = 'Pending'`)
 
-  const EmployeeId = await DataFind(
-    `SELECT DISTINCT emplyeeId FROM tbl_employee_attndence WHERE attendens_status="A" AND leave_status IN ('Pending', 'Appove', 'Reject');`
-  );
-  // console.log(EmployeeId);
-
+ 
   // let attendDate =
   //   await DataFind(`SELECT att.emplyeeId, lea.start_date,lea.emp_Id, lea.host_comment , lea.total_days, lea.end_date, lea.leave_attachment,lea.leave_type,lea.leave_resone,lea.leave_status,lea.id,
   //                                       lea.innsert_date , emp.firstName, emp.lastName ,emp.profileimage
@@ -794,21 +934,22 @@ router.get("/leavereson/", async (req, res) => {
   //                                       ORDER BY lea.start_date DESC
   //                                       `);
 
-  let attendDate = await DataFind(`SELECT att.emplyeeId,
+    let attendDate = [];
+      attendDate = await DataFind(`SELECT att.emplyeeId,
                                         lea.start_date,
                                         lea.emp_Id, lea.host_comment, lea.total_days, 
                                         lea.end_date,
                                         lea.leave_attachment, lea.leave_type,
                                         lea.leave_resone, lea.leave_status, lea.id,
                                         lea.innsert_date, emp.firstName, emp.lastName, emp.profileimage 
-                                 FROM tbl_leave_resons AS lea 
-                                 JOIN employee AS emp ON lea.emp_Id = emp.id 
-                                 JOIN tbl_employee_attndence AS att ON att.emplyeeId = lea.emp_Id
-                                 WHERE lea.emp_Id IN (${EmployeeId.map(
-                                   (val) => `'${val.emplyeeId}'`
-                                 ).join(", ")})
-                                 GROUP BY lea.id, lea.start_date
-                                 ORDER BY lea.start_date DESC`);
+                                        FROM tbl_leave_resons AS lea 
+                                        JOIN employee AS emp ON lea.emp_Id = emp.id 
+                                        JOIN tbl_employee_attndence AS att ON att.emplyeeId = lea.emp_Id
+                                        GROUP BY lea.id, lea.start_date
+                                        ORDER BY lea.start_date DESC`);
+
+
+ 
 
   attendDate = attendDate.map((item) => {
     try {
@@ -820,6 +961,7 @@ router.get("/leavereson/", async (req, res) => {
   });
 
   console.log("attendDate", attendDate);
+  console.log("setting", setting);
 
   res.render("leveResone", { setting, admin, role, attendDate });
 });
@@ -852,13 +994,13 @@ router.post("/hostmessage/", async (req, res) => {
   return res.redirect("/admin/leavereson");
 });
 
-router.get("/adnoticperi/:id", async (req, res) => {
-  let date = moment().format("DD-MM-YYYY");
-
+router.post("/adnoticperi/:id", async (req, res) => {
+  let date = req.body.start_date;
+  let daysDuration = req.body.total_days;
   const result = await DataInsert(
     `tbl_notice_period`,
-    `status,start_date,emp_Id`,
-    `'active','${date}','${req.params.id}'`,
+    `status,start_date,emp_Id,days_duration`,
+    `'active','${date}','${req.params.id}','${daysDuration}'`,
     req.hostname,
     req.protocol
   );
@@ -873,7 +1015,7 @@ router.get("/adnoticperi/:id", async (req, res) => {
 router.get("/monthlyttend/", async (req, res) => {
   const { admin, role } = req.user;
   let setting = await DataFind(`SELECT * FROM tbl_setting LIMIT 1`);
-  let employee = await DataFind(`SELECT * FROM employee`);
+  let employee = await DataFind(`SELECT * FROM employee WHERE status='active'`);
 
   let startOfMonth = moment().startOf("month");
   let endOfMonth = moment().endOf("month");
@@ -903,29 +1045,29 @@ router.get("/monthlyttend/", async (req, res) => {
         att.date, 
         att.leave_status,
         att.day_status,
-        emp.userName, 
+        emp.firstName,
+        emp.lastName,  
         emp.profileimage,
         att.clockIn_time,
         att.clockOut_time,
         att.productive_time
         FROM tbl_employee_attndence AS att
-        JOIN employee AS emp ON att.emplyeeId = emp.id
-        WHERE att.emplyeeId = '${val.id}'
+        JOIN employee AS emp ON att.emplyeeId = emp.id 
+        WHERE att.emplyeeId = '${val.id}' AND emp.status='active'
         AND MONTH(STR_TO_DATE(att.date, '%d-%m-%Y')) = MONTH(CURDATE())
         AND YEAR(STR_TO_DATE(att.date, '%d-%m-%Y')) = YEAR(CURDATE())
     `);
 
       return {
         id: val.id,
-        userName: val.userName,
+        firstName: val.firstName,
+        lastName:  val.lastName,
         profileimage: val.profileimage,
         attendance: employeeData,
+        employeeId: val.id,
       };
     })
   );
-
-  console.log(attendlist[0].attendance);
-  console.log(attendlist);
 
   res.render("monthlyattend", {
     setting,
@@ -937,15 +1079,14 @@ router.get("/monthlyttend/", async (req, res) => {
   });
 });
 
-
 router.post("/monthlyattend/", async (req, res) => {
   try {
-  
-    const inputDate = req.body.date;  
- 
+    const inputDate = req.body.date;
 
     if (!inputDate) {
-      return res.status(400).json({ error: "Date is required in DD-MM-YYYY format" });
+      return res
+        .status(400)
+        .json({ error: "Date is required in DD-MM-YYYY format" });
     }
 
     const inputMoment = moment(inputDate, "DD-MM-YYYY");
@@ -954,11 +1095,9 @@ router.post("/monthlyattend/", async (req, res) => {
       return res.status(400).json({ error: "Invalid date format" });
     }
 
-    
     const startOfMonth = inputMoment.clone().startOf("month");
     const endOfMonth = inputMoment.clone().endOf("month");
 
- 
     let allDates = [];
     let dateIterator = startOfMonth.clone();
 
@@ -967,16 +1106,14 @@ router.post("/monthlyattend/", async (req, res) => {
       dateIterator.add(1, "day");
     }
 
-  
     let dateFormate = allDates.map((val) =>
       moment(val, "DD-MM-YYYY").format("MMM, DD ddd")
     );
 
- 
-  
-    const employee = await DataFind(`SELECT * FROM employee`);
+    const employee = await DataFind(
+      `SELECT * FROM employee WHERE status='active'`
+    );
 
-   
     const attendlist = await Promise.all(
       employee.map(async (val) => {
         const employeeData = await DataFind(`
@@ -985,36 +1122,94 @@ router.post("/monthlyattend/", async (req, res) => {
             att.date, 
             att.leave_status,
             att.day_status,
-            emp.userName, 
+            emp.firstName,
+            emp.lastName, 
             emp.profileimage,
             att.clockIn_time,
             att.clockOut_time,
-            att.productive_time
+            att.productive_time,
+            IF(
+    TIME_TO_SEC(att.productive_time) < TIME_TO_SEC(sett.employee_worktime),
+    SEC_TO_TIME(TIME_TO_SEC(sett.employee_worktime) - TIME_TO_SEC(att.productive_time)),
+    '00:00:00'
+  ) AS earlyout
             FROM tbl_employee_attndence AS att
-            JOIN employee AS emp ON att.emplyeeId = emp.id
+            JOIN employee AS emp ON att.emplyeeId = emp.id AND emp.status='active'
+            JOIN tbl_setting AS sett ON 1=1
             WHERE att.emplyeeId = '${val.id}'
-            AND MONTH(STR_TO_DATE(att.date, '%d-%m-%Y')) = ${inputMoment.month() + 1}
+            AND MONTH(STR_TO_DATE(att.date, '%d-%m-%Y')) = ${
+              inputMoment.month() + 1
+            }
             AND YEAR(STR_TO_DATE(att.date, '%d-%m-%Y')) = ${inputMoment.year()}
         `);
 
         return {
           id: val.id,
-          userName: val.userName,
+          firstName: val.firstName,
+          lastName:val.lastName,
           profileimage: val.profileimage,
           attendance: employeeData,
+          employeeId: val.id,
         };
       })
     );
 
- 
-    res.status(200).json({attendlist,dateFormate,allDates});
 
+    console.log("attendlist",attendlist);
+    
+
+    res.status(200).json({ attendlist, dateFormate, allDates });
   } catch (error) {
     console.error("Error in POST /monthlyattend/:", error);
     return res.status(500).json({ error: "Internal Server Error" });
   }
 });
 
+router.get("/cancelNotice/:id", async (req, res) => {
+  if (
+    (await DataDelete(
+      `tbl_notice_period`,
+      `emp_Id='${req.params.id}'`,
+      req.hostname,
+      req.protocol
+    )) == -1
+  ) {
+    req.flash("errors", process.env.dataerror);
+    return res.redirect("/valid_license");
+  }
 
+  return res.redirect("/admin/list/");
+});
+
+router.post("/Updatenoticperi/:id", async (req, res) => {
+  let date = req.body.start_date;
+  let daysDuration = parseInt(req.body.total_days);
+
+  console.log(req.body);
+
+  const startMoment = moment(date, "YYYY-MM-DD");
+  const today = moment();
+  const diffDays = today.diff(startMoment, "days");
+
+  let newStatus = "active";
+  if (diffDays >= daysDuration) {
+    newStatus = "deactive";
+  }
+
+  const updateStatus = await DataUpdate(
+    `tbl_notice_period`,
+    `start_date='${date}', days_duration='${daysDuration}', status='${newStatus}'`,
+    `emp_Id = '${req.params.id}'`,
+    req.hostname,
+    req.protocol
+  );
+
+  if (updateStatus == -1) {
+    req.flash("errors", process.env.dataerror);
+    return res.redirect("/valid_license");
+  }
+
+  return res.redirect("/admin/list/");
+});
 
 module.exports = router;

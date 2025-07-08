@@ -6,7 +6,41 @@
 <head>
     <%- include('partials/head.ejs') %>
         <link rel="stylesheet" type="text/css" href="/css/vendors/daterange-picker.css">>
+        <style>
+            thead th.sorting_asc::before,
+            thead th.sorting_asc::after {
+                all: initial !important;
+            }
 
+            thead th.sorting_desc::after,
+            thead th.sorting_desc::before {
+                all: initial !important;
+            }
+
+            thead .sorting::after,
+            thead th.sorting::before {
+                all: initial !important;
+            }
+        </style>
+        <style>
+            .date-picker-wrapper {
+                margin-bottom: -41px;
+                z-index: 5;
+                width: 200px;
+                position: relative;
+                margin-left: 0px;
+
+            }
+
+            @media (max-width:640px) {
+                .date-picker-wrapper {
+                    margin-left: auto;
+                    margin-right: auto;
+                    margin-bottom: 15px;
+
+                }
+            }
+        </style>
 </head>
 
 <body>
@@ -14,31 +48,34 @@
         <div class="page-body">
             <div class="container-fluid">
                 <div class="page-title">
-                    <div class="row">
-                        <div class="col-sm-6">
-                            <h3>Employee List</h3>
+                    <div class="row  align-items-center">
+                        <div class="col-12 col-md-6 text-center text-md-start mb-2 mb-md-0">
+                            <h3>Monthly Attendance</h3>
                         </div>
-                        <div class="col-sm-6">
-                            <ol class="breadcrumb">
+                        <div class="col-12 col-md-6 text-center text-md-end">
+                            <ol class="breadcrumb justify-content-center justify-content-md-end mb-0">
                                 <li class="breadcrumb-item"><a href="/admin/dashboard"><i data-feather="home"
                                             class="me-2"></i>Dashboard</a></li>
-                                <li class="breadcrumb-item active"><a href="/admin/attendance"><i
-                                            data-feather="user-check" class="me-2"></i>Attendance List</a></li>
+                                <li class="breadcrumb-item active"><a href=""><i data-feather="user-check"
+                                            class="me-2"></i>Monthly Attendance</a></li>
                             </ol>
                         </div>
                     </div>
                 </div>
             </div>
+
             <div class="container-fluid ">
                 <div class="row">
 
                     <div class="col-sm-12">
                         <div class="card">
-                            <div class="card-header pb-0">
+
+
+                            <div class="card-body">
                                 <div class="mt-3">
 
                                     <div class="d-flex justify-content-between align-items-center gap-3">
-                                        <div>
+                                        <div class="date-picker-wrapper">
                                             <div class="theme-form">
                                                 <div>
                                                     <input class="form-control text-primary border-primary" type="text"
@@ -47,25 +84,18 @@
                                                 </div>
                                             </div>
                                         </div>
-                                        <button class="btn btn-outline-dark rounded"
-                                            style="font-size: 16px; padding: 0px !important; height: 35px; width:35px ;">
-                                            <i class="fa-regular fa-arrow-down-to-line"></i>
-                                        </button>
+
 
                                     </div>
 
                                 </div>
-                            </div>
-
-                            <div class="card-body">
                                 <div class="table-responsive theme-scrollbar">
                                     <table class="display table table-bordered text-center align-middle" id="basic-1">
                                         <thead id="datesFormate">
                                             <tr>
-                                                <th>Employee Data</th>
+                                                <th style="width: 70px;">Employee Data</th>
                                                 <% dateFormate.forEach(date=> { %>
-                                                    <th
-                                                        style="width: 30px; font-size: 12px; font-weight: 500; padding: 9px;">
+                                                    <th style="width: 30px; font-size: 13px; font-weight: 500;">
                                                         <%= date %>
                                                     </th>
                                                     <% }) %>
@@ -76,10 +106,13 @@
                                                 <tr>
                                                     <td class="d-flex align-items-center gap-2">
                                                         <img src="/uploads/<%= val.profileimage %>" alt=""
-                                                            class="rounded-circle" width="35" height="35">
+                                                            class="rounded-circle" width="35" height="35"
+                                                            loading="lazy">
                                                         <div>
                                                             <div class="fw-semibold">
-                                                                <%= val.userName %>
+                                                                <a href="/admin/attendlist/<%=val.employeeId%>">
+                                                                    <%= val.firstName %>
+                                                                </a>
                                                             </div>
                                                             <small class="text-muted">
                                                                 <%= val.userCode %>
@@ -91,90 +124,120 @@
                                                         <% let record=val.attendance.find(r=> r.date === date); %>
                                                             <td>
                                                                 <% if (record) { %>
-                                                                    <% if (record.attendens_status==='P' ||
-                                                                        record.attendens_status==='C' || record.attendens_status==='EC' ) { %>
-
-                                                                        <div class="d-flex align-items-center justify-content-center px-2 py-1 rounded text-success fw-semibold position-relative"
-                                                                            style="width: 28px; height: 28px; background-color: rgba(25, 135, 84, 0.1); font-size: 12px; font-weight: 600;"
+                                                                    <%if(record.clockOut_time===''){%>
+                                                                        <div class="d-flex align-items-center justify-content-center px-2 py-1 rounded text-primary fw-semibold"
+                                                                            style="width: 28px; height: 28px; background-color: rgba(25, 76, 135, 0.1); font-size: 12px; font-weight: 600;"
                                                                             data-bs-toggle="tooltip"
-                                                                             title="<%= val.attendens_status === 'C' ? 'Missing Clock Out' :val.attendens_status === 'EC' ?'Erlyclock Out': 'Present' %>">
-                                                                            <span>P</span>
-                                                                            <% if (record.attendens_status==='C' ) { %>
-                                                                                <div class="position-absolute top-0 start-100 translate-middle badge text-primary"
-                                                                                    style="font-size: 10px;">
-                                                                                    <i
-                                                                                        class="fa-solid fa-alarm-exclamation"></i>
-                                                                                </div>
-                                                                                <% }else if(record.attendens_status==='EC'){ %>
-                                                                                    <div class="position-absolute top-0 start-100 translate-middle badge text-danger"
-                                                                                    style="font-size: 10px;">
-                                                                                    <i class="fa-solid fa-alarm-snooze"></i>
-                                                                                </div>
-                                                                               <% }  %>
+                                                                            data-bs-placement="Top" title="On Going!">
+                                                                            <i
+                                                                                class="fa-solid fa-triangle-exclamation"></i>
                                                                         </div>
+                                                                        <%}else if(record.attendens_status==='P' ||
+                                                                            record.attendens_status==='C' ||
+                                                                            record.attendens_status==='EC' ||
+                                                                            record.attendens_status==='BO' ) { %>
 
-                                                                        <% } else if (record.day_status==='WK' ) { %>
+                                                                            <div class="d-flex align-items-center justify-content-center px-2 py-1 rounded text-success fw-semibold position-relative"
+                                                                                style="width: 28px; height: 28px; background-color: rgba(25, 135, 84, 0.1); font-size: 12px; font-weight: 600;"
+                                                                                data-bs-toggle="m-tooltip"
+                                                                                title="<%= val.attendens_status === 'C' ? 'Missing Clock Out' :val.attendens_status === 'EC' ?'Erlyclock Out': val.attendens_status === 'BO' ?'BreakOut Missing': 'Present' %>">
+                                                                                <span>P</span>
+                                                                                <% if (record.attendens_status==='C' ) {
+                                                                                    %>
+                                                                                    <div class="position-absolute top-0 start-100 translate-middle badge text-primary"
+                                                                                        style="font-size: 10px;">
+                                                                                        <i
+                                                                                            class="fa-solid fa-alarm-exclamation"></i>
+                                                                                    </div>
+                                                                                    <% }else
+                                                                                        if(record.attendens_status==='EC'
+                                                                                        ){ %>
+                                                                                        <div class="position-absolute top-0 start-100 translate-middle badge text-danger"
+                                                                                            style="font-size: 10px;">
+                                                                                            <i
+                                                                                                class="fa-solid fa-alarm-snooze"></i>
+                                                                                        </div>
+                                                                                        <% }else
+                                                                                            if(record.attendens_status==='BO'
+                                                                                            ){ %>
+                                                                                            <div class="position-absolute top-0 start-100 translate-middle badge text-danger"
+                                                                                                style="font-size: 11px;">
+                                                                                                <i class="fas fa-mug-hot"
+                                                                                                    style="position: relative;"></i>
 
-                                                                  <div class="d-flex align-items-center justify-content-center px-2 py-1 rounded text-info fw-semibold" style="width: 40px; height: 28px; background-color: rgba(0, 122, 255, 0.1); color: rgb(0, 122, 255) !important; font-weight: 600;" data-bs-toggle="tooltip" data-bs-placement="Top" title="" data-bs-original-title="Weekend">WK</div>
+                                                                                            </div>
+                                                                                            <% } %>
+                                                                            </div>
 
-                                                                            <% } else if
-                                                                                (record.leave_status==='Pending' ) { %>
+                                                                            <% } else if (record.day_status==='WK' ) {
+                                                                                %>
 
-                                                                                <div class="d-flex align-items-center justify-content-center px-2 py-1 rounded text-danger fw-semibold"
-                                                                                    style="width: 28px; height: 28px; font-size: 12px; background-color: rgba(220, 53, 69, 0.1);"
+                                                                                <div class="d-flex align-items-center justify-content-center px-2 py-1 rounded text-info fw-semibold"
+                                                                                    style="width: 40px; height: 28px; background-color: rgba(0, 122, 255, 0.1); color: rgb(0, 122, 255) !important; font-weight: 600;"
                                                                                     data-bs-toggle="tooltip"
-                                                                                    title="Leave Pending">
-                                                                                    A
+                                                                                    data-bs-placement="Top" title=""
+                                                                                    data-bs-original-title="Weekend">WK
                                                                                 </div>
 
                                                                                 <% } else if
-                                                                                    (record.leave_status==='Appove' ) {
+                                                                                    (record.leave_status==='Pending' ) {
                                                                                     %>
 
                                                                                     <div class="d-flex align-items-center justify-content-center px-2 py-1 rounded text-danger fw-semibold"
-                                                                                        style="width: 28px; height: 28px; font-size: 12px; background-color: rgba(220, 53, 69, 0.1);"
+                                                                                        style="width: 28px; height: 28px; font-size: 12px; background-color: rgba(220, 53, 69, 0.1); font-weight:600;"
                                                                                         data-bs-toggle="tooltip"
-                                                                                        title="Leave Approved">
+                                                                                        title="Leave Pending">
                                                                                         A
-                                                                                        <div class="position-absolute top-0 start-100 translate-middle badge text-success"
-                                                                                            style="font-size: 10px;">
-                                                                                            <i
-                                                                                                class="fa-solid fa-thumbs-up"></i>
-                                                                                        </div>
                                                                                     </div>
 
                                                                                     <% } else if
-                                                                                        (record.leave_status==='Reject'
+                                                                                        (record.leave_status==='Appove'
                                                                                         ) { %>
 
                                                                                         <div class="d-flex align-items-center justify-content-center px-2 py-1 rounded text-danger fw-semibold"
-                                                                                            style="width: 28px; height: 28px; font-size: 12px; background-color: rgba(220, 53, 69, 0.1);"
+                                                                                            style="width: 28px; height: 28px; font-size: 12px; background-color: rgba(220, 53, 69, 0.1); font-weight:600;"
                                                                                             data-bs-toggle="tooltip"
-                                                                                            title="Leave Rejected">
+                                                                                            title="Leave Approved">
                                                                                             A
-                                                                                            <div class="position-absolute top-0 start-100 translate-middle badge text-danger"
+                                                                                            <div class="position-absolute top-0 start-100 translate-middle badge text-success"
                                                                                                 style="font-size: 10px;">
                                                                                                 <i
-                                                                                                    class="fa-solid fa-ban"></i>
+                                                                                                    class="fa-solid fa-thumbs-up"></i>
                                                                                             </div>
                                                                                         </div>
 
-                                                                                        <% } else { %>
+                                                                                        <% } else if
+                                                                                            (record.leave_status==='Reject'
+                                                                                            ) { %>
 
                                                                                             <div class="d-flex align-items-center justify-content-center px-2 py-1 rounded text-danger fw-semibold"
-                                                                                                style="width: 28px; height: 28px; font-size: 12px; background-color: rgba(220, 53, 69, 0.1);"
+                                                                                                style="width: 28px; height: 28px; font-size: 12px; background-color: rgba(220, 53, 69, 0.1); font-weight:600;"
                                                                                                 data-bs-toggle="tooltip"
-                                                                                                title="Absent">
+                                                                                                title="Leave Rejected">
                                                                                                 A
+                                                                                                <div class="position-absolute top-0 start-100 translate-middle badge text-danger"
+                                                                                                    style="font-size: 10px;">
+                                                                                                    <i
+                                                                                                        class="fa-solid fa-ban"></i>
+                                                                                                </div>
                                                                                             </div>
-                                                                                            <% } %>
 
-                                                                                                <% } else { %>
+                                                                                            <% } else { %>
 
-                                                                                                    <div
-                                                                                                        style="width: 28px; height: 28px;">
-                                                                                                    </div>
-                                                                                                    <% } %>
+                                                                                                <div class="d-flex align-items-center justify-content-center px-2 py-1 rounded text-danger fw-semibold"
+                                                                                                    style="width: 28px; height: 28px; font-size: 12px; background-color: rgba(220, 53, 69, 0.1); font-weight:600;"
+                                                                                                    data-bs-toggle="tooltip"
+                                                                                                    title="Absent">
+                                                                                                    A
+                                                                                                </div>
+                                                                                                <% } %>
+
+                                                                                                    <% } else { %>
+
+                                                                                                        <div
+                                                                                                            style="width: 28px; height: 28px;">
+                                                                                                        </div>
+                                                                                                        <% } %>
                                                             </td>
                                                             <% }) %>
 
@@ -206,6 +269,10 @@
 
 
 
+
+
+
+
                 <script>
                     const today = new Date();
                     const formatDate = (date) => {
@@ -226,7 +293,6 @@
                             return `${day}-${month}-${year}`;
                         }
 
-
                         let datePic = document.getElementById('datePic').value
                         let findDate = convertDateFormat(datePic)
 
@@ -243,16 +309,24 @@
                                     $('#basic-1').DataTable().destroy();
                                 }
 
+
+
+                                function timeToSeconds(timeStr) {
+                                    const [hours, minutes, seconds] = timeStr.split(':').map(Number);
+                                    return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+                                }
+
+
                                 const thead = document.getElementById("datesFormate");
                                 thead.innerHTML = "";
 
 
                                 let headerRow = `<tr>
-                                     <th>Employee Data</th>`;
+                                     <th  style="font-size: 18px;" >Employee</th>`;
 
                                 res.dateFormate.forEach((date) => {
                                     headerRow += `
-                                     <th style="width: 30px; font-size: 12px; font-weight: 500; padding: 9px;">
+                                     <th style="width: 30px; font-size: 13px; font-weight: 500;">
                                          ${date}
                                      </th>`;
                                 });
@@ -263,30 +337,73 @@
 
 
                                 const tbody = document.getElementById("attendenceMonth");
-                                tbody.innerHTML = "";  
+                                tbody.innerHTML = "";
 
                                 res.attendlist.forEach((employee) => {
                                     let row = `<tr>
-        <td class="d-flex align-items-center gap-2">
+        <td class="d-flex align-items-center gap-2" >
             <img src="/uploads/${employee.profileimage}" alt=""
-                class="rounded-circle" width="35" height="35">
-            <div>
-                <div class="fw-semibold">${employee.userName}</div>
+                class="rounded-circle" width="35" height="35" loading="lazy">
+            <div data-bs-toggle="tooltip"
+    data-bs-placement="right"
+    title="${employee.firstName} ${employee.lastName}" >
+                <div class="fw-semibold"><a href="/admin/attendlist/${employee.employeeId}">${employee.firstName}</a></div>
                 <small class="text-muted">${employee.userCode || ''}</small>
             </div>
         </td>`;
 
-                                     
+
+
+
                                     res.allDates.forEach((date) => {
                                         const record = employee.attendance.find(r => r.date === date);
                                         if (record) {
-                                            if (record.attendens_status === 'P' || record.attendens_status === 'C' ||record.attendens_status === 'EC') {
+                                            if (record.clockOut_time === '') {
+
+                                                row += `
+                                                 <td>
+                                                  <div class="d-flex align-items-center justify-content-center px-2 py-1 rounded text-primary fw-semibold"
+                                                                        style="width: 28px; height: 28px; background-color: rgba(25, 76, 135, 0.1); font-size: 12px; font-weight: 600;"  data-bs-toggle="tooltip" data-bs-html="true"
+                                                                            data-bs-placement="Top"
+                                                                            title=" <div style='font-size: 13px; line-height: 1.8;'>
+            <div><i class='fa-solid fa-circle text-success fa-xs'></i> <strong style='color: #198754;'>IN:</strong> ${record.clockIn_time}</div> 
+                                                                            ${record.productive_time === "" ? '' : `<div><i class='fa-solid fa-circle text-info fa-xs'></i> <strong style='color: #0d6efd;'>Productive:</strong> ${record.productive_time}</div>`}
+        </div>">
+                                                                        <i class="fa-solid fa-triangle-exclamation"></i>
+                                                                    </div>
+                                                                    </td>
+                                                `
+
+                                            } else if (record.attendens_status === 'P' || record.attendens_status === 'C' || record.attendens_status === 'EC' || record.attendens_status === 'BO') {
                                                 row += `
                     <td>
                         <div class="position-relative d-flex align-items-center justify-content-center px-2 py-1 rounded text-success fw-semibold"
                             style="width: 28px; height: 28px; background-color: rgba(25, 135, 84, 0.1); font-size: 12px; font-weight: 600;"
-                            data-bs-toggle="tooltip"
-                            title="${record.attendens_status === 'C' ? 'Missing Clock Out' :record.attendens_status === 'EC' ? 'Erlyclock Out' : 'Present'}">
+                            data-bs-toggle="tooltip" data-bs-html="true"
+                            title="${record.attendens_status === 'C' ? ` <div style='font-size: 13px; line-height: 1.8;'>
+            <div><i class='fa-solid fa-circle text-success fa-xs'></i> <strong style='color: #198754;'>IN:</strong> ${record.clockIn_time}</div>
+            <div><i class='fa-solid fa-circle text-warning fa-xs'></i> <strong style='color: #dc3545;'>OUT:</strong> ${record.clockOut_time}</div>
+            <div><i class='fa-solid fa-circle text-info fa-xs'></i> <strong style='color: #0d6efd;'>Productive:</strong> ${record.productive_time}</div>
+        </div>
+` : record.attendens_status === 'EC' ? ` <div style='font-size: 13px; line-height: 1.8;'>
+            <div><i class='fa-solid fa-circle text-success fa-xs'></i> <strong style='color: #198754;'>IN:</strong> ${record.clockIn_time}</div>
+            <div><i class='fa-solid fa-circle text-warning fa-xs'></i> <strong style='color: #dc3545;'>OUT:</strong> ${record.clockOut_time}</div>
+            <div><i class='fa-solid fa-circle text-info fa-xs'></i> <strong style='color: #0d6efd;'>Productive:</strong> ${record.productive_time}</div>
+            <div><i class='fa-solid fa-circle text-danger fa-xs'></i> <strong style='color: #0d6efd;'>Erlyclock Out:</strong> ${timeToSeconds(record.earlyout)}</div>
+        </div>
+` : record.attendens_status === 'BO' ? ` <div style='font-size: 13px; line-height: 1.8;'>
+            <div><i class='fa-solid fa-circle text-success fa-xs'></i> <strong style='color: #198754;'>IN:</strong> ${record.clockIn_time}</div>
+            <div><i class='fa-solid fa-circle text-warning fa-xs'></i> <strong style='color: #dc3545;'>OUT:</strong> ${record.clockOut_time}</div>
+            <div><i class='fa-solid fa-circle text-info fa-xs'></i> <strong style='color: #0d6efd;'>Productive:</strong> ${record.productive_time}</div>
+            <div><i class='fa-solid fa-circle text-danger fa-xs'></i> <strong style='color: #0d6efd;'>Erlyclock Out:</strong> ${timeToSeconds(record.earlyout)}</div>
+        </div>
+`  : `<div style='font-size: 13px; line-height: 1.8;'>
+            <div><i class='fa-solid fa-circle text-success fa-xs'></i> <strong style='color: #198754;'>IN:</strong> ${record.clockIn_time}</div>
+            <div><i class='fa-solid fa-circle text-warning fa-xs'></i> <strong style='color: #dc3545;'>OUT:</strong> ${record.clockOut_time}</div>
+            <div><i class='fa-solid fa-circle text-info fa-xs'></i> <strong style='color: #0d6efd;'>Productive:</strong> ${record.productive_time}</div>
+        </div>
+
+`}">
                             <span>P</span>
                             ${record.attendens_status === 'C' ? `
                             <div class="position-absolute top-0 start-100 translate-middle badge text-primary"
@@ -297,7 +414,12 @@
                                 style="font-size: 10px;">
                                     <i class="fa-solid fa-alarm-snooze"></i>
 
-                            </div>` :``}
+                            </div>` : record.attendens_status === 'BO' ? ` <div class="position-absolute top-0 start-100 translate-middle badge text-danger"
+                                                                                                style="font-size: 11px;">
+                                                                                                <i class="fas fa-mug-hot"
+                                                                                                    style="position: relative;"></i>
+                                                                                                
+                                                                                            </div>`: ``}
                         </div>
                     </td>`;
                                             } else if (record.day_status === 'WK') {
@@ -309,7 +431,7 @@
                                                 row += `
                     <td>
                         <div class="d-flex align-items-center justify-content-center px-2 py-1 rounded text-danger fw-semibold"
-                            style="width: 28px; height: 28px; font-size: 12px; background-color: rgba(220, 53, 69, 0.1);"
+                            style="width: 28px; height: 28px; font-size: 12px; background-color: rgba(220, 53, 69, 0.1); font-weight:600;"
                             data-bs-toggle="tooltip"
                             title="Leave Pending">
                             A
@@ -319,7 +441,7 @@
                                                 row += `
                     <td>
                         <div class="d-flex align-items-center justify-content-center px-2 py-1 rounded text-danger fw-semibold"
-                            style="width: 28px; height: 28px; font-size: 12px; background-color: rgba(220, 53, 69, 0.1);"
+                            style="width: 28px; height: 28px; font-size: 12px; background-color: rgba(220, 53, 69, 0.1); font-weight:600;"
                             data-bs-toggle="tooltip"
                             title="Leave Approved">
                             A
@@ -333,7 +455,7 @@
                                                 row += `
                     <td>
                         <div class="d-flex align-items-center justify-content-center px-2 py-1 rounded text-danger fw-semibold"
-                            style="width: 28px; height: 28px; font-size: 12px; background-color: rgba(220, 53, 69, 0.1);"
+                            style="width: 28px; height: 28px; font-size: 12px; background-color: rgba(220, 53, 69, 0.1); font-weight:600;"
                             data-bs-toggle="tooltip"
                             title="Leave Rejected">
                             A
@@ -347,7 +469,7 @@
                                                 row += `
                     <td>
                         <div class="d-flex align-items-center justify-content-center px-2 py-1 rounded text-danger fw-semibold"
-                            style="width: 28px; height: 28px; font-size: 12px; background-color: rgba(220, 53, 69, 0.1);"
+                            style="width: 28px; height: 28px; font-size: 12px; background-color: rgba(220, 53, 69, 0.1); font-weight:600;"
                             data-bs-toggle="tooltip"
                             title="Absent">
                             A
@@ -368,7 +490,9 @@
                                 $('#basic-1').DataTable({
                                     pageLength: 10,
                                     destroy: true,
-                                    retrieve: true
+                                    ordering: false,
+                                    retrieve: true,
+                                    paging: false
                                 });
 
 
@@ -377,6 +501,9 @@
                         })
 
                     }
+
+
+
                 </script>
 
 </body>
