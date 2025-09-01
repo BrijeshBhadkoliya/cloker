@@ -1,0 +1,247 @@
+
+      $(document).on("click", "#pickup_add_payment", function () {
+      let dataid = $(this).attr("data-id");
+      let datainvoice = $(this).attr("data-invoice");
+      let datadue = $(this).attr("data-due");
+      $("#payment_action_picup").attr('action', '/pickup/payment/' + dataid);
+      $('#invoice').attr('value', datainvoice);
+      $('#payable_amount').attr('value', datadue);
+      $('#paid_amount').attr('value', datadue);
+      $('#data_id').attr('value',dataid);
+      $('#firstrzp-button1').click();
+    })
+
+
+
+    $(document).on("click", "#pickup_payment_btn", function () {
+    let datainvoice = $("#invoice").val();
+    let paid_amount = $("#paid_amount").val();
+    let payable_amount = $("#payable_amount").val();
+    let paymentid = $("#pickuppaymenttype").val();
+    let dataid  = $("#data_id").val();
+    let baseUrl = window.location.origin;
+
+    // ✅ Correct alert usage for debugging
+    // alert("dataid: " + dataid);
+    // alert("datainvoice: " + datainvoice);
+    // alert("datadue: " + datadue);
+    // alert("paymentid: " + paymentid);
+    // alert("baseUrl: " + baseUrl);
+
+    console.log("paymentid",paymentid);
+  if (paymentid == "1") {
+        
+        $.ajax({
+            url: '/pickup/paymentcash/'+ dataid,
+            type: 'POST',
+            dataType: 'JSON',
+            data: {paymentid, datainvoice,payable_amount,paid_amount,},
+            success: function (res){
+              console.log(res);
+              location.reload()
+            }
+        });  
+      }else if(paymentid == "2"){
+
+        window.location.href= baseUrl+"/payment/paystack/"+`pickup&paymentverify&${dataid}&${paid_amount}&${payable_amount}&${'Paystack'}&${paymentid}`+","+ datainvoice +","+ "0" +","+ paymentid +","+ paid_amount
+
+      } else if(paymentid == "3"){
+
+        window.location.href= baseUrl+"/payment/paypal/"+`pickup&paymentverify&${dataid}&${paid_amount}&${payable_amount}&${'Paypal'}&${paymentid}` +","+ datainvoice +","+ "0" +","+ paymentid +","+ paid_amount
+
+      } else if(paymentid == "4"){
+
+        $("#alldata").val(`pickup&paymentverify&${dataid}&${paid_amount}&${payable_amount}&${'Razorpay'}&${paymentid}` +","+ datainvoice +","+ "0" +","+ paymentid +","+ paid_amount)
+        $("#rzp-button1").click()
+       
+      } else if(paymentid == "5"){
+
+        window.location.href= baseUrl+"/payment/stripe/"+`pickup&paymentverify&${dataid}&${paid_amount}&${payable_amount}&${'Stripe'}&${paymentid}` +","+ datainvoice +","+ "0" +","+ paymentid +","+ paid_amount
+
+      } else if(paymentid == "6"){
+
+        $("#coustomer_account_payment").removeClass("d-none")
+        let checkimg = $("#payment_img").val()
+
+        if(checkimg == ""){
+
+          $("#payment_ing_error").removeClass("d-none")
+
+        }else{
+
+          // $("#payment_ing_error").addClass("d-none")
+          // $("#payment_image_submit").attr("action", "/payment/shipping_paymentimg/"+`online_shopping&paymentverify&${dataid}&${paid_amount}&${payable_amount}` +","+ datainvoice +","+ "0" +","+ paymentid +","+ paid_amount)
+          // $("#payment_image_submit").submit()
+
+              //  $("#payment_ing_error").addClass("d-none")
+               // $("#payment_action").attr("action", "/online_shopping/payment/"+`online_shopping&paymentverify&${dataid}&${paid_amount}&${payable_amount}` +","+ datainvoice +","+ "0" +","+ paymentid +","+ paid_amount)
+               // $("#payment_action").attr("action", `/online_shopping/payment/${dataid}`)
+               // $("#payment_action").attr("enctype", "multipart/form-data")
+          
+               $("#payment_action_picup").submit()
+        }
+
+      }
+        
+        // $("#payment_action").attr('action', '/online_shopping/payment/' + dataid);
+        // $('#invoice').attr('value', datainvoice);
+        // $('#payable_amount').attr('value', datadue);
+        // $('#paid_amount').attr('value', datadue);
+    })
+
+
+
+
+// razor pay 
+
+let orderId;
+let razoepayid;
+let port;
+let logo;
+$(document).on("click", "#firstrzp-button1", function(){
+  let datadue = $("#payable_amount").val();
+  // let ptype = $("#paymenttype").val();
+  console.log("datadue",datadue);
+  const ptype = '4'
+  console.log("ptype",ptype); 
+  const base_url = window.location.origin;
+  
+    let settings = {
+      "url": base_url + '/payment/razorpay/' + ptype +","+ datadue,
+      "method": "POST",
+      "timeout": 0,
+      "headers": {
+        "Content-Type" : "application/json"
+      },
+      "data": JSON.stringify({
+        "ptype": ptype,
+        "datadue": datadue,
+      }),
+    };
+
+    $.ajax(settings).done(function (response) {
+      console.log("response",response);
+      // alert(response)
+      orderId=response.order;
+      razoepayid=response.secret_id;
+      port=response.port,
+      logo=response.logo
+      $("button").show();
+    });
+})
+
+$("#rzp-button1").on("click", function(e) {
+  let data = $("#alldata").val();
+  
+  // console.log("data",data);
+  console.log("razoepayid",razoepayid);
+  console.log("orderId",orderId);
+  
+  if (!razoepayid || !orderId) {
+    console.error("Missing Razorpay key or orderId");
+    return;
+  }
+
+  let options = {
+    "key": razoepayid,
+    "amount": 1,
+    "currency": "INR",
+    "name": "test razorpay",
+    "description": "Test Transaction",
+    "image": port + "/../../uploads/" + logo,
+    "order_id": orderId,
+    "redirect": true,
+    // "callback_url": port + "/payment/payment_success/" + data,
+    "handler": function(response){
+      // alert(response.razorpay_payment_id);
+      // alert(response.razorpay_order_id);
+      let payment_id = response.razorpay_payment_id;
+      let newData = data.split(",");
+        newData[0] = newData[0] + "&" + payment_id;
+        window.location.href = port + "/payment/payment_success/" + newData.join(",");
+    },
+    "theme": {
+      "color": "#3399cc"
+    }
+  };
+  
+  let rzp1 = new Razorpay(options);
+
+  rzp1.on('payment.failed', function (response) {
+    alert(response)
+  });
+
+  rzp1.open();
+  e.preventDefault();
+})
+
+
+let conorderId;
+let conrazoepayid;
+let conport;
+
+$(document).on("click", "#secondrzp_button2", function(){
+  
+  let datadue = $("#payable_amount").val();
+  let ptype = $("#conpayment_edit").val();
+
+  const base_url = window.location.origin;
+  
+    let settings = {
+      "url": base_url + '/payment/razorpay/' + ptype +","+ datadue,
+      "method": "POST",
+      "timeout": 0,
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "data": JSON.stringify({
+        "ptype": ptype,
+        "datadue": datadue,
+      }),
+    };
+
+    $.ajax(settings).done(function (response) {
+      conorderId=response.order;
+      conrazoepayid=response.secret_id;
+      conport=response.port
+      $("button").show();
+    });
+
+})
+
+$("#conraz_button2").on("click", function(e) {
+  let data = $("#conalldata").val()
+  // alert(conalldata)
+  
+  let options = {
+    "key": conrazoepayid,
+    "amount": 1.00,
+    "currency": "INR",
+    "name": "test razorpay",
+    "description": "Test Transaction",
+    "image": "https://example.com/your_logo",
+    "order_id": conorderId,
+    "redirect": true,
+    // "callback_url": conport + "/payment/payment_success/" + data,
+    "handler": function (response) {
+      // alert(response.razorpay_payment_id);
+      // alert(response.razorpay_order_id);
+        let payment_id = response.razorpay_payment_id;
+      let newData = data.split(",");
+        newData[0] = newData[0] + "&" + payment_id;
+        window.location.href = conport + "/payment/payment_success/" + newData.join(",");
+
+    },
+    "theme": {
+      "color": "#3399cc"
+    }
+  };
+  
+  let rzp1 = new Razorpay(options);
+  rzp1.on('payment.failed', function (response) {
+    alert(response)
+  });
+  rzp1.open();
+  e.preventDefault();
+})
+
