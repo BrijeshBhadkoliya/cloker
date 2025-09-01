@@ -1,0 +1,502 @@
+const express = require("express");
+const router = express.Router();
+const auth = require("../middleware/auth");
+const { mySqlQury } = require("../middleware/db");
+const axios = require('axios');
+const { route } = require("./users");
+const multer  = require('multer');
+const access = require('../middleware/access');
+const nodemailer = require('nodemailer');
+const ejs = require('ejs');
+let sendNotification = require("../middleware/send");
+
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        console.log("1111111", file.originalname);  
+        cb(null, "./public/uploads")
+    },
+    filename: (req, file, cb) => {
+        cb(null, Date.now() + file.originalname)
+
+    }
+})
+
+const upload = multer({storage : storage});
+
+
+
+// ============= Payment Status Change ================ //
+
+router.post("/updateshiptype", auth, async(req, res)=>{
+    try {
+        const {paymentid, invoice} = req.body;
+        console.log(req.body);
+
+        await mySqlQury(`UPDATE tbl_shipment SET payment_type = '${paymentid}' WHERE invoice = '${invoice}'`)
+
+    } catch (error) {
+        console.log(error);
+    }
+})
+
+router.post("/updatecontype", auth, async(req, res)=>{
+    try {
+        const {paymentid, invoice} = req.body;
+        console.log(req.body);
+
+        await mySqlQury(`UPDATE tbl_consolidated SET payment_type = '${paymentid}' WHERE invoice = '${invoice}'`)
+
+    } catch (error) {
+        console.log(error);
+    }
+})
+
+// ============= Paystack Payment ================ //
+
+router.get("/paystack/:id", auth, async(req, res)=>{
+    try {
+        let alldata = req.params.id.split(",")
+       
+        let transaction_data = await mySqlQury(`SELECT * FROM tbl_payment_type WHERE id = '${alldata[3]}' `)
+      
+        let paystackid = transaction_data[0].secret_id;
+        const paystack = require('paystack')(paystackid);
+
+        // live replace baseURL
+        // req.protocol + req.hostname
+
+        const options = {
+            amount: (alldata[4] * 100).toFixed(2),
+            email: req.user.email,
+            callback_url:  "http://localhost:9000" + "/payment/paystack_check/" + req.params.id,
+            metadata: {
+                custom_fields: [
+                    {
+                        display_name: 'Order ID',
+                        variable_name: 'order_id',
+                        value: '12345'
+                    }
+                ]
+            }
+        };
+
+        paystack.transaction.initialize(options, (error, body) => {
+          
+            if (!error) {
+                const authorization_url = body.data.authorization_url;
+                console.log('reference id:', body.data.reference);
+                res.redirect(authorization_url);
+            }
+
+        });
+    } catch (error) {
+        console.log(error);
+    }
+})
+
+router.get("/paystack_check/:id", async(req, res)=>{
+    try {
+        const reference = req.query.reference;
+        let alldata = req.params.id.split(",")
+        let cancelpath = alldata[0].split("&").join("/");
+        const payment_detail = await mySqlQury(`SELECT * FROM tbl_payment_type WHERE id = '${alldata[3]}'`)
+        let pkey = payment_detail[0].secret_id;
+        
+        const paystackVerifyUrl = `https://api.paystack.co/transaction/verify/${reference}`;
+
+        const headers = {
+          'accept': 'application/json',
+          'Authorization': `Bearer ${pkey}`,
+          'cache-control': 'no-cache'
+        };
+
+        axios
+            .get(paystackVerifyUrl, { headers })
+            .then((response) => {
+            const data = response.data;
+                if(data.status === true && data.data.status === 'success'){
+                    // return res.status(200).send({ message: 'Paystack Payment Successful', status: true });
+
+                const transactionId = data?.data?.id || '';
+                console.log("Final PayPal Transaction ID:", transactionId);
+               
+                alldata[0] = `${alldata[0]}&${transactionId}`;
+                const newIdParam = alldata.join(",");
+                console.log("newIdParam",newIdParam);
+
+                    res.redirect("/payment/payment_success/" + newIdParam)
+                    
+                } else {
+                    console.log('Transaction was Cancelled');
+                    res.redirect("/" + cancelpath)
+                    
+                }
+            }).catch((error) => {
+                // console.error('Error:', error);
+                res.redirect("/" + cancelpath)
+            });
+
+    } catch (error) {
+        console.error(error);
+    }
+});
+
+// ============= Paypal Payment ================ //
+
+const paypal = require('paypal-rest-sdk');
+
+router.get("/paypal/:id", auth, async(req, res)=>{
+    try {
+
+        let alldata = req.params.id.split(",")
+        console.log("alldata",alldata);
+
+        let tran_data = await mySqlQury(`SELECT * FROM tbl_payment_type WHERE id = '${alldata[3]}' `)
+        // console.log(tran_data);
+
+        if (tran_data[0].live_status == "1") {
+            paypal.configure({
+                mode: "sandbox",
+                client_id: tran_data[0].secret_id,
+                client_secret: tran_data[0].secret_key
+            });
+        } else {
+            paypal.configure({
+                mode: "live",
+                client_id: tran_data[0].secret_id,
+                client_secret: tran_data[0].secret_key
+            });
+        }
+
+        const paymentData = {
+            intent: 'sale',
+            payer: {
+                payment_method: 'paypal',
+                payer_info: {
+                    email: req.user.email,
+                    first_name: req.user.name
+                }
+            },
+            redirect_urls: {
+                return_url: "http://localhost:9000" + "/payment/paypal-success/" + req.params.id,
+                cancel_url: "http://localhost:9000" + "/payment/paypal-success/" + req.params.id
+            },
+            transactions: [{
+                amount: {
+                    total: alldata[4],
+                    currency: 'USD'
+                },
+                description: "This is the payment description."
+            }]
+    };
+      
+   
+
+        paypal.payment.create(paymentData, function (error, payment) {
+            if (error) {
+                console.error('Error creating payment:', error);
+                let cancelpath = alldata[0].split("&").join("/");
+                res.redirect("/"+ cancelpath)
+            } else {
+                const approvalUrl = payment.links.find(link => link.rel === 'approval_url').href;
+                console.log("payment details",payment);
+                
+                console.log("approvalUrl",approvalUrl);
+                res.redirect(approvalUrl)
+            }
+        });
+        
+    } catch (error) {
+        console.log(error);
+    }
+});
+
+router.get('/paypal-success/:id', (req, res) => {
+    try {
+        const { PayerID } = req.query;
+        let alldata = req.params.id.split(",")
+        
+        const executePaymentData = {
+            payer_id: PayerID
+        };
+
+        if (alldata[4].match("paymentId", "i") != null ) {
+            paypal.payment.execute(alldata[4].split("&")[1].split("=")[1], executePaymentData, (error, payment) => {
+                if (error) {
+                console.error('Error executing payment:', error);
+                let cancelpath = alldata[0].split("&").join("/");
+                res.redirect("/"+ cancelpath)
+                } else {
+                const transactionId = payment.transactions?.[0]?.related_resources?.[0]?.sale?.id || '';
+                console.log("Final PayPal Transaction ID:", transactionId);
+                // console.log('Payment executed successfully:', payment);
+                // console.log("/payment/payment_success/" + req.params.id.split(',')[0].split.join('/') + `?transactionId=${transactionId}`);
+                // console.log('Payment executed successfully:', payment);
+                alldata[0] = `${alldata[0]}&${transactionId}`;
+                const newIdParam = alldata.join(",");
+                console.log("newIdParam",newIdParam);
+                
+                res.redirect("/payment/payment_success/" + newIdParam)
+                }
+            });
+        } else {
+            let cancelpath = alldata[0].split("&").join("/");
+            res.redirect("/"+ cancelpath)
+        }
+    } catch (error) {
+        console.error(error);
+    }
+});
+
+
+// ============= Razorpay Payment ================ //
+
+const Razorpay = require('razorpay');
+
+router.post("/razorpay/:id", auth, async(req, res)=>{
+    try {
+        // let alldata = req.params.id.split(",")
+        let alldata = req.params.id.split(",")
+
+        const accessdata = await access(req.user)
+        console.log(alldata);
+
+        console.log(parseFloat(alldata[1]) * 100);
+
+        let tran_data = await mySqlQury(`SELECT * FROM tbl_payment_type WHERE id = '4' `)
+        console.log("tran_data",tran_data);
+        console.log("alldata",alldata);
+
+        let instance = new Razorpay({
+            key_id: tran_data[0].secret_id,
+            key_secret: tran_data[0].secret_key,
+        });
+ 
+        let options = {
+            amount: Math.round(parseFloat(alldata[1]) * 100),
+            currency: "INR",
+            receipt: "receipt#1",
+            payment_capture: 1
+        };
+        
+        console.log("options",options);
+        
+        instance.orders.create(options, function(err, order) {
+            if (err) {
+                console.log(err);
+                console.log("order",order);
+            } else {
+                console.log("order",order);
+                console.log("options",options);
+                res.send({order:order.id, secret_id:tran_data[0].secret_id, port:"http://localhost:9000", logo:accessdata.data.site_logo})
+            }
+        });
+    } catch (error) {
+        console.log(error);
+    }
+})
+
+
+
+
+// ============= Stripe Payment ================ //
+
+router.get("/stripe/:id", auth, async(req, res)=>{
+    try {
+        // console.log(req.params.id);
+        let alldata = req.params.id.split(",")
+        // console.log(alldata);
+
+        let tran_data = await mySqlQury(`SELECT * FROM tbl_payment_type WHERE id = '${alldata[3]}' `)
+        // console.log(tran_data);
+
+        const stripe = require('stripe')(tran_data[0].secret_key);
+        const dynamicPrice = alldata[4] * 100; 
+        const price = await stripe.prices.create({
+            unit_amount: dynamicPrice,
+            currency: 'inr',
+            product_data: {
+                name: req.user.name,
+            },
+        });
+
+        const priceId = price.id;
+
+        stripe.checkout.sessions.create({
+            customer: 'cus_OlMq2DmXRtzvVC',
+            payment_method_types: ['card'],
+            mode: "payment",
+            line_items: [{
+                price: priceId,
+                quantity: 1,
+            }],
+
+            success_url: "http://localhost:9000" + "/payment/strip-success/"+ `${req.params.id}` +"?payment_intent={CHECKOUT_SESSION_ID}",
+            cancel_url: "http://localhost:9000" + "/payment/strip-cencal/"+ `${req.params.id}` +"?payment_intent={CHECKOUT_SESSION_ID}",
+
+            }).then(session => {
+                console.log('session data'+ session.url)
+                res.redirect(session.url)
+            }).catch(error => {
+                console.error("Error creating Stripe Checkout session:", error);
+                let cancelpath = alldata[0].split("&").join("/");
+                res.redirect("/"+ cancelpath)
+        });
+    } catch (error) {
+        console.log(error);
+    }
+})
+
+router.get("/strip-success/:id", async(req, res)=>{
+    try {
+        const { payment_intent } = req.query;
+
+        // 4242 4242 4242 4242
+        let alldata = req.params.id.split(",");
+        let tran_data = await mySqlQury(`SELECT * FROM tbl_payment_type WHERE id = '${alldata[3]}'`);
+
+        const stripe = require('stripe')(tran_data[0].secret_key);
+        
+        const session = await stripe.checkout.sessions.retrieve(payment_intent);
+        const payment_intenta = session.payment_intent;
+
+        let check = await stripe.paymentIntents.retrieve(payment_intenta);
+
+        if(check.status == "succeeded") {   
+
+            const transactionId = check?.id || '';
+            console.log("Final PayPal Transaction ID:", transactionId);
+               
+            alldata[0] = `${alldata[0]}&${transactionId}`;
+            const newIdParam = alldata.join(",");
+            console.log("newIdParam",newIdParam);
+
+            res.redirect("/payment/payment_success/" + newIdParam)
+
+        } else {
+            let cancelpath = alldata[0].split("&").join("/");
+            res.redirect("/"+ cancelpath)
+        }
+    } catch (error) {
+        console.error(error);
+    }
+});
+
+router.get("/strip-cencal/:id", async(req, res)=>{
+    try {
+        const { payment_intent } = req.query;
+
+        let alldata = req.params.id.split(",");
+        let tran_data = await mySqlQury(`SELECT * FROM tbl_payment_type WHERE id = '${alldata[3]}'`);
+
+        const stripe = require('stripe')(tran_data[0].secret_key);
+        
+        const session = await stripe.checkout.sessions.retrieve(payment_intent);
+
+        const payment_intent_id = session.payment_intent;
+        
+        await stripe.paymentIntents.retrieve(payment_intent_id).catch(error => {
+            // console.error("Error Stripe Checkout session: ", error);
+            let cancelpath = alldata[0].split("&").join("/");
+            res.redirect("/"+ cancelpath)
+        });
+    } catch (error) {
+        console.error(error);
+    }
+});
+
+// ============= Bank Payment Transaction Image ================ //
+
+router.post("/shipping_paymentimg/:id", auth, upload.single('payment_image'), async(req, res)=>{
+    try {
+        let alldata = req.params.id.split(",");
+        let redirectpath = alldata[0].split("&").join("/");
+
+        let data = await mySqlQury(`SELECT * FROM tbl_shipment WHERE invoice = '${alldata[1]}'`)
+        // await mySqlQury(`UPDATE tbl_shipment SET due_amount = '0', total = '${data[0].due_amount}', payment_image = '${req.file.filename}' WHERE invoice = '${alldata[1]}'`)
+
+        res.redirect("/"+ redirectpath)
+    } catch (error) {
+        console.log(error);
+    }
+})
+
+router.post("/pakages_paymentimg/:id", auth, upload.single('payment_image'), async(req, res)=>{
+    try {
+        let alldata = req.params.id.split(",");
+        let redirectpath = alldata[0].split("&").join("/");
+
+        let data = await mySqlQury(`SELECT * FROM tbl_shipment WHERE invoice = '${alldata[1]}'`)
+        await mySqlQury(`UPDATE tbl_register_packages SET due_amount = '0', total = '${data[0].due_amount}', payment_image = '${req.file.filename}' WHERE invoice = '${alldata[1]}'`)
+
+        res.redirect("/"+ redirectpath)
+    } catch (error) {
+        console.log(error);
+    }
+})
+
+router.post("/conslidate_paymentimg/:id", auth, upload.single('payment_image'), async(req, res)=>{
+    try {
+        let alldata = req.params.id.split(",");
+        let redirectpath = alldata[0].split("&").join("/");
+
+        let data = await mySqlQury(`SELECT * FROM tbl_consolidated WHERE invoice = '${alldata[1]}'`)
+        // await mySqlQury(`UPDATE tbl_consolidated SET due_amount = '0', total = '${data[0].due_amount}', payment_image = '${req.file.filename}' WHERE invoice = '${alldata[1]}'`)
+
+        res.redirect("/"+ redirectpath)
+    } catch (error) {
+        console.log(error);
+    }
+})
+
+
+// ============= Success payment Update ================ //
+
+router.get("/payment_success/:id", async(req, res)=>{
+    try {
+        let alldata = req.params.id.split(",");
+        let redirectpath = alldata[0].split("&").join("/");
+
+        let data
+        if (alldata[2] == "0") {
+            console.log(222);
+            // data = await mySqlQury(`SELECT * FROM tbl_shipment WHERE invoice = '${alldata[1]}'`)
+            // if (data) await mySqlQury(`UPDATE tbl_shipment SET due_amount = '0', total = '${data[0].paid_amount}' WHERE invoice = '${alldata[1]}'`)
+            
+        } else if (alldata[2] == "1") {
+            console.log(333);
+            // data = await mySqlQury(`SELECT * FROM tbl_consolidated WHERE invoice = '${alldata[1]}'`)
+            // if (data) await mySqlQury(`UPDATE tbl_consolidated SET due_amount = '0', total = '${data[0].due_amount}' WHERE invoice = '${alldata[1]}'`)
+        }
+
+        res.redirect("/" + redirectpath);
+    } catch (error) {
+        console.log(error);
+    }
+});
+
+router.post("/payment_success/:id", async(req, res)=>{
+    try {
+        let alldata = req.params.id.split(",");
+        let redirectpath = alldata[0].split("&").join("/");
+
+        let data
+        if (alldata[2] == "0") {
+            console.log(222);
+            // data = await mySqlQury(`SELECT * FROM tbl_shipment WHERE invoice = '${alldata[1]}'`)
+            // if (data) await mySqlQury(`UPDATE tbl_shipment SET due_amount = '0', total = '${data[0].due_amount}' WHERE invoice = '${alldata[1]}'`)
+            
+        } else if (alldata[2] == "1") {
+            console.log(333);
+            // data = await mySqlQury(`SELECT * FROM tbl_consolidated WHERE invoice = '${alldata[1]}'`)
+            // if (data) await mySqlQury(`UPDATE tbl_consolidated SET due_amount = '0', total = '${data[0].due_amount}' WHERE invoice = '${alldata[1]}'`)
+        }
+
+        res.redirect("/" + redirectpath);
+    } catch (error) {
+        console.log(error);
+    }
+});
+
+
+module.exports = router;
